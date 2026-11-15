@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-mobile-web-app-title" content="helmut-körnig-halle-sportanlagen">
+<title>helmut-körnig-halle-sportanlagen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9EDEA; --panel:#F7F9F7; --ink:#14201B; --ink2:#55635C; --line:#C3CCC6;
+  --gruen:#1B7F3B; --rot:#B3261E; --weiss:#FFFFFF;
+  --akzent:#17694B; --auf-akzent:#FFFFFF; --fehler:#B3261E; --schleier:rgba(15,21,18,.55);
+  --display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --body:Barlow,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#0F1512; --panel:#18211C; --ink:#E7EEE9; --ink2:#9BAAA1; --line:#33413A;
+  --akzent:#4CC38A; --auf-akzent:#06150E; --fehler:#F2766B; --schleier:rgba(0,0,0,.6);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:16px; line-height:1.35}
+.seite{min-height:100vh; min-height:100dvh; max-width:640px; margin:0 auto; padding:18px 16px 14px; display:flex; flex-direction:column; gap:14px}
+.kopf{display:flex; flex-direction:column; gap:6px}
+.kopfzeile{display:flex; justify-content:space-between; align-items:center; gap:12px}
+.marke{margin:0; font-size:13px; font-weight:500; letter-spacing:.04em; text-transform:uppercase; color:var(--ink2)}
+h1{margin:0; font-family:var(--display); font-weight:600; font-size:clamp(32px, 8vw, 44px); line-height:1; text-transform:uppercase; text-wrap:balance}
+.thema-knopf{display:inline-flex; align-items:center; justify-content:center; flex:none; width:44px; height:44px; padding:0; border-radius:50%; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer}
+.thema-knopf:hover{border-color:var(--ink)}
+.thema-knopf svg{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+.thema-knopf .sonne{display:none}
+:root[data-theme="dark"] .thema-knopf .sonne{display:block}
+:root[data-theme="dark"] .thema-knopf .mond{display:none}
+button:focus-visible{outline:3px solid var(--ink); outline-offset:2px}
+.nur-leser{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+table{width:100%; border-collapse:separate; border-spacing:0; table-layout:fixed; background:var(--panel); border:1px solid var(--line); border-radius:14px; overflow:hidden}
+thead th{padding:8px 12px; border-bottom:2px solid var(--ink); text-align:left; font-size:13px; font-weight:600; color:var(--ink2)}
+tbody th, tbody td{padding:10px 12px; border-bottom:1px solid var(--line); text-align:left; vertical-align:middle}
+tbody tr:last-child th, tbody tr:last-child td{border-bottom:0}
+tbody th{font-weight:400}
+.anlage{display:block; font-family:var(--display); font-weight:600; font-size:19px; line-height:1.05; overflow-wrap:anywhere}
+.sub{display:block; margin-top:2px; font-size:13px; font-weight:400; color:var(--ink2)}
+.pille{display:inline-block; padding:3px 9px; border-radius:999px; color:var(--weiss); font-size:14px; font-weight:600; white-space:nowrap}
+.pille.gruen{background:var(--gruen)}
+.pille.rot{background:var(--rot)}
+.termin{margin:6px 0 0; font-size:15px; line-height:1.3; color:var(--ink)}
+.zustand{display:block; font-size:14px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--ink2)}
+.kasten{margin:6px 0 0; padding:8px 10px; border-radius:10px; color:var(--weiss); font-family:var(--display); font-weight:600; font-size:18px; line-height:1.15}
+.kasten.gruen{background:var(--gruen)}
+.kasten.rot{background:var(--rot)}
+.leer{color:var(--ink2); font-size:15px}
+.verbindung{margin:0; font-size:13px; font-weight:600; color:var(--ink)}
+.stand{margin:0; font-size:14px; font-weight:500; color:var(--ink2)}
+/* Auf schmalen Bildschirmen steht der Name über dem Status, damit er nicht mitten im Wort umbricht */
+@media (max-width:599px){
+  table, tbody{display:block}
+  colgroup{display:none}
+  thead{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+  tbody tr{display:block; padding:12px 14px 14px; border-bottom:1px solid var(--line)}
+  tbody tr:last-child{border-bottom:0}
+  tbody th, tbody td{display:block; border:0; padding:0}
+  tbody th{padding-bottom:8px}
+}
+/* Zugang für das Personal. Die Fenster erscheinen nur, wenn der runde Knopf gedrückt gehalten wird. */
+.thema-knopf{-webkit-touch-callout:none; -webkit-user-select:none; user-select:none; touch-action:manipulation}
+.schleier{position:fixed; top:0; right:0; bottom:0; left:0; z-index:10; display:flex; flex-direction:column; align-items:center; padding:96px 16px 16px; background:var(--schleier); overflow:auto}
+.fenster{width:100%; max-width:420px; background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:20px; display:flex; flex-direction:column; gap:16px; box-shadow:0 12px 32px rgba(0,0,0,.28)}
+.fenster-kopf{display:flex; flex-direction:column; gap:6px}
+.fenster h2{margin:0; font-family:var(--display); font-weight:600; font-size:30px; line-height:1.05; text-transform:uppercase}
+.fenster h2:focus{outline:none}
+.fenster form, .fenster .wahl{display:flex; flex-direction:column; gap:16px}
+.feld{display:flex; flex-direction:column; gap:6px; font-size:15px; color:var(--ink2)}
+.feld input{font:inherit; font-size:16px; color:var(--ink); background:var(--bg); min-height:48px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; width:100%}
+.hinweis{margin:0; font-size:14px; line-height:1.35; color:var(--ink2)}
+.fehler{margin:0; min-height:20px; font-size:14px; color:var(--fehler)}
+.reihe{display:flex; gap:10px}
+.knopf{flex:1; font:inherit; font-size:15px; font-weight:600; min-height:44px; padding:8px 18px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer}
+.knopf.primaer{background:var(--akzent); border-color:var(--akzent); color:var(--auf-akzent)}
+.knopf:disabled{opacity:.6; cursor:default}
+.bereiche{display:flex; flex-direction:column; gap:10px}
+.bereich{display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:76px; padding:14px 14px 14px 16px; border:1px solid var(--line); border-radius:12px; background:var(--bg); color:var(--ink); text-decoration:none}
+.bereich:hover{border-color:var(--ink)}
+.bereich-text{display:flex; flex-direction:column; gap:3px; min-width:0}
+.bereich-name{font-family:var(--display); font-weight:600; font-size:24px; line-height:1.05; text-transform:uppercase}
+.bereich-zusatz{font-size:14px; line-height:1.3; color:var(--ink2)}
+.bereich svg{flex:none; width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+.fenster a:focus-visible, .fenster input:focus-visible{outline:3px solid var(--ink); outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="seite">
+
+<header class="kopf">
+  <div class="kopfzeile">
+    <p class="marke">Helmut-Körnig-Halle</p>
+    <button class="thema-knopf" id="dunkel" type="button" aria-pressed="false" aria-label="Dunkelmodus" title="Dunkelmodus"><svg class="mond" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sonne" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></button>
+  </div>
+  <h1>Status Sportanlagen</h1>
+  <p class="stand" id="stand">Stand: –</p>
+</header>
+
+<table>
+  <caption class="nur-leser">Status der Sportanlagen</caption>
+  <colgroup><col style="width:38%"><col style="width:62%"></colgroup>
+  <thead>
+    <tr>
+      <th scope="col">Anlage</th>
+      <th scope="col">Status</th>
+    </tr>
+  </thead>
+  <tbody id="zeilen"></tbody>
+</table>
+
+<p class="verbindung" id="verbindung" hidden>Keine Verbindung. Die Angaben können veraltet sein.</p>
+
+</div>
+
+<!-- Zugang für das Personal: erscheint nur, wenn der runde Knopf oben rechts gedrückt gehalten wird -->
+<div class="schleier" id="zugang" hidden>
+  <div class="fenster" role="dialog" aria-modal="true" aria-labelledby="zugang-titel">
+    <div class="fenster-kopf">
+      <p class="marke">Helmut-Körnig-Halle · Personal</p>
+      <h2 id="zugang-titel" tabindex="-1">Anmelden</h2>
+    </div>
+    <p class="hinweis" id="zugang-warten">Einen Moment …</p>
+    <form id="zugang-formular" novalidate hidden>
+      <label class="feld">Zugangscode
+        <input id="zugang-code" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" required>
+      </label>
+      <p class="hinweis">Das Gerät merkt sich den Zugang. Der Code muss hier nur einmal eingegeben werden.</p>
+      <p class="fehler" id="zugang-fehler" role="alert"></p>
+      <div class="reihe">
+        <button class="knopf" id="zugang-abbrechen" type="button">Abbrechen</button>
+        <button class="knopf primaer" id="zugang-anmelden" type="submit">Anmelden</button>
+      </div>
+    </form>
+    <div class="wahl" id="zugang-wahl" hidden>
+      <div class="bereiche">
+        <a class="bereich" href="./Reinigungsplan">
+          <span class="bereich-text"><span class="bereich-name">Hallenreinigung</span><span class="bereich-zusatz">Im Hallenplan eintragen, was geputzt ist</span></span>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>
+        </a>
+        <a class="bereich" href="./Sportanlagen">
+          <span class="bereich-text"><span class="bereich-name">Sportanlagen</span><span class="bereich-zusatz">Status der Matten und der Tribüne einstellen</span></span>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+      <div class="reihe">
+        <button class="knopf" id="zugang-schliessen" type="button">Schließen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { firebaseConfig } from "./js/config.js";
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
+/* Dunkelmodus merken */
+const wurzel = document.documentElement;
+function thema(dunkel) {
+  wurzel.dataset.theme = dunkel ? "dark" : "light";
+  $("dunkel").setAttribute("aria-pressed", String(dunkel));
+  try { localStorage.setItem("hkh-thema", dunkel ? "dark" : "light"); } catch (e) {}
+}
+let gemerkt = null;
+try { gemerkt = localStorage.getItem("hkh-thema"); } catch (e) {}
+thema(gemerkt ? gemerkt === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+/* Kurz tippen schaltet hell und dunkel um. Wird der Knopf gedrückt gehalten, öffnet sich der Zugang für das Personal. */
+const HALTEN_MS = 800;
+const knopf = $("dunkel");
+let halteUhr = 0;
+let gehalten = false;
+knopf.addEventListener("click", () => {
+  if (gehalten) { gehalten = false; return; }
+  thema(wurzel.dataset.theme !== "dark");
+});
+knopf.addEventListener("pointerdown", (e) => {
+  if (e.pointerType === "mouse" && e.button !== 0) return;
+  gehalten = false;
+  clearTimeout(halteUhr);
+  halteUhr = setTimeout(() => { gehalten = true; zugangOeffnen(); }, HALTEN_MS);
+});
+["pointerup", "pointerleave", "pointercancel"].forEach((name) => knopf.addEventListener(name, () => clearTimeout(halteUhr)));
+knopf.addEventListener("contextmenu", (e) => e.preventDefault());
+
+/* Zugang für das Personal: Ist das Gerät schon angemeldet, kommt sofort die Auswahl, sonst erst der Zugangscode.
+   Die Anmeldung wird erst hier nachgeladen, damit die Anzeige für Sportler schlank bleibt. */
+let zugangModul = null;
+let vorherFokus = null;
+const ladeZugang = async () => (zugangModul ??= await import("./js/zugang.js"));
+function zeigeTeil(teil) {
+  $("zugang-warten").hidden = teil !== "warten";
+  $("zugang-formular").hidden = teil !== "formular";
+  $("zugang-wahl").hidden = teil !== "wahl";
+  $("zugang-titel").textContent = teil === "wahl" ? "Bereich wählen" : "Anmelden";
+}
+async function zugangOeffnen() {
+  const fenster = $("zugang");
+  if (!fenster.hidden) return;
+  vorherFokus = document.activeElement;
+  $("zugang-fehler").textContent = "";
+  $("zugang-code").value = "";
+  zeigeTeil("warten");
+  fenster.hidden = false;
+  $("zugang-titel").focus();
+  let frei = false;
+  let stoerung = false;
+  try {
+    frei = await (await ladeZugang()).istFreigeschaltet();
+  } catch (err) {
+    console.error(err);
+    stoerung = true;
+  }
+  if (fenster.hidden) return;
+  zeigeTeil(frei ? "wahl" : "formular");
+  if (stoerung) $("zugang-fehler").textContent = "Keine Verbindung zum Server.";
+  (frei ? fenster.querySelector(".bereich") : $("zugang-code")).focus();
+}
+function zugangSchliessen() {
+  $("zugang").hidden = true;
+  $("zugang-code").value = "";
+  if (vorherFokus && document.contains(vorherFokus)) vorherFokus.focus();
+}
+$("zugang-formular").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const fehler = $("zugang-fehler");
+  const absenden = $("zugang-anmelden");
+  const code = $("zugang-code").value.trim();
+  fehler.textContent = "";
+  if (!code) {
+    fehler.textContent = "Bitte den Zugangscode eingeben.";
+    return;
+  }
+  absenden.disabled = true;
+  let modul = null;
+  try {
+    modul = await ladeZugang();
+    await modul.anmelden(code);
+    $("zugang-code").value = "";
+    zeigeTeil("wahl");
+    $("zugang").querySelector(".bereich").focus();
+  } catch (err) {
+    console.error(err);
+    fehler.textContent = modul ? modul.anmeldeFehler(err) : "Keine Verbindung zum Server.";
+  } finally {
+    absenden.disabled = false;
+  }
+});
+$("zugang-abbrechen").addEventListener("click", zugangSchliessen);
+$("zugang-schliessen").addEventListener("click", zugangSchliessen);
+document.addEventListener("keydown", (e) => {
+  const fenster = $("zugang");
+  if (fenster.hidden) return;
+  if (e.key === "Escape") { zugangSchliessen(); return; }
+  if (e.key !== "Tab") return;
+  /* Die Tab-Taste bleibt im Fenster */
+  const ziele = [...fenster.querySelectorAll("a[href], button, input")].filter((el) => !el.disabled && el.offsetParent !== null);
+  if (!ziele.length) { e.preventDefault(); return; }
+  const erstes = ziele[0];
+  const letztes = ziele[ziele.length - 1];
+  if (e.shiftKey && (document.activeElement === erstes || !fenster.contains(document.activeElement))) { e.preventDefault(); letztes.focus(); }
+  else if (!e.shiftKey && (document.activeElement === letztes || !fenster.contains(document.activeElement))) { e.preventDefault(); erstes.focus(); }
+});
+/* Die Personal-Seiten führen mit "#auswahl" hierher zurück: dann geht die Auswahl sofort auf */
+if (location.hash === "#auswahl") {
+  history.replaceState(null, "", location.pathname + location.search);
+  zugangOeffnen();
+}
+
+/* Zustände: grün = frei, rot = nicht frei. Ohne Status gilt rot. */
+const ZUSTAENDE = {
+  anlage: { aufgebaut: ["Aufgebaut", true], abgebaut: ["Abgebaut", false] },
+  tribuene: { eingefahren: ["Eingefahren", true], ausgefahren: ["Ausgefahren", false] },
+};
+const OHNE_STATUS = { anlage: "abgebaut", tribuene: "ausgefahren" };
+/* Wörter für die Sätze: "aus" = Abbau bzw. Ausfahren, "ein" = Wiederaufbau bzw. Einfahren */
+const VERBEN = {
+  anlage: { aus: "abgebaut", ein: "wieder aufgebaut" },
+  tribuene: { aus: "ausgefahren", ein: "eingefahren" },
+};
+const WOCHENTAGE = ["So.", "Mo.", "Di.", "Mi.", "Do.", "Fr.", "Sa."];
+const ZEITPUNKT = /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2}))?$/;
+const artVon = (m) => (m.art === "tribuene" ? "tribuene" : "anlage");
+
+function zustand(m) {
+  const art = m.art === "tribuene" ? "tribuene" : "anlage";
+  const tabelle = ZUSTAENDE[art];
+  const gesetzt = Object.prototype.hasOwnProperty.call(tabelle, m.status);
+  const [text, gruen] = tabelle[gesetzt ? m.status : OHNE_STATUS[art]];
+  return { text, gruen, gesetzt };
+}
+
+/* "2026-11-16T08:00" wird zu "Wird voraussichtlich am Mo., 16.11. um 08:00 Uhr abgebaut.", "2026-11-16" zu "Wird voraussichtlich am Mo., 16.11. abgebaut." */
+function satz(zeit, verb) {
+  const t = ZEITPUNKT.exec(zeit ?? "");
+  if (!t) return "";
+  const [, jahr, monat, tag, std, min] = t;
+  const wochentag = WOCHENTAGE[new Date(Date.UTC(+jahr, +monat - 1, +tag)).getUTCDay()];
+  const uhrzeit = std ? ` um ${std}:${min} Uhr` : "";
+  return `Wird voraussichtlich am ${wochentag}, ${tag}.${monat}.${uhrzeit} ${verb}.`;
+}
+
+/* Zuerst der nächste Wechsel: bei grün das Abbauen bzw. Ausfahren, bei rot das Aufbauen bzw. Einfahren */
+function saetze(m, z) {
+  const { aus, ein } = VERBEN[artVon(m)];
+  const liste = z.gruen
+    ? [satz(m.aus, aus), satz(m.ein, ein)]
+    : [satz(m.ein, ein), satz(m.aus, aus)];
+  return liste.filter(Boolean);
+}
+
+function zeile(m) {
+  const z = zustand(m);
+  const termine = saetze(m, z);
+  const zeiten = termine.length
+    ? termine.map((s) => `<p class="termin">${esc(s)}</p>`).join("")
+    : `<p class="termin">Termine folgen.</p>`;
+  const farbe = z.gruen ? "gruen" : "rot";
+  if (artVon(m) === "tribuene") {
+    return `<tr>
+    <th scope="row"><span class="anlage">${esc(m.name)}</span></th>
+    <td><span class="zustand">${esc(z.text)}</span><p class="kasten ${farbe}">110 Meter Sprintgerade ${z.gruen ? "nutzbar" : "nicht nutzbar"}</p>${zeiten}</td>
+  </tr>`;
+  }
+  return `<tr>
+    <th scope="row"><span class="anlage">${esc(m.name)}</span>${m.sub ? `<span class="sub">${esc(m.sub)}</span>` : ""}</th>
+    <td><span class="pille ${farbe}">${esc(z.text)}</span>${zeiten}</td>
+  </tr>`;
+}
+
+function sortiert(liste) {
+  return liste.sort((a, b) => (a.reihenfolge ?? 99) - (b.reihenfolge ?? 99) || String(a.name).localeCompare(b.name, "de"));
+}
+
+/* "Stand" zeigt die letzte Änderung in deutscher Zeit, zum Beispiel "14.11.2026, 00:48 Uhr" */
+function standZeit(ms) {
+  const t = Object.fromEntries(
+    new Intl.DateTimeFormat("de-DE", {
+      timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric",
+      hour: "2-digit", minute: "2-digit", hourCycle: "h23",
+    }).formatToParts(new Date(ms)).map((p) => [p.type, p.value]),
+  );
+  return `${t.day}.${t.month}.${t.year}, ${t.hour}:${t.minute} Uhr`;
+}
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+onValue(ref(db, "matten"), (snap) => {
+  const v = snap.val() ?? {};
+  const liste = sortiert(Object.entries(v).map(([key, m]) => ({ key, ...m })));
+  const neuste = Object.values(v).reduce((max, m) => Math.max(max, typeof m?.geaendert === "number" ? m.geaendert : 0), 0);
+  $("stand").textContent = neuste ? `Stand: ${standZeit(neuste)}` : "Stand: –";
+  $("zeilen").innerHTML = liste.length
+    ? liste.map(zeile).join("")
+    : `<tr><td colspan="2" class="leer">Noch keine Anlagen eingetragen.</td></tr>`;
+});
+onValue(ref(db, ".info/connected"), (snap) => {
+  $("verbindung").hidden = snap.val() === true;
+});
+</script>
+</body>
+</html>

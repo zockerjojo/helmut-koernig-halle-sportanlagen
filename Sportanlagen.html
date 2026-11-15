@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="apple-mobile-web-app-title" content="helmut-körnig-halle-sportanlagen/Sportanlagen">
+<title>helmut-körnig-halle-sportanlagen/Sportanlagen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9EDEA; --panel:#F7F9F7; --ink:#14201B; --ink-2:#55635C; --line:#C3CCC6;
+  --accent:#17694B; --on-accent:#FFFFFF; --fehler:#B3261E;
+  --gruen:#1B7F3B; --rot:#B3261E; --weiss:#FFFFFF;
+  --display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --body:Barlow,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#0F1512; --panel:#18211C; --ink:#E7EEE9; --ink-2:#9BAAA1; --line:#33413A;
+  --accent:#4CC38A; --on-accent:#06150E; --fehler:#F2766B;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:16px; line-height:1.4}
+.wrap{max-width:900px; margin:0 auto; padding:0 20px 40px}
+.kopf{display:flex; justify-content:space-between; align-items:center; gap:12px 16px; flex-wrap:wrap; padding-top:24px}
+.marke{font-family:var(--display); font-weight:600; font-size:24px; line-height:1; letter-spacing:.04em; text-transform:uppercase}
+.werkzeuge{display:flex; align-items:center; gap:10px 12px; flex-wrap:wrap}
+.wer{font-size:14px; color:var(--ink-2); overflow-wrap:anywhere}
+.knopf{font:inherit; font-size:15px; font-weight:600; min-height:44px; padding:8px 18px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer}
+.knopf.primaer{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
+.knopf[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
+a.knopf{display:inline-flex; align-items:center; justify-content:center; gap:4px; text-decoration:none}
+#auswahl{padding-left:12px}
+a.knopf svg{flex:none; width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+button:focus-visible, input:focus-visible, a:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+h1{margin:0; font-family:var(--display); font-weight:600; font-size:clamp(36px, 6vw, 52px); line-height:1; text-transform:uppercase; text-wrap:balance}
+.muted{margin:0; font-size:15px; color:var(--ink-2)}
+.meldung{margin:0; min-height:20px; font-size:14px; color:var(--ink-2)}
+.meldung.fehler{color:var(--fehler)}
+.stapel{display:flex; flex-direction:column; gap:16px}
+.anmeldung{max-width:420px; margin:48px auto 0; display:flex; flex-direction:column; gap:16px}
+.feld{display:flex; flex-direction:column; gap:6px; font-size:15px; color:var(--ink-2)}
+input[type="password"], input[type="date"], input[type="time"]{font:inherit; font-size:16px; color:var(--ink); background:var(--panel); min-height:44px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; width:100%; min-width:0}
+.kopfzeile{display:flex; justify-content:space-between; align-items:baseline; gap:12px; flex-wrap:wrap; border-bottom:2px solid var(--ink); padding-bottom:10px}
+.liste{display:grid; grid-template-columns:minmax(0,1fr); gap:16px; padding-top:8px}
+@media (min-width:760px){ .liste{grid-template-columns:repeat(2, minmax(0,1fr))} }
+.karte{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:20px; display:flex; flex-direction:column; gap:14px; min-width:0}
+.karte-kopf{display:flex; flex-direction:column; gap:4px}
+.karte h2{margin:0; font-family:var(--display); font-weight:600; font-size:30px; line-height:1.05; text-transform:uppercase; text-wrap:balance; overflow-wrap:anywhere}
+fieldset{border:0; margin:0; padding:0; min-width:0; display:flex; flex-direction:column; gap:8px}
+legend{font-size:14px; color:var(--ink-2); padding:0 0 6px}
+.wahl label{display:flex; align-items:center; gap:12px; min-height:44px; padding:8px 12px; border:1px solid var(--line); border-radius:10px; cursor:pointer; color:var(--ink)}
+.wahl input{width:20px; height:20px; margin:0; accent-color:var(--accent); flex:none}
+.zeit{display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); gap:12px}
+.punkt{display:inline-block; flex:none; width:12px; height:12px; border-radius:50%}
+.punkt.gruen{background:var(--gruen)}
+.punkt.rot{background:var(--rot)}
+.kasten{margin:6px 0 0; padding:8px 10px; border-radius:10px; color:var(--weiss); font-family:var(--display); font-weight:600; font-size:18px; line-height:1.15}
+.kasten.gruen{background:var(--gruen)}
+.kasten.rot{background:var(--rot)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="kopf">
+  <div class="marke">Helmut-Körnig-Halle · Personal</div>
+  <div class="werkzeuge">
+    <a class="knopf" id="auswahl" href="./#auswahl" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 6l-6 6 6 6"/></svg>Auswahl</a>
+    <span class="wer" id="wer"></span>
+    <button class="knopf" id="abmelden" type="button" hidden>Abmelden</button>
+  </div>
+</header>
+
+<p class="muted" id="pruefung" style="margin-top:48px">Einen Moment …</p>
+
+<section id="anmeldung" class="anmeldung" hidden>
+  <h1>Anmelden</h1>
+  <form id="formular" class="stapel" novalidate>
+    <label class="feld">Zugangscode
+      <input id="code" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" required>
+    </label>
+    <button class="knopf primaer" id="anmelden-knopf" type="submit">Anmelden</button>
+    <p class="meldung fehler" id="anmeldung-fehler" role="alert"></p>
+  </form>
+  <a class="knopf" href="./">Zur Startseite</a>
+</section>
+
+<section id="panel" class="stapel" hidden>
+  <div class="kopfzeile"><h1>Sportanlagen</h1></div>
+  <p class="muted">Änderungen erscheinen sofort auf der öffentlichen Anzeige.</p>
+  <div class="werkzeuge">
+    <button class="knopf primaer" id="startliste" type="button" hidden>Startliste anlegen</button>
+    <span class="meldung" id="startliste-meldung" aria-live="polite"></span>
+  </div>
+  <div class="liste" id="liste"></div>
+</section>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getDatabase, ref, get, set, onValue, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { firebaseConfig } from "./js/config.js";
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
+/* Farbschema: übernimmt das auf der öffentlichen Anzeige gewählte Schema; hier gibt es keinen Umschalter */
+const wurzel = document.documentElement;
+function thema(dunkel) {
+  wurzel.dataset.theme = dunkel ? "dark" : "light";
+}
+let gemerkt = null;
+try { gemerkt = localStorage.getItem("hkh-thema"); } catch (e) {}
+thema(gemerkt ? gemerkt === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+/* Startliste: die fünf Einträge ohne Status und ohne Zeit. Das Hallenteam trägt sie selbst ein. */
+const STARTLISTE = [
+  { key: "stab-benz", name: "Stabhochsprunganlage", sub: "Benz · Gelb", art: "anlage", reihenfolge: 1 },
+  { key: "stab-vennekel", name: "Stabhochsprunganlage", sub: "Vennekel · Grün", art: "anlage", reihenfolge: 2 },
+  { key: "hoch-benz", name: "Hochsprunganlage", sub: "Benz · Gelb", art: "anlage", reihenfolge: 3 },
+  { key: "hoch-schulsport", name: "Hochsprunganlage", sub: "Schulsport · Blau", art: "anlage", reihenfolge: 4 },
+  { key: "tribuene-nord", name: "Tribüne Nord", art: "tribuene", reihenfolge: 5 },
+];
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+const istRechteFehler = (err) => /PERMISSION_DENIED/.test(`${err?.code ?? ""} ${err?.message ?? ""}`);
+
+function anmeldeFehler(err) {
+  if (istRechteFehler(err)) return "Der Code stimmt nicht.";
+  switch (err?.code) {
+    case "auth/network-request-failed":
+      return "Keine Verbindung zum Server.";
+    case "auth/too-many-requests":
+      return "Zu viele Versuche. Bitte warte einen Moment.";
+    default:
+      return "Anmeldung hat nicht geklappt. Bitte noch einmal versuchen.";
+  }
+}
+
+/* Anmeldung: Die Seite meldet sich anonym an. Die Datenbank prüft den Code, wenn der Eintrag gespeichert wird.
+   Beim Öffnen wird zuerst geprüft, ob das Gerät schon freigeschaltet ist. Erst dann erscheint die Anmeldung oder die Einstellung. */
+let anmeldungLaeuft = false;
+function zeigeBereich(angemeldet) {
+  $("pruefung").hidden = true;
+  $("anmeldung").hidden = angemeldet;
+  $("panel").hidden = !angemeldet;
+  $("abmelden").hidden = !angemeldet;
+  $("auswahl").hidden = !angemeldet;
+  $("wer").textContent = angemeldet ? "Angemeldet" : "";
+}
+async function istFreigeschaltet(uid) {
+  const snap = await get(ref(db, `admins/${uid}`));
+  return snap.exists();
+}
+onAuthStateChanged(auth, async (user) => {
+  if (anmeldungLaeuft) return;
+  let freigeschaltet = false;
+  try {
+    freigeschaltet = !!user && (await istFreigeschaltet(user.uid));
+  } catch (err) {
+    console.error(err);
+  }
+  zeigeBereich(freigeschaltet);
+});
+$("formular").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const feld = $("code");
+  const knopf = $("anmelden-knopf");
+  const fehler = $("anmeldung-fehler");
+  const code = feld.value.trim();
+  fehler.textContent = "";
+  if (!code) {
+    fehler.textContent = "Bitte den Zugangscode eingeben.";
+    return;
+  }
+  anmeldungLaeuft = true;
+  knopf.disabled = true;
+  try {
+    const { user } = await signInAnonymously(auth);
+    await set(ref(db, `admins/${user.uid}`), code);
+    feld.value = "";
+    zeigeBereich(true);
+  } catch (err) {
+    console.error(err);
+    fehler.textContent = anmeldeFehler(err);
+    await signOut(auth).catch(() => {});
+  } finally {
+    anmeldungLaeuft = false;
+    knopf.disabled = false;
+  }
+});
+$("abmelden").addEventListener("click", () => signOut(auth));
+
+/* Lehnt die Datenbank den Zugang ab (z. B. weil der Code geändert wurde), wird abgemeldet */
+async function zugangAbgelaufen(err) {
+  if (!istRechteFehler(err)) return false;
+  $("anmeldung-fehler").textContent = "Dein Zugang ist nicht mehr gültig. Bitte den Code neu eingeben.";
+  await signOut(auth).catch(() => {});
+  return true;
+}
+
+/* Karten: Status je Art, darunter zwei Termine. Ein Termin braucht ein Datum, die Uhrzeit ist optional. */
+const OPTIONEN = {
+  anlage: [["aufgebaut", "Aufgebaut", "gruen"], ["abgebaut", "Abgebaut", "rot"]],
+  tribuene: [["eingefahren", "Eingefahren", "gruen"], ["ausgefahren", "Ausgefahren", "rot"]],
+};
+const TERMINE = {
+  anlage: { aus: "Wird abgebaut am", ein: "Wird wieder aufgebaut am" },
+  tribuene: { aus: "Wird ausgefahren am", ein: "Wird eingefahren am" },
+};
+const ZEIT_TEILE = /^(\d{4}-\d{2}-\d{2})(?:T(\d{2}:\d{2}))?$/;
+
+function termin(m, art, paar) {
+  const teile = ZEIT_TEILE.exec(m[paar] ?? "");
+  return `<fieldset class="paar">
+      <legend>${TERMINE[art][paar]}</legend>
+      <div class="zeit">
+        <label class="feld">Datum<input type="date" data-paar="${paar}" data-feld="datum" value="${esc(teile ? teile[1] : "")}"></label>
+        <label class="feld">Uhrzeit (optional)<input type="time" data-paar="${paar}" data-feld="zeit" value="${esc(teile ? teile[2] : "")}"></label>
+      </div>
+    </fieldset>`;
+}
+
+/* Tribüne: grün = eingefahren (nutzbar), sonst rot. Ohne Status gilt rot, wie auf der öffentlichen Anzeige. */
+function sprintAnzeige(status) {
+  return status === "eingefahren"
+    ? { farbe: "gruen", text: "nutzbar" }
+    : { farbe: "rot", text: "nicht nutzbar" };
+}
+function sprintKasten(status) {
+  const { farbe, text } = sprintAnzeige(status);
+  return `<p class="kasten ${farbe}" data-sprint>110 Meter Sprintgerade ${text}</p>`;
+}
+/* Beim Auswählen sofort umstellen, nicht erst nach dem Speichern oder nach dem Verlassen des Feldes */
+function sprintAktualisieren(kartenEl, status) {
+  const kasten = kartenEl.querySelector("[data-sprint]");
+  if (!kasten) return;
+  const { farbe, text } = sprintAnzeige(status);
+  kasten.className = `kasten ${farbe}`;
+  kasten.textContent = `110 Meter Sprintgerade ${text}`;
+}
+
+function karte(m) {
+  const art = m.art === "tribuene" ? "tribuene" : "anlage";
+  const gruppe = `s-${m.key}`;
+  const wahl = OPTIONEN[art]
+    .map(([wert, text, farbe]) => `<label><input type="radio" name="${esc(gruppe)}" value="${wert}"${m.status === wert ? " checked" : ""}> <span>${text}</span><span class="punkt ${farbe}" aria-hidden="true"></span></label>`)
+    .join("");
+  return `<article class="karte" data-key="${esc(m.key)}">
+    <div class="karte-kopf"><h2>${esc(m.name)}</h2>${art === "tribuene" ? sprintKasten(m.status) : (m.sub ? `<p class="muted">${esc(m.sub)}</p>` : "")}</div>
+    <fieldset class="wahl"><legend>Status</legend>${wahl}</fieldset>
+    ${termin(m, art, "aus")}
+    ${termin(m, art, "ein")}
+    <p class="meldung" aria-live="polite"></p>
+  </article>`;
+}
+
+function sortiert(liste) {
+  return liste.sort((a, b) => (a.reihenfolge ?? 99) - (b.reihenfolge ?? 99) || String(a.name).localeCompare(b.name, "de"));
+}
+
+/* Daten live aus Firebase; während eine Eingabe läuft, wird nicht neu gezeichnet */
+let fokus = false;
+let ausstehend = null;
+function zeichne(v) {
+  const liste = sortiert(Object.entries(v).map(([key, m]) => ({ key, ...m })));
+  $("startliste").hidden = liste.length > 0;
+  $("liste").innerHTML = liste.map(karte).join("");
+}
+onValue(ref(db, "matten"), (snap) => {
+  const v = snap.val() ?? {};
+  if (fokus) { ausstehend = v; return; }
+  zeichne(v);
+});
+const liste = $("liste");
+liste.addEventListener("focusin", () => { fokus = true; });
+liste.addEventListener("focusout", (e) => {
+  if (liste.contains(e.relatedTarget)) return;
+  fokus = false;
+  if (ausstehend) { const v = ausstehend; ausstehend = null; zeichne(v); }
+});
+
+/* Speichern: jede Änderung geht direkt in die Datenbank. Jede Änderung schreibt nur ihr eigenes Feld. */
+async function speichere(key, werte, meldung) {
+  meldung.classList.remove("fehler");
+  meldung.textContent = "Speichere …";
+  try {
+    await update(ref(db, `matten/${key}`), { ...werte, geaendert: serverTimestamp() });
+    meldung.textContent = "Gespeichert. Die Anzeige ist aktualisiert.";
+  } catch (err) {
+    console.error(err);
+    if (await zugangAbgelaufen(err)) { meldung.textContent = ""; return; }
+    meldung.classList.add("fehler");
+    meldung.textContent = "Speichern hat nicht geklappt. Bitte noch einmal versuchen.";
+  }
+}
+liste.addEventListener("change", (e) => {
+  const kartenEl = e.target.closest(".karte");
+  if (!kartenEl) return;
+  const key = kartenEl.dataset.key;
+  const meldung = kartenEl.querySelector(".meldung");
+  if (e.target.matches('input[type="radio"]')) {
+    sprintAktualisieren(kartenEl, e.target.value);
+    speichere(key, { status: e.target.value }, meldung);
+    return;
+  }
+  const paar = e.target.dataset.paar;
+  if (!paar) return;
+  const datum = kartenEl.querySelector(`input[data-paar="${paar}"][data-feld="datum"]`).value;
+  const zeit = kartenEl.querySelector(`input[data-paar="${paar}"][data-feld="zeit"]`).value.slice(0, 5);
+  if (!datum && !zeit) {
+    speichere(key, { [paar]: null }, meldung);
+    return;
+  }
+  if (!datum) {
+    meldung.classList.add("fehler");
+    meldung.textContent = "Bitte ein Datum eintragen.";
+    return;
+  }
+  speichere(key, { [paar]: zeit ? `${datum}T${zeit}` : datum }, meldung);
+});
+
+/* Startliste anlegen (nur wenn die Liste leer ist) */
+$("startliste").addEventListener("click", async () => {
+  const meldung = $("startliste-meldung");
+  const werte = {};
+  STARTLISTE.forEach(({ key, ...m }) => { werte[`matten/${key}`] = { ...m, geaendert: serverTimestamp() }; });
+  meldung.textContent = "Lege die Startliste an …";
+  try {
+    await update(ref(db), werte);
+    meldung.textContent = "Startliste ist angelegt.";
+  } catch (err) {
+    console.error(err);
+    if (await zugangAbgelaufen(err)) { meldung.textContent = ""; return; }
+    meldung.textContent = "Das hat nicht geklappt. Bitte noch einmal versuchen.";
+  }
+});
+</script>
+</body>
+</html>
