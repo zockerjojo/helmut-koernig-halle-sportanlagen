@@ -76,6 +76,16 @@ tbody th{font-weight:400}
 .fenster form, .fenster .wahl{display:flex; flex-direction:column; gap:16px}
 .feld{display:flex; flex-direction:column; gap:6px; font-size:15px; color:var(--ink2)}
 .feld input{font:inherit; font-size:16px; color:var(--ink); background:var(--bg); min-height:48px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; width:100%}
+/* Augen-Taste: blendet den eingegebenen Code ein und aus */
+.feld-eingabe{position:relative; display:flex}
+.feld-eingabe input{padding-right:52px}
+.augen-knopf{position:absolute; top:0; right:0; bottom:0; width:48px; display:flex; align-items:center; justify-content:center; padding:0; border:0; border-radius:0 10px 10px 0; background:none; color:var(--ink2); cursor:pointer}
+.augen-knopf:hover{color:var(--ink)}
+.augen-knopf:focus-visible{outline:3px solid var(--ink); outline-offset:-3px}
+.augen-knopf svg{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+.augen-knopf .auge-zu{display:none}
+.augen-knopf[aria-pressed="true"] .auge-auf{display:none}
+.augen-knopf[aria-pressed="true"] .auge-zu{display:block}
 .hinweis{margin:0; font-size:14px; line-height:1.35; color:var(--ink2)}
 .fehler{margin:0; min-height:20px; font-size:14px; color:var(--fehler)}
 .reihe{display:flex; gap:10px}
@@ -129,9 +139,13 @@ tbody th{font-weight:400}
     </div>
     <p class="hinweis" id="zugang-warten">Einen Moment …</p>
     <form id="zugang-formular" novalidate hidden>
-      <label class="feld">Zugangscode
-        <input id="zugang-code" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" required>
-      </label>
+      <div class="feld">
+        <label for="zugang-code">Zugangscode</label>
+        <div class="feld-eingabe">
+          <input id="zugang-code" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" required>
+          <button class="augen-knopf" id="zugang-augen" type="button" aria-pressed="false" aria-label="Code anzeigen" title="Code anzeigen"><svg class="auge-auf" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="auge-zu" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20C5 20 1 12 1 12a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg></button>
+        </div>
+      </div>
       <p class="hinweis">Das Gerät merkt sich den Zugang. Der Code muss hier nur einmal eingegeben werden.</p>
       <p class="fehler" id="zugang-fehler" role="alert"></p>
       <div class="reihe">
@@ -211,6 +225,7 @@ async function zugangOeffnen() {
   vorherFokus = document.activeElement;
   $("zugang-fehler").textContent = "";
   $("zugang-code").value = "";
+  codeVerbergen();
   zeigeTeil("warten");
   fenster.hidden = false;
   $("zugang-titel").focus();
@@ -230,8 +245,28 @@ async function zugangOeffnen() {
 function zugangSchliessen() {
   $("zugang").hidden = true;
   $("zugang-code").value = "";
+  codeVerbergen();
   if (vorherFokus && document.contains(vorherFokus)) vorherFokus.focus();
 }
+
+/* Augen-Taste: der Code lässt sich zum Nachsehen kurz sichtbar machen. Beim Schließen wird er wieder verdeckt. */
+function augenTaste(knopfId, feldId) {
+  const knopf = $(knopfId);
+  const feld = $(feldId);
+  const setzen = (sichtbar) => {
+    feld.type = sichtbar ? "text" : "password";
+    knopf.setAttribute("aria-pressed", String(sichtbar));
+    const text = sichtbar ? "Code verbergen" : "Code anzeigen";
+    knopf.setAttribute("aria-label", text);
+    knopf.title = text;
+  };
+  knopf.addEventListener("click", () => {
+    setzen(feld.type === "password");
+    feld.focus();
+  });
+  return () => setzen(false);
+}
+const codeVerbergen = augenTaste("zugang-augen", "zugang-code");
 $("zugang-formular").addEventListener("submit", async (e) => {
   e.preventDefault();
   const fehler = $("zugang-fehler");
@@ -248,6 +283,7 @@ $("zugang-formular").addEventListener("submit", async (e) => {
     modul = await ladeZugang();
     await modul.anmelden(code);
     $("zugang-code").value = "";
+    codeVerbergen();
     zeigeTeil("wahl");
     $("zugang").querySelector(".bereich").focus();
   } catch (err) {

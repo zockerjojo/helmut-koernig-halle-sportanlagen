@@ -206,6 +206,16 @@ textarea:focus-visible,.tf:focus-visible{outline:3px solid var(--accent);outline
 a.ghost{display:flex;align-items:center;justify-content:center;gap:2px;color:var(--ink);text-decoration:none}
 a.ghost svg{flex:none;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .bot .acts .ghost{min-width:0;padding:0 4px;white-space:nowrap}
+/* Augen-Taste: blendet den eingegebenen Code ein und aus */
+.feld-eingabe{position:relative;display:flex}
+.feld-eingabe .tf{padding-right:52px}
+.augen-knopf{position:absolute;top:0;right:0;bottom:0;width:48px;display:flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:0 10px 10px 0;background:none;color:var(--ink);opacity:.65;cursor:pointer}
+.augen-knopf:hover{opacity:1}
+.augen-knopf:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+.augen-knopf svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.augen-knopf .auge-zu{display:none}
+.augen-knopf[aria-pressed="true"] .auge-auf{display:none}
+.augen-knopf[aria-pressed="true"] .auge-zu{display:block}
 </style>
 </head>
 <body>
@@ -352,7 +362,10 @@ a.ghost svg{flex:none;width:16px;height:16px;fill:none;stroke:currentColor;strok
       <h2 id="h-code">Live-Abgleich</h2>
       <p id="code-state"></p>
       <div id="code-row" style="display:flex;flex-direction:column;gap:8px">
-        <input class="tf" id="code-in" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="60" aria-label="Zugangscode">
+        <div class="feld-eingabe" id="code-wrap">
+          <input class="tf" id="code-in" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="60" aria-label="Zugangscode">
+          <button class="augen-knopf" id="code-augen" type="button" aria-pressed="false" aria-label="Code anzeigen" title="Code anzeigen"><svg class="auge-auf" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="auge-zu" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20C5 20 1 12 1 12a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg></button>
+        </div>
         <div class="err" id="code-err" aria-live="polite"></div>
         <button class="ghost" id="code-link" type="button" style="flex:none">Link für Kollegen kopieren</button>
       </div>
@@ -599,12 +612,21 @@ function startSync(){
     });
   }).catch(function(e){try{console.error(e)}catch(x){}if(sync.state!=="denied")setState("fail")});
 }
+/* Augen-Taste: der Code lässt sich zum Nachsehen kurz sichtbar machen. Beim Öffnen wird er wieder verdeckt. */
+function codeSichtbar(sichtbar){
+  var knopf=$("code-augen"),feld=$("code-in");
+  feld.type=sichtbar?"text":"password";
+  knopf.setAttribute("aria-pressed",String(sichtbar));
+  var t=sichtbar?"Code verbergen":"Code anzeigen";
+  knopf.setAttribute("aria-label",t);knopf.title=t;
+}
+$("code-augen").addEventListener("click",function(){codeSichtbar($("code-in").type==="password");$("code-in").focus()});
 function openCode(msg){
   var gate=sync.state==="nocode"||sync.state==="denied";
-  $("code-in").value="";$("code-err").textContent=msg||"";
+  $("code-in").value="";codeSichtbar(false);$("code-err").textContent=msg||"";
   $("h-code").textContent=gate?"Anmelden":"Live-Abgleich";
   $("code-state").textContent=gate?"Bitte den Zugangscode eingeben. Das Gerät merkt sich den Zugang. Der Code muss hier nur einmal eingegeben werden.":(STATE_LONG[sync.state]||"");
-  $("code-in").style.display=gate?"":"none";
+  $("code-wrap").style.display=gate?"":"none";
   $("code-go").style.display=gate?"":"none";
   $("code-home").style.display=gate?"":"none";
   $("code-cancel").style.display=gate?"none":"";

@@ -45,7 +45,17 @@ h1{margin:0; font-family:var(--display); font-weight:600; font-size:clamp(36px, 
 .stapel{display:flex; flex-direction:column; gap:16px}
 .anmeldung{max-width:420px; margin:48px auto 0; display:flex; flex-direction:column; gap:16px}
 .feld{display:flex; flex-direction:column; gap:6px; font-size:15px; color:var(--ink-2)}
-input[type="password"], input[type="date"], input[type="time"]{font:inherit; font-size:16px; color:var(--ink); background:var(--panel); min-height:44px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; width:100%; min-width:0}
+input[type="password"], input[type="text"], input[type="date"], input[type="time"]{font:inherit; font-size:16px; color:var(--ink); background:var(--panel); min-height:44px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; width:100%; min-width:0}
+/* Augen-Taste: blendet den eingegebenen Code ein und aus */
+.feld-eingabe{position:relative; display:flex}
+.feld-eingabe input{padding-right:52px}
+.augen-knopf{position:absolute; top:0; right:0; bottom:0; width:48px; display:flex; align-items:center; justify-content:center; padding:0; border:0; border-radius:0 10px 10px 0; background:none; color:var(--ink-2); cursor:pointer}
+.augen-knopf:hover{color:var(--ink)}
+.augen-knopf:focus-visible{outline:3px solid var(--accent); outline-offset:-3px}
+.augen-knopf svg{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+.augen-knopf .auge-zu{display:none}
+.augen-knopf[aria-pressed="true"] .auge-auf{display:none}
+.augen-knopf[aria-pressed="true"] .auge-zu{display:block}
 .kopfzeile{display:flex; justify-content:space-between; align-items:baseline; gap:12px; flex-wrap:wrap; border-bottom:2px solid var(--ink); padding-bottom:10px}
 .liste{display:grid; grid-template-columns:minmax(0,1fr); gap:16px; padding-top:8px}
 @media (min-width:760px){ .liste{grid-template-columns:repeat(2, minmax(0,1fr))} }
@@ -82,9 +92,13 @@ legend{font-size:14px; color:var(--ink-2); padding:0 0 6px}
 <section id="anmeldung" class="anmeldung" hidden>
   <h1>Anmelden</h1>
   <form id="formular" class="stapel" novalidate>
-    <label class="feld">Zugangscode
-      <input id="code" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" required>
-    </label>
+    <div class="feld">
+      <label for="code">Zugangscode</label>
+      <div class="feld-eingabe">
+        <input id="code" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" required>
+        <button class="augen-knopf" id="augen" type="button" aria-pressed="false" aria-label="Code anzeigen" title="Code anzeigen"><svg class="auge-auf" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="auge-zu" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20C5 20 1 12 1 12a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg></button>
+      </div>
+    </div>
     <button class="knopf primaer" id="anmelden-knopf" type="submit">Anmelden</button>
     <p class="meldung fehler" id="anmeldung-fehler" role="alert"></p>
   </form>
@@ -173,6 +187,25 @@ onAuthStateChanged(auth, async (user) => {
   }
   zeigeBereich(freigeschaltet);
 });
+/* Augen-Taste: der Code lässt sich zum Nachsehen kurz sichtbar machen. Nach dem Anmelden wird er wieder verdeckt. */
+function augenTaste(knopfId, feldId) {
+  const knopf = $(knopfId);
+  const feld = $(feldId);
+  const setzen = (sichtbar) => {
+    feld.type = sichtbar ? "text" : "password";
+    knopf.setAttribute("aria-pressed", String(sichtbar));
+    const text = sichtbar ? "Code verbergen" : "Code anzeigen";
+    knopf.setAttribute("aria-label", text);
+    knopf.title = text;
+  };
+  knopf.addEventListener("click", () => {
+    setzen(feld.type === "password");
+    feld.focus();
+  });
+  return () => setzen(false);
+}
+const codeVerbergen = augenTaste("augen", "code");
+
 $("formular").addEventListener("submit", async (e) => {
   e.preventDefault();
   const feld = $("code");
@@ -190,6 +223,7 @@ $("formular").addEventListener("submit", async (e) => {
     const { user } = await signInAnonymously(auth);
     await set(ref(db, `admins/${user.uid}`), code);
     feld.value = "";
+    codeVerbergen();
     zeigeBereich(true);
   } catch (err) {
     console.error(err);
