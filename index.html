@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="apple-mobile-web-app-title" content="helmut-körnig-halle-sportanlagen">
 <title>helmut-körnig-halle-sportanlagen</title>
+<link rel="icon" type="image/png" href="./bilder/favicon.png">
+<link rel="apple-touch-icon" href="./bilder/symbol.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600&display=swap" rel="stylesheet">
@@ -100,6 +102,15 @@ tbody th{font-weight:400}
 .bereich-zusatz{font-size:14px; line-height:1.3; color:var(--ink2)}
 .bereich svg{flex:none; width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
 .fenster a:focus-visible, .fenster input:focus-visible{outline:3px solid var(--ink); outline-offset:2px}
+/* Logo oben links: führt auf jeder Seite zurück zur Startseite */
+.logo-link{display:inline-flex; align-items:center; gap:10px; min-width:0; flex:none; text-decoration:none; color:inherit; border-radius:6px}
+.logo-link img{flex:none; display:block; height:34px; width:auto}
+.logo-link:focus-visible{outline:3px solid var(--ink); outline-offset:3px}
+/* Hinweis und Abspann unter der Tabelle, in der Schriftgröße der Zusatzzeilen */
+.hinweis-block{display:flex; flex-direction:column; gap:8px; font-size:13px; line-height:1.4; color:var(--ink2)}
+.hinweis-block p{margin:0}
+.hinweis-titel{font-weight:600; color:var(--ink)}
+.abspann{margin-top:4px; padding-top:10px; border-top:1px solid var(--line)}
 </style>
 </head>
 <body>
@@ -107,7 +118,10 @@ tbody th{font-weight:400}
 
 <header class="kopf">
   <div class="kopfzeile">
-    <p class="marke">Helmut-Körnig-Halle</p>
+    <a class="logo-link" href="./" aria-label="Zur Startseite">
+      <img src="./bilder/logo.png" alt="Dortmunder Sportstätten" width="480" height="241">
+      <span class="marke">Helmut-Körnig-Halle</span>
+    </a>
     <button class="thema-knopf" id="dunkel" type="button" aria-pressed="false" aria-label="Dunkelmodus" title="Dunkelmodus"><svg class="mond" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sonne" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></button>
   </div>
   <h1>Status Sportanlagen</h1>
@@ -127,6 +141,14 @@ tbody th{font-weight:400}
 </table>
 
 <p class="verbindung" id="verbindung" hidden>Keine Verbindung. Die Angaben können veraltet sein.</p>
+
+<section class="hinweis-block">
+  <p class="hinweis-titel">Hinweis zur Aktualität:</p>
+  <p>Die Live-Anlagenübersicht ist ein internes Informationsangebot, welches vom Personal der Helmut-Körnig-Halle eigenständig zur Verfügung gestellt und regelmäßig aktualisiert wird.</p>
+  <p>Dennoch kann es aufgrund kurzfristiger Änderungen oder organisatorischer Abläufe zu Abweichungen kommen. Alle Angaben sind daher unverbindlich und ohne Gewähr.</p>
+  <p>Dieses Angebot steht offiziell nicht im Zusammenhang mit der Internetpräsenz der Dortmunder Sportstätten gGmbH oder der Helmut-Körnig-Halle.</p>
+  <p class="abspann">Created by Joel Pap<br>Designed &amp; developed with AI assistance<br>Powered by Vibe Coding<br>© 2026 Joel Pap · Alle Rechte vorbehalten</p>
+</section>
 
 </div>
 
@@ -156,11 +178,11 @@ tbody th{font-weight:400}
     <div class="wahl" id="zugang-wahl" hidden>
       <div class="bereiche">
         <a class="bereich" href="./Reinigungsplan">
-          <span class="bereich-text"><span class="bereich-name">Hallenreinigung</span><span class="bereich-zusatz">Im Hallenplan eintragen, was geputzt ist</span></span>
+          <span class="bereich-text"><span class="bereich-name">Hallenreinigung</span><span class="bereich-zusatz">Gereinigte Bereiche eintragen und einsehen</span></span>
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>
         </a>
         <a class="bereich" href="./Sportanlagen">
-          <span class="bereich-text"><span class="bereich-name">Sportanlagen</span><span class="bereich-zusatz">Status der Matten und der Tribüne einstellen</span></span>
+          <span class="bereich-text"><span class="bereich-name">Sportanlagen</span><span class="bereich-zusatz">Status der Anlagen und der Tribüne einstellen</span></span>
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>
         </a>
       </div>
@@ -173,7 +195,7 @@ tbody th{font-weight:400}
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, onValue, set, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { firebaseConfig } from "./js/config.js";
 
 const $ = (id) => document.getElementById(id);
@@ -405,6 +427,18 @@ onValue(ref(db, "matten"), (snap) => {
 onValue(ref(db, ".info/connected"), (snap) => {
   $("verbindung").hidden = snap.val() === true;
 });
+
+/* Besucherzählung: jedes Gerät zählt einmal pro Tag, Neuladen zählt also nicht mit.
+   Gezählt wird nur diese öffentliche Anzeige, nicht die Personal-Seiten.
+   Die Zahlen stehen in der Datenbank unter "besuche" und sind nur für freigeschaltete Geräte lesbar. */
+const TAG = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Berlin" }).format(new Date());
+try {
+  if (localStorage.getItem("hkh-besuch") !== TAG) {
+    localStorage.setItem("hkh-besuch", TAG);
+    set(ref(db, "besuche/gesamt"), increment(1)).catch(() => {});
+    set(ref(db, `besuche/tage/${TAG}`), increment(1)).catch(() => {});
+  }
+} catch (e) {}
 </script>
 </body>
 </html>

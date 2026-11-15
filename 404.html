@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>Seite nicht gefunden · Helmut-Körnig-Halle</title>
+<link rel="icon" type="image/png" href="/bilder/favicon.png">
+<link rel="apple-touch-icon" href="/bilder/symbol.png">
 <script>
 /* Andere Schreibweisen der Adressen führen zur richtigen Seite, zum Beispiel /reinigungsplan statt /Reinigungsplan */
 (function () {
@@ -44,11 +46,17 @@ h1{margin:0; font-family:var(--display); font-weight:600; font-size:clamp(32px, 
 p{margin:0}
 .knopf{display:inline-flex; align-items:center; justify-content:center; align-self:flex-start; min-height:44px; padding:8px 18px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); font-size:15px; font-weight:600; text-decoration:none}
 .knopf:focus-visible{outline:3px solid var(--ink); outline-offset:2px}
+.logo-link{display:inline-flex; align-items:center; gap:10px; align-self:flex-start; text-decoration:none; color:inherit; border-radius:6px}
+.logo-link img{flex:none; display:block; height:34px; width:auto}
+.logo-link:focus-visible{outline:3px solid var(--ink); outline-offset:3px}
 </style>
 </head>
 <body>
 <div class="seite">
-  <p class="marke">Helmut-Körnig-Halle</p>
+  <a class="logo-link" href="/" aria-label="Zur Startseite">
+    <img src="/bilder/logo.png" alt="Dortmunder Sportstätten" width="480" height="241">
+    <span class="marke">Helmut-Körnig-Halle</span>
+  </a>
   <h1>Seite nicht gefunden</h1>
   <p>Diese Adresse gibt es hier nicht.</p>
   <a class="knopf" id="start" href="/">Zur Startseite</a>
