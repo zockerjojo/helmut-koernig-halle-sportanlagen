@@ -160,7 +160,7 @@ textarea:focus-visible,.tf:focus-visible{outline:3px solid var(--accent);outline
 /* kompakte Bedienung */
 .top{padding:6px 12px 2px}
 .top h1{font-size:16px;white-space:nowrap;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
-.thb{flex:none;width:30px;height:30px;padding:0;border:1px solid var(--line);border-radius:50%;background:var(--panel);font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center}
+.thb{flex:none;width:30px;height:30px;padding:0;border:1px solid var(--line);border-radius:50%;background:var(--panel);font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation}
 .logo{width:38px;height:38px;background:none;border:0;padding:0;border-radius:0}
 #prog{font-size:13px}
 .ctl{gap:6px;padding:4px 12px 6px}
@@ -202,10 +202,8 @@ textarea:focus-visible,.tf:focus-visible{outline:3px solid var(--accent);outline
 .fullmap #app{grid-template-columns:minmax(0,1fr) !important;grid-template-rows:auto minmax(0,1fr) !important;grid-template-areas:"ctl" "map" !important}
 .fullmap .map{margin:0 !important;border:0 !important;border-radius:0 !important}
 @media (prefers-reduced-motion:no-preference){.b,.zb{transition:background-color .12s}}
-/* Knopf zurück zur Startseite */
+/* Knopf zurück zur Startseite im Anmeldefenster */
 a.ghost{display:flex;align-items:center;justify-content:center;gap:2px;color:var(--ink);text-decoration:none}
-a.ghost svg{flex:none;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.bot .acts .ghost{min-width:0;padding:0 4px;white-space:nowrap}
 /* Augen-Taste: blendet den eingegebenen Code ein und aus */
 .feld-eingabe{position:relative;display:flex}
 .feld-eingabe .tf{padding-right:52px}
@@ -330,7 +328,6 @@ a.ghost svg{flex:none;width:16px;height:16px;fill:none;stroke:currentColor;strok
   <footer class="bot">
     <p id="info" aria-live="polite"></p>
     <div class="acts">
-      <a class="ghost" id="zur-startseite" href="./"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 6l-6 6 6 6"/></svg>Startseite</a>
       <button class="ghost" id="open-notes">Notizen (0)</button>
       <button class="ghost danger" id="open-reset">Zurücksetzen</button>
     </div>
@@ -1028,7 +1025,20 @@ function themeIcon(){$("theme").innerHTML=isDark()?"&#9728;&#65038;":"&#9790;&#6
 /* Dieselbe Einstellung wie auf der Startseite und bei den Sportanlagen */
 try{var th0=localStorage.getItem("hkh-thema");if(th0==="dark"||th0==="light")document.documentElement.setAttribute("data-theme",th0)}catch(e){}
 themeIcon();
-$("theme").addEventListener("click",function(){var n=isDark()?"light":"dark";document.documentElement.setAttribute("data-theme",n);try{localStorage.setItem("hkh-thema",n)}catch(e){}themeIcon()});
+/* Kurz tippen schaltet hell und dunkel um. Gedrückt halten führt zur Auswahl der Bereiche. */
+var HALTEN_MS=2000;
+var halteUhr=0,gehalten=false;
+$("theme").addEventListener("click",function(){
+  if(gehalten){gehalten=false;return}
+  var n=isDark()?"light":"dark";document.documentElement.setAttribute("data-theme",n);try{localStorage.setItem("hkh-thema",n)}catch(e){}themeIcon();
+});
+$("theme").addEventListener("pointerdown",function(e){
+  if(e.pointerType==="mouse"&&e.button!==0)return;
+  gehalten=false;clearTimeout(halteUhr);
+  halteUhr=setTimeout(function(){gehalten=true;location.href="./#auswahl"},HALTEN_MS);
+});
+["pointerup","pointerleave","pointercancel"].forEach(function(n){$("theme").addEventListener(n,function(){clearTimeout(halteUhr)})});
+$("theme").addEventListener("contextmenu",function(e){e.preventDefault()});
 if(window.matchMedia){try{window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",themeIcon)}catch(e){}}
 
 /* ---------- Dropdown, Richtungsschalter, Vollbild ---------- */

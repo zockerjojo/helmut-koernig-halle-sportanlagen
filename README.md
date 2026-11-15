@@ -10,7 +10,8 @@ Eine Webseite für die Helmut-Körnig-Halle in Dortmund mit drei Bereichen.
 
 ## Zugang für das Personal
 
-- Auf der Startseite den runden Knopf oben rechts etwa eine Sekunde gedrückt halten. Kurz tippen schaltet nur hell und dunkel um.
+- Auf jeder Seite den Hell-/Dunkel-Knopf etwa zwei Sekunden gedrückt halten. Kurz tippen schaltet nur hell und dunkel um.
+- Auf der Startseite öffnet sich damit die Auswahl der Bereiche. Auf den beiden Personal-Seiten führt dasselbe lange Drücken zurück zu dieser Auswahl. Andere Knöpfe zum Wechseln der Seite gibt es nicht.
 - Beim ersten Mal fragt das Gerät nach dem Zugangscode. Danach merkt es sich den Zugang und zeigt sofort die Auswahl.
 - Die beiden Personal-Seiten lassen sich auch direkt öffnen, zum Beispiel als Verknüpfung auf dem Handy. Sie prüfen beim Öffnen zuerst, ob das Gerät schon freigeschaltet ist.
 - Der Zugangscode steht nur in der Datenbank unter `zugang/code`. Er steht in keiner Datei dieses Projekts. Geändert wird er in der Firebase-Konsole.

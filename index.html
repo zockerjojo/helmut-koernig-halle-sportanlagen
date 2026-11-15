@@ -191,7 +191,7 @@ try { gemerkt = localStorage.getItem("hkh-thema"); } catch (e) {}
 thema(gemerkt ? gemerkt === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches);
 
 /* Kurz tippen schaltet hell und dunkel um. Wird der Knopf gedrückt gehalten, öffnet sich der Zugang für das Personal. */
-const HALTEN_MS = 800;
+const HALTEN_MS = 2000;
 const knopf = $("dunkel");
 let halteUhr = 0;
 let gehalten = false;

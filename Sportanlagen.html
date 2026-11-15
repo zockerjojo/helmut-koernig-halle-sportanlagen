@@ -30,7 +30,12 @@ body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); 
 .kopf{display:flex; justify-content:space-between; align-items:center; gap:12px 16px; flex-wrap:wrap; padding-top:24px}
 .marke{font-family:var(--display); font-weight:600; font-size:24px; line-height:1; letter-spacing:.04em; text-transform:uppercase}
 .werkzeuge{display:flex; align-items:center; gap:10px 12px; flex-wrap:wrap}
-.wer{font-size:14px; color:var(--ink-2); overflow-wrap:anywhere}
+.thema-knopf{display:inline-flex; align-items:center; justify-content:center; flex:none; width:44px; height:44px; padding:0; border-radius:50%; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; touch-action:manipulation}
+.thema-knopf:hover{border-color:var(--ink)}
+.thema-knopf svg{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+.thema-knopf .sonne{display:none}
+:root[data-theme="dark"] .thema-knopf .sonne{display:block}
+:root[data-theme="dark"] .thema-knopf .mond{display:none}
 .knopf{font:inherit; font-size:15px; font-weight:600; min-height:44px; padding:8px 18px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer}
 .knopf.primaer{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
 .knopf[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
@@ -80,11 +85,7 @@ legend{font-size:14px; color:var(--ink-2); padding:0 0 6px}
 
 <header class="kopf">
   <div class="marke">Helmut-Körnig-Halle · Personal</div>
-  <div class="werkzeuge">
-    <a class="knopf" id="auswahl" href="./#auswahl" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 6l-6 6 6 6"/></svg>Auswahl</a>
-    <span class="wer" id="wer"></span>
-    <button class="knopf" id="abmelden" type="button" hidden>Abmelden</button>
-  </div>
+  <button class="thema-knopf" id="dunkel" type="button" aria-pressed="false" aria-label="Dunkelmodus" title="Dunkelmodus"><svg class="mond" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sonne" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></button>
 </header>
 
 <p class="muted" id="pruefung" style="margin-top:48px">Einen Moment …</p>
@@ -102,7 +103,6 @@ legend{font-size:14px; color:var(--ink-2); padding:0 0 6px}
     <button class="knopf primaer" id="anmelden-knopf" type="submit">Anmelden</button>
     <p class="meldung fehler" id="anmeldung-fehler" role="alert"></p>
   </form>
-  <a class="knopf" href="./">Zur Startseite</a>
 </section>
 
 <section id="panel" class="stapel" hidden>
@@ -126,14 +126,34 @@ import { firebaseConfig } from "./js/config.js";
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
-/* Farbschema: übernimmt das auf der öffentlichen Anzeige gewählte Schema; hier gibt es keinen Umschalter */
+/* Farbschema wie auf der öffentlichen Anzeige, dieselbe Einstellung für alle Seiten */
 const wurzel = document.documentElement;
 function thema(dunkel) {
   wurzel.dataset.theme = dunkel ? "dark" : "light";
+  $("dunkel").setAttribute("aria-pressed", String(dunkel));
+  try { localStorage.setItem("hkh-thema", dunkel ? "dark" : "light"); } catch (e) {}
 }
 let gemerkt = null;
 try { gemerkt = localStorage.getItem("hkh-thema"); } catch (e) {}
 thema(gemerkt ? gemerkt === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+/* Kurz tippen schaltet hell und dunkel um. Gedrückt halten führt zur Auswahl der Bereiche. */
+const HALTEN_MS = 2000;
+const themaKnopf = $("dunkel");
+let halteUhr = 0;
+let gehalten = false;
+themaKnopf.addEventListener("click", () => {
+  if (gehalten) { gehalten = false; return; }
+  thema(wurzel.dataset.theme !== "dark");
+});
+themaKnopf.addEventListener("pointerdown", (e) => {
+  if (e.pointerType === "mouse" && e.button !== 0) return;
+  gehalten = false;
+  clearTimeout(halteUhr);
+  halteUhr = setTimeout(() => { gehalten = true; location.href = "./#auswahl"; }, HALTEN_MS);
+});
+["pointerup", "pointerleave", "pointercancel"].forEach((name) => themaKnopf.addEventListener(name, () => clearTimeout(halteUhr)));
+themaKnopf.addEventListener("contextmenu", (e) => e.preventDefault());
 
 /* Startliste: die fünf Einträge ohne Status und ohne Zeit. Das Hallenteam trägt sie selbst ein. */
 const STARTLISTE = [
@@ -169,9 +189,6 @@ function zeigeBereich(angemeldet) {
   $("pruefung").hidden = true;
   $("anmeldung").hidden = angemeldet;
   $("panel").hidden = !angemeldet;
-  $("abmelden").hidden = !angemeldet;
-  $("auswahl").hidden = !angemeldet;
-  $("wer").textContent = angemeldet ? "Angemeldet" : "";
 }
 async function istFreigeschaltet(uid) {
   const snap = await get(ref(db, `admins/${uid}`));
@@ -234,8 +251,6 @@ $("formular").addEventListener("submit", async (e) => {
     knopf.disabled = false;
   }
 });
-$("abmelden").addEventListener("click", () => signOut(auth));
-
 /* Lehnt die Datenbank den Zugang ab (z. B. weil der Code geändert wurde), wird abgemeldet */
 async function zugangAbgelaufen(err) {
   if (!istRechteFehler(err)) return false;
