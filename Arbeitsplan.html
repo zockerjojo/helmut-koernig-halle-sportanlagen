@@ -103,7 +103,8 @@ textarea{resize:none; line-height:1.35}
 #punkte circle.treffer{fill:transparent; stroke:none}
 #punkte circle.kugel{stroke:var(--ink); stroke-width:1.2}
 #punkte circle.kugel.gewaehlt{stroke-width:2.4}
-#etiketten text{font-family:var(--body); font-size:9px; font-weight:600; fill:var(--ink); paint-order:stroke; stroke:var(--panel); stroke-width:2.6; stroke-linejoin:round}
+#etiketten text{font-family:var(--body)}
+#etiketten rect{fill:var(--panel); stroke:var(--line)}
 #pfeile line.strich{stroke-linecap:round}
 #pfeile line.treffer{stroke:transparent; stroke-width:16}
 /* Tafel unten: Hinweis, Details, Formular, Verlauf */
@@ -175,7 +176,7 @@ textarea{resize:none; line-height:1.35}
 
   <div class="map" id="map">
     <svg id="svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hallenplan von oben">
-      <defs><clipPath id="inf"><path d="M268 93 H552 A80 80 0 0 1 552 253 H268 A80 80 0 0 1 268 93 Z"/></clipPath><clipPath id="outc"><path clip-rule="evenodd" d="M35 6 H675 L687 16 H737 V64 H697 Q703 160 694 255 L681 316 H31 L17 286 L14 226 Q-2 130 19 25 Z M268 60 H552 A113 113 0 0 1 552 286 H268 A113 113 0 0 1 268 60 Z M661 202 L655 277 L640 296 L597 296 L597 276.65 A113 113 0 0 0 661 202 Z M158 303 H563 V315 H158 Z M351 286 H364 V303 H351 Z M159 288.5 H351 V303 H159 Z M364 288.5 H563 V303 H364 Z"/></clipPath><clipPath id="noblk"><path clip-rule="evenodd" d="M-60 -60 H820 V400 H-60 Z M159 288.5 h192 v14.5 h-192 Z M364 288.5 h199 v14.5 h-199 Z M12 160 h87 v76 h-87 Z M117 66 h35 v40 h-35 Z M563 196 h43 v22 h-43 Z"/></clipPath><clipPath id="zaunc"><path d="M661 202 L655 277 L640 296 L597 296 L597 276.65 A113 113 0 0 0 661 202 Z"/></clipPath></defs>
+      <defs><filter id="etikett-schatten" x="-20%" y="-30%" width="140%" height="170%"><feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-opacity=".22"></feDropShadow></filter><clipPath id="inf"><path d="M268 93 H552 A80 80 0 0 1 552 253 H268 A80 80 0 0 1 268 93 Z"/></clipPath><clipPath id="outc"><path clip-rule="evenodd" d="M35 6 H675 L687 16 H737 V64 H697 Q703 160 694 255 L681 316 H31 L17 286 L14 226 Q-2 130 19 25 Z M268 60 H552 A113 113 0 0 1 552 286 H268 A113 113 0 0 1 268 60 Z M661 202 L655 277 L640 296 L597 296 L597 276.65 A113 113 0 0 0 661 202 Z M158 303 H563 V315 H158 Z M351 286 H364 V303 H351 Z M159 288.5 H351 V303 H159 Z M364 288.5 H563 V303 H364 Z"/></clipPath><clipPath id="noblk"><path clip-rule="evenodd" d="M-60 -60 H820 V400 H-60 Z M159 288.5 h192 v14.5 h-192 Z M364 288.5 h199 v14.5 h-199 Z M12 160 h87 v76 h-87 Z M117 66 h35 v40 h-35 Z M563 196 h43 v22 h-43 Z"/></clipPath><clipPath id="zaunc"><path d="M661 202 L655 277 L640 296 L597 296 L597 276.65 A113 113 0 0 0 661 202 Z"/></clipPath></defs>
       <g id="world">
         <path class="hall" id="hallp" d="M35 6 H675 L687 16 H737 V64 H697 Q703 160 694 255 L681 316 H31 L17 286 L14 226 Q-2 130 19 25 Z"/>
         <rect class="trib" x="160" y="8" width="520" height="6"/>
@@ -584,16 +585,11 @@ function zeichnePlan() {
     ebenePunkte.appendChild(neu("circle", { cx: e.x, cy: e.y, r: 7 * p, fill: punktFarbe(e), class: "kugel" + (gewaehlt ? " gewaehlt" : ""), "stroke-width": (gewaehlt ? 2.4 : 1.2) * p }));
   });
   if (zeigeText) {
+    const schatten = $("etikett-schatten")?.firstElementChild;
+    if (schatten) { schatten.setAttribute("dy", 1 * p); schatten.setAttribute("stdDeviation", 1.2 * p); }
+    const belegt = [];
     liste.forEach((e) => {
-      const x = istPfeil(e) ? e.x1 : e.x;
-      const y = istPfeil(e) ? e.y1 : e.y;
-      const rechts = x < W0 * 0.7;
-      const t = neu("text", { x: x + (rechts ? 11 : -11) * p, y: y - 2 * p, "text-anchor": rechts ? "start" : "end", "font-size": 11 * p, "stroke-width": 3 * p });
-      t.textContent = titelVon(e);
-      ebeneEtiketten.appendChild(t);
-      const u = neu("text", { x: x + (rechts ? 11 : -11) * p, y: y + 9 * p, "text-anchor": rechts ? "start" : "end", "font-size": 9 * p, "stroke-width": 3 * p, opacity: ".8" });
-      u.textContent = untertitelVon(e);
-      ebeneEtiketten.appendChild(u);
+      etikettZeichnen(istPfeil(e) ? e.x1 : e.x, istPfeil(e) ? e.y1 : e.y, titelVon(e), untertitelVon(e), p, belegt);
     });
   }
   if (S.start) {
@@ -604,6 +600,52 @@ function zeichnePlan() {
     if (S.entwurf.art === "pfeil") pfeilZeichnen(ebenePfeile, S.entwurf.x1, S.entwurf.y1, S.entwurf.x2, S.entwurf.y2, f, p, true);
     else ebenePunkte.appendChild(neu("circle", { cx: S.entwurf.x, cy: S.entwurf.y, r: 8 * p, fill: f, stroke: "#FFFFFF", "stroke-width": 2 * p, "fill-opacity": ".85" }));
   }
+}
+
+/* Aufgabe und Person stehen in einer eigenen Box, damit sie auf dem bunten
+   Plan lesbar bleiben. Die Breite ergibt sich erst nach dem Messen des Textes,
+   deshalb wird zuerst gezeichnet und danach die Box gesetzt. */
+function etikettZeichnen(x, y, titel, unter, p, belegt) {
+  const g = neu("g", {});
+  const kasten = neu("rect", { rx: 3 * p, ry: 3 * p, "stroke-width": p, filter: "url(#etikett-schatten)" });
+  const t1 = neu("text", { "font-size": 11 * p, "font-weight": "600", fill: stilWert("--ink", "#14201B") });
+  const t2 = neu("text", { "font-size": 9 * p, "font-weight": "500", fill: stilWert("--ink-2", "#55635C") });
+  t1.textContent = titel;
+  t2.textContent = unter;
+  g.appendChild(kasten); g.appendChild(t1); g.appendChild(t2);
+  ebeneEtiketten.appendChild(g);
+
+  /* Sehr langer Text würde über die halbe Karte laufen und wird gekürzt. */
+  const platz = sicht.w * 0.45;
+  if (t1.getComputedTextLength() > platz) {
+    let text = titel;
+    while (text.length > 6 && t1.getComputedTextLength() > platz) {
+      text = text.slice(0, -2);
+      t1.textContent = text + "…";
+    }
+  }
+  const breite = Math.max(t1.getComputedTextLength(), t2.getComputedTextLength()) + 11 * p;
+  const hoehe = 26 * p;
+  /* Die Box steht rechts vom Punkt. Passt sie dort nicht mehr ins Bild, springt sie nach links. */
+  const rechtsRand = sicht.x + sicht.w;
+  const passtRechts = x + 12 * p + breite <= rechtsRand;
+  const passtLinks = x - 12 * p - breite >= sicht.x;
+  const rechts = passtRechts || !passtLinks;
+  const bx = rechts ? x + 12 * p : x - 12 * p - breite;
+  let by = y - hoehe / 2;
+  /* Zwei Boxen übereinander wären unlesbar: die zweite rutscht nach unten. */
+  for (let versuch = 0; versuch < 4; versuch++) {
+    const stoesst = belegt.some((r) => bx < r.x + r.b && bx + breite > r.x && by < r.y + r.h && by + hoehe > r.y);
+    if (!stoesst) break;
+    by += hoehe + 2 * p;
+  }
+  /* Am oberen und unteren Rand bleibt die Box im Bild. */
+  by = Math.min(Math.max(by, sicht.y + 2 * p), sicht.y + sicht.h - hoehe - 2 * p);
+  belegt.push({ x: bx, y: by, b: breite, h: hoehe });
+  kasten.setAttribute("x", bx); kasten.setAttribute("y", by);
+  kasten.setAttribute("width", breite); kasten.setAttribute("height", hoehe);
+  t1.setAttribute("x", bx + 5.5 * p); t1.setAttribute("y", by + 11.5 * p);
+  t2.setAttribute("x", bx + 5.5 * p); t2.setAttribute("y", by + 21.5 * p);
 }
 
 /* Abstand eines Punktes zu einer Strecke, für das Antippen von Pfeilen. */
