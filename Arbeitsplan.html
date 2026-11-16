@@ -365,13 +365,10 @@ function anmeldeFehler(err) {
     default: return "Anmeldung hat nicht geklappt. Bitte noch einmal versuchen.";
   }
 }
-async function zugangAbgelaufen(err) {
-  if (!istRechteFehler(err)) return false;
-  $("anmeldung-fehler").textContent = "Dein Zugang ist nicht mehr gültig. Bitte den Code neu eingeben.";
-  zeigeBereich(false);
-  await signOut(auth).catch(() => {});
-  return true;
-}
+/* Lehnt die Datenbank den Arbeitsplan ab, heißt das fast immer: für den Zweig "arbeitsplan"
+   fehlen noch die Regeln. Das ist kein abgelaufener Zugang, also bleibt das Gerät angemeldet.
+   Ob der Code noch gilt, wird beim Öffnen der Seite ohnehin geprüft. */
+const NICHT_FREI = "Der Arbeitsplan ist in der Datenbank noch nicht freigeschaltet. Die Regeln für den Zweig „arbeitsplan“ müssen einmal veröffentlicht werden.";
 
 let anmeldungLaeuft = false;
 let hoeren = null;
@@ -800,7 +797,7 @@ async function schreiben(werte) {
     return true;
   } catch (err) {
     console.error(err);
-    if (!(await zugangAbgelaufen(err))) hinweisSetzen("Das konnte nicht gespeichert werden. Bitte noch einmal versuchen.");
+    hinweisSetzen(istRechteFehler(err) ? NICHT_FREI : "Das konnte nicht gespeichert werden. Bitte noch einmal versuchen.");
     return false;
   }
 }
@@ -934,10 +931,9 @@ function sauber(roh) {
   });
   return raus;
 }
-async function datenFehler(err) {
+function datenFehler(err) {
   console.error(err);
-  if (await zugangAbgelaufen(err)) return;
-  $("live-text").textContent = "Keine Verbindung. Die Anzeige kann veraltet sein.";
+  $("live-text").textContent = istRechteFehler(err) ? NICHT_FREI : "Keine Verbindung. Die Anzeige kann veraltet sein.";
 }
 let syncLaeuft = false;
 function starteSync() {
