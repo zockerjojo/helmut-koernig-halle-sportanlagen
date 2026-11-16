@@ -269,10 +269,10 @@ textarea{resize:none; line-height:1.35}
           <textarea id="f-text" rows="2" maxlength="200" placeholder="Zum Beispiel: Netz am Ballfang prüfen"></textarea>
         </div>
         <div class="feld">
-          <span id="f-wer-text">Wer macht das?</span>
+          <span id="f-wer-text">Wer macht das? Darf frei bleiben.</span>
           <div class="personen" role="group" aria-labelledby="f-wer-text" id="f-personen"></div>
         </div>
-        <p class="muted" id="f-hinweis">Ohne Person bleibt die Aufgabe ungefärbt. Mit Person bekommt sie deren Farbe.</p>
+        <p class="muted" id="f-hinweis">Bleibt die Person frei, gilt die Aufgabe für das ganze Personal.</p>
         <p class="meldung fehler" id="f-fehler" role="alert"></p>
         <div class="reihe">
           <button class="knopf" id="f-abbrechen" type="button">Abbrechen</button>
@@ -319,8 +319,10 @@ const PERSONEN = [
   { n: "Patrick", c: "#A259FF" },
   { n: "Lukas", c: "#35E0F2" },
 ];
-const FARBE_OHNE = "#8A968F";
-const farbeVon = (name) => PERSONEN.find((p) => p.n === name)?.c ?? FARBE_OHNE;
+/* Ohne Person gilt die Aufgabe fuer das ganze Personal. Sie bekommt die Schriftfarbe,
+   damit sie sich klar von einer erledigten (grauen) Aufgabe unterscheidet. */
+const stilWert = (name, ersatz) => getComputedStyle(wurzel).getPropertyValue(name).trim() || ersatz;
+const farbeVon = (name) => PERSONEN.find((p) => p.n === name)?.c ?? stilWert("--ink", "#14201B");
 
 /* Farbschema: dieselbe Einstellung wie auf den anderen Seiten. */
 const wurzel = document.documentElement;
@@ -341,6 +343,8 @@ let gehalten = false;
 themaKnopf.addEventListener("click", () => {
   if (gehalten) { gehalten = false; return; }
   thema(wurzel.dataset.theme !== "dark");
+  /* Aufgaben ohne Person nehmen die Schriftfarbe an: nach dem Wechsel neu zeichnen. */
+  try { zeichnePlan(); alleZeichnen(); verlaufZeichnen(); } catch (err) {}
 });
 themaKnopf.addEventListener("pointerdown", (e) => {
   if (e.pointerType === "mouse" && e.button !== 0) return;
@@ -539,10 +543,10 @@ svg.addEventListener("pointercancel", () => { zieh = null; });
 const istPfeil = (e) => e.art === "pfeil";
 const titelVon = (e) => (istPfeil(e) ? `${e.text} dorthin bringen` : e.text);
 const untertitelVon = (e) => {
-  const wer = e.person || "ohne Person";
-  return e.status === "erledigt" ? `✓ ${wer} · erledigt` : `${wer} · offen`;
+  if (e.status === "erledigt") return e.person ? `✓ ${e.person} · erledigt` : "✓ erledigt";
+  return e.person ? `${e.person} · offen` : "Für alle · offen";
 };
-const punktFarbe = (e) => (e.status === "erledigt" ? getComputedStyle(wurzel).getPropertyValue("--erledigt").trim() || "#6B7770" : farbeVon(e.person));
+const punktFarbe = (e) => (e.status === "erledigt" ? stilWert("--erledigt", "#6B7770") : farbeVon(e.person));
 const sortiert = () => Object.entries(S.eintraege).map(([id, e]) => ({ id, ...e })).sort((a, b) => (a.ts || 0) - (b.ts || 0));
 
 function pfeilZeichnen(ziel, x1, y1, x2, y2, farbe, p, gestrichelt) {
@@ -591,7 +595,7 @@ function zeichnePlan() {
     ebenePunkte.appendChild(neu("circle", { cx: S.start.x, cy: S.start.y, r: 8 * p, fill: "none", stroke: farbeVon(S.person), "stroke-width": 2.5 * p, "stroke-dasharray": `${4 * p} ${3 * p}` }));
   }
   if (S.entwurf) {
-    const f = S.person ? farbeVon(S.person) : FARBE_OHNE;
+    const f = farbeVon(S.person);
     if (S.entwurf.art === "pfeil") pfeilZeichnen(ebenePfeile, S.entwurf.x1, S.entwurf.y1, S.entwurf.x2, S.entwurf.y2, f, p, true);
     else ebenePunkte.appendChild(neu("circle", { cx: S.entwurf.x, cy: S.entwurf.y, r: 8 * p, fill: f, stroke: "#FFFFFF", "stroke-width": 2 * p, "fill-opacity": ".85" }));
   }
@@ -703,8 +707,8 @@ function formularOeffnen(id) {
   $("f-text").placeholder = pfeil ? "Zum Beispiel: Matten" : "Zum Beispiel: Netz am Ballfang prüfen";
   $("f-text").value = e ? e.text : "";
   $("f-hinweis").textContent = pfeil
-    ? "Der Pfeil bekommt die Farbe der Person. Erledigt wird er grau."
-    : "Ohne Person bleibt die Aufgabe ungefärbt. Mit Person bekommt sie deren Farbe.";
+    ? "Bleibt die Person frei, gilt der Pfeil für das ganze Personal. Mit Person bekommt er deren Farbe."
+    : "Bleibt die Person frei, gilt die Aufgabe für das ganze Personal. Mit Person bekommt sie deren Farbe.";
   $("f-fehler").textContent = "";
   personenZeichnen();
   tafelZeigen("formular");
@@ -793,7 +797,6 @@ function verlaufPaar(was, titel, person) {
 async function schreiben(werte) {
   try {
     await update(ref(db), werte);
-    aufraeumen();
     return true;
   } catch (err) {
     console.error(err);
@@ -801,15 +804,8 @@ async function schreiben(werte) {
     return false;
   }
 }
-/* Der Verlauf soll nicht endlos wachsen: über 400 Einträgen fallen die ältesten weg. */
-async function aufraeumen() {
-  const alle = Object.entries(S.verlauf);
-  if (alle.length <= 400) return;
-  const weg = alle.sort((a, b) => (a[1]?.ts || 0) - (b[1]?.ts || 0)).slice(0, alle.length - 300);
-  const werte = {};
-  weg.forEach(([id]) => { werte[`${BASIS}/verlauf/${id}`] = null; });
-  try { await update(ref(db), werte); } catch (err) { console.error(err); }
-}
+/* Der Verlauf wird nie automatisch gekürzt: einmal Eingetragenes bleibt stehen.
+   Angezeigt werden die neuesten 100 Einträge. */
 
 /* ---- Personen ---- */
 function personenZeichnen() {

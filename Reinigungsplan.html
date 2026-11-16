@@ -73,7 +73,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .bot{grid-area:bot;display:flex;flex-direction:column;gap:8px;padding:8px 16px 12px}
 #info{font-size:15px;line-height:1.3;min-height:40px;margin:0;color:var(--ink-2);display:flex;align-items:center}
 #info.strong{color:var(--ink);font-weight:500}
-.ghost{flex:1;min-height:44px;border:1px solid var(--line);background:transparent;border-radius:10px;font-size:15px;font-weight:500}
+.ghost{flex:1 1 150px;min-width:150px;min-height:44px;border:1px solid var(--line);background:transparent;border-radius:10px;font-size:15px;font-weight:500}
 .ghost.danger{color:var(--danger)}
 .shade{position:absolute;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;justify-content:center;z-index:5}
 .shade.open{display:flex}
@@ -87,7 +87,7 @@ textarea,.tf{font:inherit;color:var(--ink);background:var(--bg);border:1px solid
 textarea:focus-visible,.tf:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
 #code-err{-webkit-user-select:text;user-select:text;overflow-wrap:anywhere}
 .err{color:var(--danger);font-size:14px;min-height:18px}
-.acts{display:flex;gap:8px}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
 .primary{flex:1;min-height:44px;border:0;border-radius:10px;background:var(--accent);color:var(--on-accent);font-size:15px;font-weight:600}
 .primary.danger{background:var(--danger);color:#fff}
 .note{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid var(--line);border-radius:10px}
@@ -128,6 +128,9 @@ textarea:focus-visible,.tf:focus-visible{outline:3px solid var(--accent);outline
 .color .zgate{stroke:#10201A}
 .tag{font-family:var(--font-body);font-size:8.5px;fill:var(--ink-2);text-anchor:middle}
 #paint path{stroke-opacity:.62}
+/* Noch nicht gewischte Bahnen: nur sichtbar, solange die Anzeige eingeschaltet ist */
+.nichtgereinigt{stroke:var(--danger);stroke-opacity:.85}
+.color .nichtgereinigt{stroke:#FF4136;stroke-opacity:.9}
 /* Farb-Ansicht */
 .color .hall{fill:#4E9977}
 .color .floor{fill:#57A683}
@@ -332,6 +335,8 @@ a.ghost{display:flex;align-items:center;justify-content:center;gap:2px;color:var
     <p id="info" aria-live="polite"></p>
     <div class="acts">
       <button class="ghost" id="open-notes">Notizen (0)</button>
+      <button class="ghost" id="btn-offen" type="button" aria-pressed="false">Umschalten nicht gereinigte Bereiche</button>
+      <button class="ghost" id="btn-bild" type="button">Plan herunterladen</button>
       <button class="ghost danger" id="open-reset">Zurücksetzen</button>
     </div>
   </footer>
@@ -340,7 +345,7 @@ a.ghost{display:flex;align-items:center;justify-content:center;gap:2px;color:var
     <div class="sheet" role="dialog" aria-labelledby="h-edit">
       <h2 id="h-edit">Neue Notiz</h2>
       <p id="edit-who"></p>
-      <textarea id="note-text" placeholder="Hier klebt Harz, zweimal drüber" maxlength="200"></textarea>
+      <textarea id="note-text" placeholder="Hier Information eingeben" maxlength="200"></textarea>
       <div class="err" id="note-err"></div>
       <div class="acts">
         <button class="ghost" id="edit-cancel">Abbrechen</button>
@@ -409,6 +414,7 @@ function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
 
 /* ---------- Bahnen und Streifen ---------- */
 var lanes=[],hallEl=$("hallp"),gcount={};
+var ZEIGE_OFFEN=false; /* zeigt noch nicht gewischte Bahnen rot */
 function inHall(p){try{var pt=svg.createSVGPoint();pt.x=p.x;pt.y=p.y;return hallEl.isPointInFill(pt)}catch(e){return p.x>=6&&p.x<=697&&p.y>=6&&p.y<=315}}
 var ZAUN=[[661,202],[655,277],[640,296],[597,296],[597,276.65],[620,264],[645,238]];
 function inPoly(p,q){var c=false;for(var i=0,j=q.length-1;i<q.length;j=i++){var a=q[i],b=q[j];if((a[1]>p.y)!==(b[1]>p.y)&&p.x<(b[0]-a[0])*(p.y-a[1])/(b[1]-a[1])+a[0])c=!c}return c}
@@ -466,7 +472,8 @@ function near(l,p){var b=null,bd=1e9;for(var i=0;i<l.pts.length;i++){var q=l.pts
 function key(v){return v?v.p+"|"+v.d:""}
 function seg(l,a,len,v){
   var el=document.createElementNS(NS,"path");el.setAttribute("d",l.d);
-  el.setAttribute("stroke",(PEOPLE[v.p]||PEOPLE[0]).c);el.setAttribute("stroke-width",l.w);
+  if(v)el.setAttribute("stroke",(PEOPLE[v.p]||PEOPLE[0]).c);else el.setAttribute("class","nichtgereinigt");
+  el.setAttribute("stroke-width",l.w);
   if(len<l.L-0.01){el.setAttribute("stroke-dasharray",len.toFixed(2)+" "+(l.L-len+0.01).toFixed(2));el.setAttribute("stroke-dashoffset",(-a).toFixed(2))}
   l.g.appendChild(el);
 }
@@ -474,11 +481,11 @@ function render(l){
   while(l.g.firstChild)l.g.removeChild(l.g.firstChild);
   var n=l.n,start=0;
   if(l.closed){var f=-1;for(var i=0;i<n;i++){if(key(l.st[i])!==key(l.st[(i+n-1)%n])){f=i;break}}
-    if(f<0){if(l.st[0])seg(l,0,l.L,l.st[0]);return}start=f}
+    if(f<0){if(l.st[0])seg(l,0,l.L,l.st[0]);else if(ZEIGE_OFFEN)seg(l,0,l.L,null);return}start=f}
   var k=0;
   while(k<n){var idx=(start+k)%n,v=l.st[idx],c=1;
     while(k+c<n&&key(l.st[(start+k+c)%n])===key(v))c++;
-    if(v)seg(l,idx*l.ps,c*l.ps,v);k+=c}
+    if(v)seg(l,idx*l.ps,c*l.ps,v);else if(ZEIGE_OFFEN)seg(l,idx*l.ps,c*l.ps,null);k+=c}
 }
 function fill(l,a,b,v,undo){
   var i0=Math.floor(Math.min(a,b)/l.ps),i1=Math.min(Math.floor(Math.max(a,b)/l.ps),i0+l.n-1);
@@ -1062,6 +1069,97 @@ function setFull(on){
 $("z-full").addEventListener("click",function(){setFull(!FULL)});
 $("z-rot").addEventListener("click",function(){ROT=ROT==="h"?"v":"h";try{localStorage.setItem("hkh-putzplan-rot",ROT)}catch(e){}orient();say(ROT==="h"?"Plan liegt jetzt quer.":"Plan steht jetzt hochkant.",false)});
 document.addEventListener("fullscreenchange",function(){if(!document.fullscreenElement&&FULL)setFull(false)});
+
+/* ---------- Nicht gereinigte Bereiche ---------- */
+/* Gezeichnet werden sonst nur gewischte Abschnitte. Eingeschaltet kommen die
+   Luecken dazu, in Rot: dann sieht man auf einen Blick, was noch offen ist. */
+function offenUmschalten(){
+  ZEIGE_OFFEN=!ZEIGE_OFFEN;
+  $("btn-offen").setAttribute("aria-pressed",String(ZEIGE_OFFEN));
+  lanes.forEach(render);
+  say(ZEIGE_OFFEN?"Rot sind die Bahnen, die noch nicht gewischt wurden.":"Die rote Anzeige ist aus.",true);
+}
+$("btn-offen").addEventListener("click",offenUmschalten);
+
+/* ---------- Plan als Bild herunterladen ---------- */
+/* Der Plan im SVG lebt von den Farben der Seite. Fuer das Bild werden sie
+   fest eingetragen, sonst kaeme ein schwarz-weisser Umriss heraus. */
+function bildStil(farbig,v){
+  var ink=v("--ink","#14201B"),ink2=v("--ink-2","#55635C"),panel=v("--panel","#F7F9F7");
+  var line=v("--line","#C3CCC6"),bahn=v("--plan-track","#DCE3DE"),rot=v("--danger","#B3261E");
+  var strich=farbig?"#10201A":ink;
+  return ".hall{fill:"+(farbig?"#4E9977":panel)+"}"
+    +".floor{fill:"+(farbig?"#57A683":"none")+"}"
+    +".track{fill:"+(farbig?"#B4513E":bahn)+"}"
+    +".sand{fill:"+(farbig?"#DCC48E":"none")+"}"
+    +".mat{fill:"+(farbig?"#E7B21C":"none")+"}"
+    +".trib{fill:"+(farbig?"#8C9590":line)+"}"
+    +".ln{fill:none;stroke:"+(farbig?"#FFFFFF":ink2)+";stroke-width:.9"+(farbig?";stroke-opacity:.9":"")+"}"
+    +".ln.thin{stroke-width:.45}.ln.dash{stroke-dasharray:3 2}"
+    +".hallwall{fill:none;stroke:"+strich+";stroke-width:2.4;stroke-linejoin:round}"
+    +".wall{fill:none;stroke:"+strich+";stroke-width:1.6;stroke-linejoin:round}"
+    +".fence{fill:none;stroke:"+strich+";stroke-width:2;stroke-dasharray:5 2.2;stroke-linejoin:round}"
+    +".zgate{fill:none;stroke:"+strich+";stroke-width:1.2}"
+    +".wpan{fill:"+(farbig?"#FFFFFF":ink)+";stroke:"+strich+";stroke-width:.6;stroke-linejoin:round}"
+    +".pil{fill:"+(farbig?"#DAD7CC":panel)+";stroke:"+strich+";stroke-width:1.1}"
+    +".gate{display:"+(farbig?"inline":"none")+";fill:#FFFFFF;stroke:#10201A;stroke-width:.5;stroke-linejoin:round}"
+    +".tag{font-family:sans-serif;font-size:8.5px;fill:"+(farbig?"#FFFFFF":ink2)+";text-anchor:middle}"
+    +".nichtgereinigt{stroke:"+(farbig?"#FF4136":rot)+";stroke-opacity:.85}"
+    +"#paint path,#free path{stroke-opacity:"+(farbig?".9":".82")+"}"
+    +"#pins circle{fill:"+(farbig?"#F29F05":panel)+";stroke:"+(farbig?"#2B1B00":ink)+"}"
+    +"#pins text{font-family:sans-serif;fill:"+(farbig?"#2B1B00":ink)+"}";
+}
+function planBild(){
+  var knopf=$("btn-bild");
+  if(knopf.disabled)return;
+  knopf.disabled=true;
+  say("Das Bild wird erstellt …",false);
+  var fertig=function(){knopf.disabled=false};
+  try{
+    var cs=getComputedStyle(document.documentElement);
+    var v=function(n,e){return (cs.getPropertyValue(n)||"").trim()||e};
+    var farbig=map.classList.contains("color");
+    var klon=svg.cloneNode(true);
+    klon.setAttribute("xmlns",NS);
+    klon.setAttribute("viewBox","0 0 "+W0+" "+H0);
+    klon.setAttribute("width",W0);
+    klon.setAttribute("height",H0);
+    var welt=klon.querySelector("#world");
+    if(welt)welt.removeAttribute("transform");   /* immer quer, egal wie der Plan gerade steht */
+    var stil=document.createElementNS(NS,"style");
+    stil.textContent=bildStil(farbig,v);
+    klon.insertBefore(stil,klon.firstChild);
+    var quelle='<?xml version="1.0" encoding="UTF-8"?>'+new XMLSerializer().serializeToString(klon);
+    var bild=new Image();
+    bild.onload=function(){
+      try{
+        var m=3;   /* dreifache Groesse, damit es auf dem Handy scharf bleibt */
+        var lw=document.createElement("canvas");
+        lw.width=W0*m;lw.height=H0*m;
+        var c=lw.getContext("2d");
+        c.fillStyle=farbig?"#2C3A33":v("--panel","#F7F9F7");
+        c.fillRect(0,0,lw.width,lw.height);
+        c.drawImage(bild,0,0,lw.width,lw.height);
+        lw.toBlob(function(b){
+          if(!b){say("Das Bild konnte nicht erstellt werden.",true);fertig();return}
+          var t=new Date();
+          var zwei=function(n){return (n<10?"0":"")+n};
+          var name="Reinigungsplan-"+t.getFullYear()+"-"+zwei(t.getMonth()+1)+"-"+zwei(t.getDate())+".png";
+          var url=URL.createObjectURL(b);
+          var a=document.createElement("a");
+          a.href=url;a.download=name;
+          document.body.appendChild(a);a.click();a.remove();
+          setTimeout(function(){URL.revokeObjectURL(url)},20000);
+          say("Bild gespeichert: "+name,true);
+          fertig();
+        },"image/png");
+      }catch(e){try{console.error(e)}catch(x){}say("Das Bild konnte nicht erstellt werden.",true);fertig()}
+    };
+    bild.onerror=function(){say("Das Bild konnte nicht erstellt werden.",true);fertig()};
+    bild.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(quelle);
+  }catch(e){try{console.error(e)}catch(x){}say("Das Bild konnte nicht erstellt werden.",true);fertig()}
+}
+$("btn-bild").addEventListener("click",planBild);
 
 /* ---------- Start ---------- */
 var had=load();
