@@ -143,10 +143,11 @@ textarea{resize:none; line-height:1.35}
 <p class="muted" id="pruefung" style="margin-top:48px">Einen Moment …</p>
 
 <section id="anmeldung" class="anmeldung" hidden>
-  <h1>Anmelden</h1>
+  <h1>Hallen Arbeitsplan</h1>
+  <p class="muted">Für diesen Bereich gibt es einen eigenen Code. Der Code für Hallenreinigung und Sportanlagen passt hier nicht.</p>
   <form id="formular" class="stapel" novalidate>
     <div class="feld">
-      <label for="code">Zugangscode</label>
+      <label for="code">Code für den Arbeitsplan</label>
       <div class="feld-eingabe">
         <input id="code" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" required>
         <button class="augen-knopf" id="augen" type="button" aria-pressed="false" aria-label="Code anzeigen" title="Code anzeigen"><svg class="auge-auf" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="auge-zu" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20C5 20 1 12 1 12a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg></button>
@@ -372,7 +373,7 @@ function anmeldeFehler(err) {
 /* Lehnt die Datenbank den Arbeitsplan ab, heißt das fast immer: für den Zweig "arbeitsplan"
    fehlen noch die Regeln. Das ist kein abgelaufener Zugang, also bleibt das Gerät angemeldet.
    Ob der Code noch gilt, wird beim Öffnen der Seite ohnehin geprüft. */
-const NICHT_FREI = "Der Arbeitsplan ist in der Datenbank noch nicht freigeschaltet. Die Regeln für den Zweig „arbeitsplan“ müssen einmal veröffentlicht werden.";
+const NICHT_FREI = "Kein Zugriff auf den Arbeitsplan. Entweder gilt der Code nicht mehr, oder in der Datenbank fehlt der Zugang für den Arbeitsplan.";
 
 let anmeldungLaeuft = false;
 let hoeren = null;
@@ -382,8 +383,12 @@ function zeigeBereich(angemeldet) {
   $("panel").hidden = !angemeldet;
   $("verlauf-knopf").hidden = !angemeldet;
 }
+/* Der Arbeitsplan hat einen eigenen Code. Freigeschaltete Geräte stehen deshalb
+   nicht unter admins, sondern unter arbeitsplanzugang. Wer nur den Code für
+   Reinigung und Sportanlagen hat, kommt hier nicht hinein. */
+const ZUGANG = "arbeitsplanzugang";
 async function istFreigeschaltet(uid) {
-  const snap = await get(ref(db, `admins/${uid}`));
+  const snap = await get(ref(db, `${ZUGANG}/${uid}`));
   return snap.exists();
 }
 onAuthStateChanged(auth, async (user) => {
@@ -421,7 +426,7 @@ $("formular").addEventListener("submit", async (e) => {
   knopf.disabled = true;
   try {
     const { user } = await signInAnonymously(auth);
-    await set(ref(db, `admins/${user.uid}`), code);
+    await set(ref(db, `${ZUGANG}/${user.uid}`), code);
     feld.value = "";
     codeVerbergen();
     zeigeBereich(true);

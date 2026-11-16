@@ -130,6 +130,7 @@ textarea:focus-visible,.tf:focus-visible{outline:3px solid var(--accent);outline
 #paint path{stroke-opacity:.62}
 /* Noch nicht gewischte Bahnen: nur sichtbar, solange die Anzeige eingeschaltet ist */
 .nichtgereinigt{stroke:var(--danger);stroke-opacity:.85}
+.map.nuroffen #free{display:none}
 .color .nichtgereinigt{stroke:#FF4136;stroke-opacity:.9}
 /* Farb-Ansicht */
 .color .hall{fill:#4E9977}
@@ -468,6 +469,12 @@ rows(2,303,315,158,563,"tunnel","tunnel","Lauftunnel",null);
 cols(2,351,364,286,303,"gang","gang","Gang vom Lauftunnel in die Halle",null);
 rows(1,286,288.5,159,563,"spalt","out","Spalt zwischen Rundbahn und Lager","outc");
 cols(10,597,661,200,296,"zaun","zaun","Eingezäunter Bereich","zaunc");
+/* Flächen, die bisher keine Bahnen hatten. Eigene Gruppennamen, damit alle
+   bisher eingetragenen Bahnen ihre Kennung behalten und nichts verrutscht. */
+rows(2,6,18,35,675,"tribuene","out","Streifen an der Tribüne","outc");
+cols(3,14,31,18,57,"rand-links","out","Rand links neben der Sprintgerade","outc");
+cols(5,704,737,16,64,"ecke-rechts","out","Ecke oben rechts","outc");
+rows(1,57,60,119,150,"anlauf-kopf","anlauf","Streifen über der Anlaufbahn",null);
 function near(l,p){var b=null,bd=1e9;for(var i=0;i<l.pts.length;i++){var q=l.pts[i],d=(q.x-p.x)*(q.x-p.x)+(q.y-p.y)*(q.y-p.y);if(d<bd){bd=d;b=q}}return{s:b.s,dist:Math.sqrt(bd)}}
 function key(v){return v?v.p+"|"+v.d:""}
 function seg(l,a,len,v){
@@ -481,11 +488,11 @@ function render(l){
   while(l.g.firstChild)l.g.removeChild(l.g.firstChild);
   var n=l.n,start=0;
   if(l.closed){var f=-1;for(var i=0;i<n;i++){if(key(l.st[i])!==key(l.st[(i+n-1)%n])){f=i;break}}
-    if(f<0){if(l.st[0])seg(l,0,l.L,l.st[0]);else if(ZEIGE_OFFEN)seg(l,0,l.L,null);return}start=f}
+    if(f<0){if(l.st[0]){if(!ZEIGE_OFFEN)seg(l,0,l.L,l.st[0])}else if(ZEIGE_OFFEN)seg(l,0,l.L,null);return}start=f}
   var k=0;
   while(k<n){var idx=(start+k)%n,v=l.st[idx],c=1;
     while(k+c<n&&key(l.st[(start+k+c)%n])===key(v))c++;
-    if(v)seg(l,idx*l.ps,c*l.ps,v);else if(ZEIGE_OFFEN)seg(l,idx*l.ps,c*l.ps,null);k+=c}
+    if(v){if(!ZEIGE_OFFEN)seg(l,idx*l.ps,c*l.ps,v)}else if(ZEIGE_OFFEN)seg(l,idx*l.ps,c*l.ps,null);k+=c}
 }
 function fill(l,a,b,v,undo){
   var i0=Math.floor(Math.min(a,b)/l.ps),i1=Math.min(Math.floor(Math.max(a,b)/l.ps),i0+l.n-1);
@@ -497,7 +504,8 @@ function fill(l,a,b,v,undo){
 function progress(){
   var tot=0,done=0;
   lanes.forEach(function(l){var a=l.ps*l.w;for(var i=0;i<l.n;i++){if(l.valid&&!l.valid[i])continue;tot+=a;if(l.st[i])done+=a}});
-  $("prog").textContent=Math.round(done/tot*100)+" % geputzt";
+  var anteil=tot?Math.round(done/tot*100):0;
+  $("prog").textContent=ZEIGE_OFFEN?(anteil+" % geputzt \u00b7 "+(100-anteil)+" % offen"):(anteil+" % geputzt");
 }
 
 /* ---------- Speichern (nur dieses Gerät) ---------- */
@@ -1076,8 +1084,10 @@ document.addEventListener("fullscreenchange",function(){if(!document.fullscreenE
 function offenUmschalten(){
   ZEIGE_OFFEN=!ZEIGE_OFFEN;
   $("btn-offen").setAttribute("aria-pressed",String(ZEIGE_OFFEN));
+  map.classList.toggle("nuroffen",ZEIGE_OFFEN);
   lanes.forEach(render);
-  say(ZEIGE_OFFEN?"Rot sind die Bahnen, die noch nicht gewischt wurden.":"Die rote Anzeige ist aus.",true);
+  progress();
+  say(ZEIGE_OFFEN?"Rot ist, was noch nicht gewischt wurde. Das Gewischte ist ausgeblendet.":"Wieder alles zu sehen.",true);
 }
 $("btn-offen").addEventListener("click",offenUmschalten);
 
@@ -1107,7 +1117,8 @@ function bildStil(farbig,v){
     +".nichtgereinigt{stroke:"+(farbig?"#FF4136":rot)+";stroke-opacity:.85}"
     +"#paint path,#free path{stroke-opacity:"+(farbig?".9":".82")+"}"
     +"#pins circle{fill:"+(farbig?"#F29F05":panel)+";stroke:"+(farbig?"#2B1B00":ink)+"}"
-    +"#pins text{font-family:sans-serif;fill:"+(farbig?"#2B1B00":ink)+"}";
+    +"#pins text{font-family:sans-serif;fill:"+(farbig?"#2B1B00":ink)+"}"
+    +(ZEIGE_OFFEN?"#free{display:none}":"");
 }
 function planBild(){
   var knopf=$("btn-bild");
