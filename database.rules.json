@@ -4,15 +4,33 @@
       ".read": true,
       "$matteId": {
         ".write": "auth != null && root.child('admins').child(auth.uid).exists() && root.child('admins').child(auth.uid).val().toLowerCase() == root.child('zugang').child('code').val().toLowerCase()",
-        "name": { ".validate": "newData.isString() && newData.val().length < 120" },
-        "sub": { ".validate": "newData.isString() && newData.val().length < 120" },
-        "art": { ".validate": "newData.val() == 'anlage' || newData.val() == 'tribuene'" },
-        "status": { ".validate": "newData.val() == 'aufgebaut' || newData.val() == 'abgebaut' || newData.val() == 'eingefahren' || newData.val() == 'ausgefahren'" },
-        "aus": { ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}(T[0-9]{2}:[0-9]{2})?$/)" },
-        "ein": { ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}(T[0-9]{2}:[0-9]{2})?$/)" },
-        "reihenfolge": { ".validate": "newData.isNumber()" },
-        "geaendert": { ".validate": "newData.isNumber()" },
-        "$anderes": { ".validate": false }
+        "name": {
+          ".validate": "newData.isString() && newData.val().length < 120"
+        },
+        "sub": {
+          ".validate": "newData.isString() && newData.val().length < 120"
+        },
+        "art": {
+          ".validate": "newData.val() == 'anlage' || newData.val() == 'tribuene'"
+        },
+        "status": {
+          ".validate": "newData.val() == 'aufgebaut' || newData.val() == 'abgebaut' || newData.val() == 'eingefahren' || newData.val() == 'ausgefahren'"
+        },
+        "aus": {
+          ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}(T[0-9]{2}:[0-9]{2})?$/)"
+        },
+        "ein": {
+          ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}(T[0-9]{2}:[0-9]{2})?$/)"
+        },
+        "reihenfolge": {
+          ".validate": "newData.isNumber()"
+        },
+        "geaendert": {
+          ".validate": "newData.isNumber()"
+        },
+        "$anderes": {
+          ".validate": false
+        }
       }
     },
     "putzplan": {
@@ -20,33 +38,132 @@
       ".write": "auth != null && root.child('admins').child(auth.uid).exists() && root.child('admins').child(auth.uid).val().toLowerCase() == root.child('zugang').child('code').val().toLowerCase()",
       "lanes": {
         "$lane": {
-          "$seg": { ".validate": "newData.isString() && newData.val().length < 16" }
+          "$seg": {
+            ".validate": "newData.isString() && newData.val().length < 16"
+          }
         }
       },
       "notes": {
         "$id": {
-          "x": { ".validate": "newData.isNumber()" },
-          "y": { ".validate": "newData.isNumber()" },
-          "ts": { ".validate": "newData.isNumber()" },
-          "t": { ".validate": "newData.isString() && newData.val().length < 400" },
-          "by": { ".validate": "newData.isString() && newData.val().length < 30" },
-          "d": { ".validate": "newData.isString() && newData.val().length < 30" },
-          "$other": { ".validate": false }
+          "x": {
+            ".validate": "newData.isNumber()"
+          },
+          "y": {
+            ".validate": "newData.isNumber()"
+          },
+          "ts": {
+            ".validate": "newData.isNumber()"
+          },
+          "t": {
+            ".validate": "newData.isString() && newData.val().length < 400"
+          },
+          "by": {
+            ".validate": "newData.isString() && newData.val().length < 30"
+          },
+          "d": {
+            ".validate": "newData.isString() && newData.val().length < 30"
+          },
+          "$other": {
+            ".validate": false
+          }
         }
       },
       "free": {
         "$id": {
-          "p": { ".validate": "newData.isNumber()" },
-          "d": { ".validate": "newData.isString() && newData.val().length < 30" },
-          "pts": { ".validate": "newData.isString() && newData.val().length < 60000" },
-          "$other": { ".validate": false }
+          "p": {
+            ".validate": "newData.isNumber()"
+          },
+          "d": {
+            ".validate": "newData.isString() && newData.val().length < 30"
+          },
+          "pts": {
+            ".validate": "newData.isString() && newData.val().length < 60000"
+          },
+          "$other": {
+            ".validate": false
+          }
         }
       },
-      "$other": { ".validate": false }
+      "$other": {
+        ".validate": false
+      }
+    },
+    "arbeitsplan": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).exists() && root.child('admins').child(auth.uid).val().toLowerCase() == root.child('zugang').child('code').val().toLowerCase()",
+      ".write": "auth != null && root.child('admins').child(auth.uid).exists() && root.child('admins').child(auth.uid).val().toLowerCase() == root.child('zugang').child('code').val().toLowerCase()",
+      "eintraege": {
+        "$id": {
+          ".validate": "newData.hasChildren(['art','text','status','ts'])",
+          "art": {
+            ".validate": "newData.val() == 'aufgabe' || newData.val() == 'pfeil'"
+          },
+          "text": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 200"
+          },
+          "person": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "status": {
+            ".validate": "newData.val() == 'offen' || newData.val() == 'erledigt'"
+          },
+          "x": {
+            ".validate": "newData.isNumber()"
+          },
+          "y": {
+            ".validate": "newData.isNumber()"
+          },
+          "x1": {
+            ".validate": "newData.isNumber()"
+          },
+          "y1": {
+            ".validate": "newData.isNumber()"
+          },
+          "x2": {
+            ".validate": "newData.isNumber()"
+          },
+          "y2": {
+            ".validate": "newData.isNumber()"
+          },
+          "ts": {
+            ".validate": "newData.isNumber()"
+          },
+          "$anderes": {
+            ".validate": false
+          }
+        }
+      },
+      "verlauf": {
+        "$id": {
+          ".validate": "newData.hasChildren(['wer','was','titel','ts'])",
+          "wer": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "was": {
+            ".validate": "newData.isString() && newData.val().length <= 20"
+          },
+          "titel": {
+            ".validate": "newData.isString() && newData.val().length <= 200"
+          },
+          "person": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "ts": {
+            ".validate": "newData.isNumber()"
+          },
+          "$anderes": {
+            ".validate": false
+          }
+        }
+      },
+      "$anderes": {
+        ".validate": false
+      }
     },
     "besuche": {
       ".read": "auth != null && root.child('admins').child(auth.uid).exists() && root.child('admins').child(auth.uid).val().toLowerCase() == root.child('zugang').child('code').val().toLowerCase()",
-      "gesamt": { ".write": "newData.isNumber() && ((!data.exists() && newData.val() == 1) || (data.exists() && newData.val() == data.val() + 1))" },
+      "gesamt": {
+        ".write": "newData.isNumber() && ((!data.exists() && newData.val() == 1) || (data.exists() && newData.val() == data.val() + 1))"
+      },
       "tage": {
         "$tag": {
           ".write": "newData.isNumber() && ((!data.exists() && newData.val() == 1) || (data.exists() && newData.val() == data.val() + 1))",

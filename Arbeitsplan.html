@@ -1,0 +1,978 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="apple-mobile-web-app-title" content="helmut-körnig-halle-sportanlagen/Arbeitsplan">
+<title>helmut-körnig-halle-sportanlagen/Arbeitsplan</title>
+<link rel="icon" type="image/png" href="./bilder/favicon.png">
+<link rel="apple-touch-icon" href="./bilder/symbol.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9EDEA; --panel:#F7F9F7; --ink:#14201B; --ink-2:#55635C; --line:#C3CCC6;
+  --accent:#17694B; --on-accent:#FFFFFF; --fehler:#B3261E; --erledigt:#6B7770;
+  --plan-track:#DCE3DE; --weiss:#FFFFFF;
+  --display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --body:Barlow,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#0F1512; --panel:#18211C; --ink:#E7EEE9; --ink-2:#9BAAA1; --line:#33413A;
+  --accent:#4CC38A; --on-accent:#06150E; --fehler:#F2766B; --erledigt:#7F8D85;
+  --plan-track:#212D27;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:16px; line-height:1.4}
+.wrap{max-width:900px; margin:0 auto; padding:0 20px 40px}
+.kopf{display:flex; justify-content:space-between; align-items:center; gap:12px 16px; flex-wrap:wrap; padding-top:24px}
+.marke{font-family:var(--display); font-weight:600; font-size:24px; line-height:1; letter-spacing:.04em; text-transform:uppercase}
+.kopf-knoepfe{display:flex; gap:10px; flex:none}
+.rund-knopf{display:inline-flex; align-items:center; justify-content:center; flex:none; width:44px; height:44px; padding:0; border-radius:50%; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; touch-action:manipulation}
+.rund-knopf:hover{border-color:var(--ink)}
+.rund-knopf svg{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+#verlauf-knopf[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
+.rund-knopf .sonne{display:none}
+:root[data-theme="dark"] #dunkel .sonne{display:block}
+:root[data-theme="dark"] #dunkel .mond{display:none}
+.knopf{font:inherit; font-size:15px; font-weight:600; min-height:44px; padding:8px 18px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer}
+.knopf.primaer{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
+.knopf.gefahr{border-color:var(--fehler); color:var(--fehler); background:var(--panel)}
+.knopf:disabled{opacity:.5; cursor:not-allowed}
+button:focus-visible, input:focus-visible, a:focus-visible, textarea:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+h1{margin:0; font-family:var(--display); font-weight:600; font-size:clamp(32px, 6vw, 48px); line-height:1; text-transform:uppercase; text-wrap:balance}
+h2{margin:0; font-family:var(--display); font-weight:600; font-size:26px; line-height:1.05; text-transform:uppercase; text-wrap:balance; overflow-wrap:anywhere}
+.muted{margin:0; font-size:15px; color:var(--ink-2)}
+.meldung{margin:0; min-height:20px; font-size:14px; color:var(--ink-2)}
+.meldung.fehler{color:var(--fehler)}
+.stapel{display:flex; flex-direction:column; gap:16px}
+.anmeldung{max-width:420px; margin:48px auto 0; display:flex; flex-direction:column; gap:16px}
+.feld{display:flex; flex-direction:column; gap:6px; font-size:15px; color:var(--ink-2)}
+input[type="password"], input[type="text"], textarea{font:inherit; font-size:16px; color:var(--ink); background:var(--panel); min-height:44px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; width:100%; min-width:0}
+textarea{resize:none; line-height:1.35}
+.feld-eingabe{position:relative; display:flex}
+.feld-eingabe input{padding-right:52px}
+.augen-knopf{position:absolute; top:0; right:0; bottom:0; width:48px; display:flex; align-items:center; justify-content:center; padding:0; border:0; border-radius:0 10px 10px 0; background:none; color:var(--ink-2); cursor:pointer}
+.augen-knopf:hover{color:var(--ink)}
+.augen-knopf svg{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+.augen-knopf .auge-zu{display:none}
+.augen-knopf[aria-pressed="true"] .auge-auf{display:none}
+.augen-knopf[aria-pressed="true"] .auge-zu{display:block}
+.logo-link{display:inline-flex; align-items:center; gap:10px; min-width:0; text-decoration:none; color:inherit; border-radius:6px}
+.logo-link img{flex:none; display:block; height:34px; width:auto}
+.logo-link:focus-visible{outline:3px solid var(--accent); outline-offset:3px}
+
+/* Werkzeuge: Ansehen, Aufgabe, Pfeil */
+.leiste{display:flex; gap:4px; padding:4px; border-radius:999px; background:var(--panel); border:1px solid var(--line)}
+.leiste button{flex:1; min-height:40px; padding:0 6px; border:0; border-radius:999px; background:transparent; color:var(--ink); font:inherit; font-size:15px; font-weight:600; cursor:pointer}
+.leiste button[aria-pressed="true"]{background:var(--accent); color:var(--on-accent)}
+/* Personen */
+.personen{display:flex; flex-wrap:wrap; gap:8px}
+.person{display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:0 14px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); font:inherit; font-size:15px; font-weight:600; cursor:pointer}
+.person[aria-pressed="true"]{border:2px solid var(--ink)}
+.person .farbe{width:12px; height:12px; border-radius:50%; border:1px solid var(--ink); flex:none}
+/* Karte mit dem Hallenplan */
+.map{position:relative; width:100%; aspect-ratio:740/322; min-height:220px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--panel); touch-action:none}
+#svg{position:absolute; inset:0; width:100%; height:100%; display:block; touch-action:none}
+.map.setzen{cursor:crosshair}
+.zoom{position:absolute; right:8px; bottom:8px; display:flex; flex-direction:column; gap:6px}
+.zb{width:44px; height:44px; border-radius:10px; border:1px solid var(--line); background:var(--panel); color:var(--ink); font:inherit; font-size:22px; font-weight:600; line-height:1; display:flex; align-items:center; justify-content:center; cursor:pointer}
+.zb.klein{font-size:13px; font-weight:600}
+/* Hallenplan */
+.hall{fill:var(--panel); stroke:none}
+.floor{fill:none}
+.track{fill:var(--plan-track)}
+.sand,.mat{fill:none}
+.trib{fill:var(--line)}
+.ln{fill:none; stroke:var(--ink-2); stroke-width:.9}
+.ln.thin{stroke-width:.45}
+.ln.dash{stroke-dasharray:3 2}
+.hallwall{fill:none; stroke:var(--ink); stroke-width:2.4; stroke-linejoin:round}
+.gate{display:none}
+.wall{fill:none; stroke:var(--ink); stroke-width:1.6; stroke-linejoin:round}
+.fence{fill:none; stroke:var(--ink); stroke-width:2; stroke-dasharray:5 2.2; stroke-linejoin:round}
+.zgate{fill:none; stroke:var(--ink); stroke-width:1.2}
+.wpan{fill:var(--ink); stroke:var(--ink); stroke-width:.6; stroke-linejoin:round}
+.pil{fill:var(--panel); stroke:var(--ink); stroke-width:1.1}
+/* Aufgaben und Pfeile im Plan */
+#punkte circle.treffer{fill:transparent; stroke:none}
+#punkte circle.kugel{stroke:var(--ink); stroke-width:1.2}
+#punkte circle.kugel.gewaehlt{stroke-width:2.4}
+#etiketten text{font-family:var(--body); font-size:9px; font-weight:600; fill:var(--ink); paint-order:stroke; stroke:var(--panel); stroke-width:2.6; stroke-linejoin:round}
+#pfeile line.strich{stroke-linecap:round}
+#pfeile line.treffer{stroke:transparent; stroke-width:16}
+/* Tafel unten: Hinweis, Details, Formular, Verlauf */
+.tafel{border:1px solid var(--line); border-radius:16px; background:var(--panel); padding:16px; display:flex; flex-direction:column; gap:12px}
+.tafel .kopfzeile{display:flex; flex-direction:column; gap:4px}
+.obertitel{margin:0; font-size:13px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2)}
+.rueckfrage{display:flex; flex-direction:column; gap:8px; padding:12px; border:1px solid var(--fehler); border-radius:12px; background:var(--bg)}
+.reihe{display:flex; gap:10px; flex-wrap:wrap}
+.reihe > *{flex:1 1 140px}
+.textknopf{min-height:40px; border:0; background:none; color:var(--ink-2); font:inherit; font-size:15px; font-weight:600; text-decoration:underline; cursor:pointer}
+/* Verlauf */
+.filter{display:flex; flex-wrap:wrap; gap:8px}
+.filter button{min-height:36px; padding:0 12px; border-radius:999px; border:1px solid var(--line); background:var(--bg); color:var(--ink); font:inherit; font-size:14px; font-weight:600; cursor:pointer}
+.filter button[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
+.verlauf{display:flex; flex-direction:column; max-height:260px; overflow-y:auto; margin:0; padding:0; list-style:none}
+.verlauf li{display:flex; gap:10px; align-items:flex-start; padding:10px 0; border-bottom:1px solid var(--line)}
+.verlauf li:last-child{border-bottom:0}
+.verlauf .farbe{width:12px; height:12px; margin-top:5px; border-radius:50%; border:1px solid var(--ink); flex:none}
+.verlauf .zeile{display:flex; flex-direction:column; gap:2px; min-width:0}
+.verlauf .wann{font-size:13px; color:var(--ink-2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="kopf">
+  <a class="logo-link" href="./" aria-label="Zur Startseite">
+    <img src="./bilder/logo.png" alt="Dortmunder Sportstätten" width="480" height="241">
+    <span class="marke">Helmut-Körnig-Halle · Personal</span>
+  </a>
+  <div class="kopf-knoepfe">
+    <button class="rund-knopf" id="verlauf-knopf" type="button" aria-pressed="false" aria-label="Verlauf anzeigen" title="Verlauf anzeigen" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button>
+    <button class="rund-knopf" id="dunkel" type="button" aria-pressed="false" aria-label="Dunkelmodus" title="Dunkelmodus"><svg class="mond" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sonne" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></button>
+  </div>
+</header>
+
+<p class="muted" id="pruefung" style="margin-top:48px">Einen Moment …</p>
+
+<section id="anmeldung" class="anmeldung" hidden>
+  <h1>Anmelden</h1>
+  <form id="formular" class="stapel" novalidate>
+    <div class="feld">
+      <label for="code">Zugangscode</label>
+      <div class="feld-eingabe">
+        <input id="code" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" required>
+        <button class="augen-knopf" id="augen" type="button" aria-pressed="false" aria-label="Code anzeigen" title="Code anzeigen"><svg class="auge-auf" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="auge-zu" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20C5 20 1 12 1 12a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg></button>
+      </div>
+    </div>
+    <button class="knopf primaer" id="anmelden-knopf" type="submit">Anmelden</button>
+    <p class="meldung fehler" id="anmeldung-fehler" role="alert"></p>
+  </form>
+</section>
+
+<section id="panel" class="stapel" hidden style="padding-top:16px">
+  <h1>Hallen Arbeitsplan</h1>
+  <p class="muted" id="live-text">Aufgaben und Pfeile für die ganze Halle. Alle sehen dasselbe.</p>
+
+  <div class="feld">
+    <span id="ich-text">Wer bist du?</span>
+    <div class="personen" role="group" aria-labelledby="ich-text" id="ich-wahl"></div>
+  </div>
+
+  <div class="leiste" role="group" aria-label="Werkzeug">
+    <button type="button" id="w-ansehen" aria-pressed="true">Ansehen</button>
+    <button type="button" id="w-aufgabe" aria-pressed="false">Aufgabe</button>
+    <button type="button" id="w-pfeil" aria-pressed="false">Pfeil</button>
+  </div>
+
+  <div class="map" id="map">
+    <svg id="svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hallenplan von oben">
+      <defs><clipPath id="inf"><path d="M268 93 H552 A80 80 0 0 1 552 253 H268 A80 80 0 0 1 268 93 Z"/></clipPath><clipPath id="outc"><path clip-rule="evenodd" d="M35 6 H675 L687 16 H737 V64 H697 Q703 160 694 255 L681 316 H31 L17 286 L14 226 Q-2 130 19 25 Z M268 60 H552 A113 113 0 0 1 552 286 H268 A113 113 0 0 1 268 60 Z M661 202 L655 277 L640 296 L597 296 L597 276.65 A113 113 0 0 0 661 202 Z M158 303 H563 V315 H158 Z M351 286 H364 V303 H351 Z M159 288.5 H351 V303 H159 Z M364 288.5 H563 V303 H364 Z"/></clipPath><clipPath id="noblk"><path clip-rule="evenodd" d="M-60 -60 H820 V400 H-60 Z M159 288.5 h192 v14.5 h-192 Z M364 288.5 h199 v14.5 h-199 Z M12 160 h87 v76 h-87 Z M117 66 h35 v40 h-35 Z M563 196 h43 v22 h-43 Z"/></clipPath><clipPath id="zaunc"><path d="M661 202 L655 277 L640 296 L597 296 L597 276.65 A113 113 0 0 0 661 202 Z"/></clipPath></defs>
+      <g id="world">
+        <path class="hall" id="hallp" d="M35 6 H675 L687 16 H737 V64 H697 Q703 160 694 255 L681 316 H31 L17 286 L14 226 Q-2 130 19 25 Z"/>
+        <rect class="trib" x="160" y="8" width="520" height="6"/>
+        <rect class="track" x="31" y="18" width="700" height="39"/>
+        <path class="track" fill-rule="evenodd" d="M268 60 H552 A113 113 0 0 1 552 286 H268 A113 113 0 0 1 268 60 Z M268 93 H552 A80 80 0 0 1 552 253 H268 A80 80 0 0 1 268 93 Z"/>
+        <path class="floor" d="M268 93 H552 A80 80 0 0 1 552 253 H268 A80 80 0 0 1 268 93 Z"/>
+        <rect class="track" x="119" y="60" width="31" height="254"/>
+        <rect class="mat" x="117" y="66" width="35" height="40"/>
+        <rect class="mat" x="12" y="160" width="87" height="76"/>
+        <rect class="track" x="200" y="137" width="339" height="53"/>
+        <rect class="track" x="358" y="111" width="231" height="7.5"/>
+        <rect class="mat" x="314" y="98" width="44" height="33"/>
+        <rect class="track" x="252" y="201" width="311" height="13.5"/>
+        <rect class="sand" x="563" y="196" width="43" height="22"/>
+        <rect class="mat" x="250" y="100" width="63" height="31"/>
+        <rect class="mat" x="250" y="192" width="61" height="36.5"/>
+        <rect class="mat" x="314" y="192" width="43" height="36.5"/>
+        <rect class="trib" x="161" y="289.5" width="58" height="12.5"/><rect class="trib" x="228" y="289.5" width="58" height="12.5"/><rect class="trib" x="295" y="289.5" width="58" height="12.5"/><rect class="trib" x="362" y="289.5" width="58" height="12.5"/><rect class="trib" x="429" y="289.5" width="58" height="12.5"/><rect class="trib" x="496" y="289.5" width="58" height="12.5"/>
+        <g id="lanes" fill="none" stroke="none"></g>
+        <g id="paint" fill="none" clip-path="url(#noblk)"></g>
+        <g>
+          <path class="hallwall" d="M35 6 H675 L687 16 H737 V64 H697 Q703 160 694 255 L681 316 H31 L17 286 L14 226 Q-2 130 19 25 Z"/>
+          <rect class="ln" x="31" y="18" width="700" height="39"/>
+          <path class="ln thin" d="M31 24.5 H731 M31 31 H731 M31 37.5 H731 M31 44 H731 M31 50.5 H731"/>
+          <path class="ln" d="M268 60 H552 A113 113 0 0 1 552 286 H268 A113 113 0 0 1 268 60 Z"/>
+          <path class="ln thin" d="M268 65.5 H552 A107.5 107.5 0 0 1 552 280.5 H268 A107.5 107.5 0 0 1 268 65.5 Z"/> <path class="ln thin" d="M268 71 H552 A102 102 0 0 1 552 275 H268 A102 102 0 0 1 268 71 Z"/> <path class="ln thin" d="M268 76.5 H552 A96.5 96.5 0 0 1 552 269.5 H268 A96.5 96.5 0 0 1 268 76.5 Z"/> <path class="ln thin" d="M268 82 H552 A91 91 0 0 1 552 264 H268 A91 91 0 0 1 268 82 Z"/> <path class="ln thin" d="M268 87.5 H552 A85.5 85.5 0 0 1 552 258.5 H268 A85.5 85.5 0 0 1 268 87.5 Z"/>
+          <path class="ln" d="M268 93 H552 A80 80 0 0 1 552 253 H268 A80 80 0 0 1 268 93 Z"/>
+          <rect class="ln" x="200" y="137" width="339" height="53"/>
+          <path class="ln thin" d="M200 143.625 H539 M200 150.25 H539 M200 156.875 H539 M200 163.5 H539 M200 170.125 H539 M200 176.75 H539 M200 183.375 H539 M217 137 V190"/>
+          <rect class="ln" x="119" y="60" width="31" height="254"/>
+          <path class="ln thin" d="M126.75 60 V314 M134.5 60 V314 M142.25 60 V314"/>
+          <rect class="ln dash" x="117" y="66" width="35" height="40"/>
+          <rect class="ln dash" x="12" y="160" width="87" height="76"/>
+          <circle class="ln dash" cx="36" cy="142" r="6"/><circle class="ln dash" cx="42" cy="102" r="6"/><circle class="ln dash" cx="24" cy="122" r="6"/><circle class="ln dash" cx="76" cy="132" r="6"/>
+          <rect class="ln" x="358" y="111" width="231" height="7.5"/>
+          <rect class="ln" x="314" y="98" width="44" height="33"/>
+          <rect class="ln" x="252" y="201" width="311" height="13.5"/>
+          <path class="ln thin" d="M252 207.75 H563"/>
+          <rect class="ln" x="563" y="196" width="43" height="22"/>
+          <rect class="ln" x="250" y="100" width="63" height="31"/>
+          <rect class="ln" x="250" y="192" width="61" height="36.5"/>
+          <rect class="ln" x="314" y="192" width="43" height="36.5"/>
+          <path class="gate" d="M371.5 111 L375.3 109 V113 Z"/><path class="gate" d="M371.5 118.5 L375.3 116.5 V120.5 Z"/><path class="gate" d="M398.6 111 L402.4 109 V113 Z"/><path class="gate" d="M398.6 118.5 L402.4 116.5 V120.5 Z"/><path class="gate" d="M425.7 111 L429.5 109 V113 Z"/><path class="gate" d="M425.7 118.5 L429.5 116.5 V120.5 Z"/><path class="gate" d="M452.2 111 L456 109 V113 Z"/><path class="gate" d="M452.2 118.5 L456 116.5 V120.5 Z"/><path class="gate" d="M441.1 201 L437.3 199 V203 Z"/><path class="gate" d="M441.1 207.75 L437.3 205.75 V209.75 Z"/><path class="gate" d="M467.9 201 L464.1 199 V203 Z"/><path class="gate" d="M467.9 207.75 L464.1 205.75 V209.75 Z"/><path class="gate" d="M494.7 201 L490.9 199 V203 Z"/><path class="gate" d="M494.7 207.75 L490.9 205.75 V209.75 Z"/><path class="gate" d="M521.5 201 L517.7 199 V203 Z"/><path class="gate" d="M521.5 207.75 L517.7 205.75 V209.75 Z"/><path class="gate" d="M548.3 201 L544.5 199 V203 Z"/><path class="gate" d="M548.3 207.75 L544.5 205.75 V209.75 Z"/>
+        </g>
+        <g>
+          <rect class="wall" x="159" y="288.5" width="192" height="14.5"/><rect class="wall" x="364" y="288.5" width="199" height="14.5"/>
+          <path class="fence" d="M661 202 L655 277 L640 296 L597 296 M597 284 L597 276.65"/><path class="zgate" d="M597 296 L589 289"/><path class="wpan" d="M24 84.6 H80 V87.4 H26.8 V112 H24 Z"/><rect class="wpan" x="99" y="84.6" width="12" height="2.8"/><circle class="pil" cx="114" cy="80.5" r="2.6"/><circle class="pil" cx="676" cy="78" r="2.6"/><circle class="pil" cx="676" cy="103" r="2.6"/><circle class="pil" cx="676" cy="128" r="2.6"/><circle class="pil" cx="676" cy="153" r="2.6"/><circle class="pil" cx="676" cy="178" r="2.6"/><circle class="pil" cx="661" cy="202" r="2.6"/><circle class="pil" cx="658" cy="240" r="2.6"/><circle class="pil" cx="655" cy="277" r="2.6"/><circle class="pil" cx="640" cy="296" r="2.6"/><circle class="pil" cx="618.5" cy="296" r="2.6"/><circle class="pil" cx="597" cy="296" r="2.6"/>
+          <path class="gate" d="M479.5 71.0 L483.3 69.0 L483.3 73.0 Z"/><path class="gate" d="M479.5 65.5 L483.3 63.5 L483.3 67.5 Z"/><path class="gate" d="M540.3 93.0 L544.1 91.0 L544.1 95.0 Z"/><path class="gate" d="M540.3 87.5 L544.1 85.5 L544.1 89.5 Z"/><path class="gate" d="M540.3 82.0 L544.1 80.0 L544.1 84.0 Z"/><path class="gate" d="M268.3 93.0 L272.1 91.0 L272.1 95.0 Z"/><path class="gate" d="M268.3 87.5 L272.1 85.5 L272.1 89.5 Z"/><path class="gate" d="M268.3 82.0 L272.1 80.0 L272.1 84.0 Z"/><path class="gate" d="M284.3 253.0 L280.5 255.0 L280.5 251.0 Z"/><path class="gate" d="M284.3 258.5 L280.5 260.5 L280.5 256.5 Z"/><path class="gate" d="M284.3 264.0 L280.5 266.0 L280.5 262.0 Z"/><path class="gate" d="M284.3 275.0 L280.5 277.0 L280.5 273.0 Z"/><path class="gate" d="M284.3 280.5 L280.5 282.5 L280.5 278.5 Z"/><path class="gate" d="M553.6 253.0 L549.8 255.0 L549.8 251.0 Z"/><path class="gate" d="M553.6 258.5 L549.8 260.5 L549.8 256.5 Z"/><path class="gate" d="M553.6 264.0 L549.8 266.0 L549.8 262.0 Z"/><path class="gate" d="M553.6 275.0 L549.8 277.0 L549.8 273.0 Z"/><path class="gate" d="M553.6 280.5 L549.8 282.5 L549.8 278.5 Z"/><path class="gate" d="M209.4 89.5 L211.4 85.7 L213.7 89.0 Z"/><path class="gate" d="M206.3 84.9 L208.4 81.2 L210.6 84.5 Z"/><path class="gate" d="M169.6 200.1 L166.8 197.0 L170.6 196.0 Z"/><path class="gate" d="M164.3 201.5 L161.4 198.3 L165.3 197.3 Z"/><path class="gate" d="M647.2 209.6 L647.6 213.9 L643.9 212.4 Z"/><path class="gate" d="M652.3 211.7 L652.7 215.9 L649.0 214.4 Z"/>
+        </g>
+        <g id="pfeile"></g>
+        <g id="punkte"></g>
+        <g id="etiketten"></g>
+      </g>
+    </svg>
+    <div class="zoom">
+      <button class="zb" id="z-rein" type="button" aria-label="Näher heranzoomen" title="Näher heran">+</button>
+      <button class="zb" id="z-raus" type="button" aria-label="Weiter weg zoomen" title="Weiter weg">−</button>
+      <button class="zb klein" id="z-ganz" type="button" aria-label="Ganze Halle zeigen" title="Ganze Halle">Alles</button>
+    </div>
+  </div>
+  <p class="meldung" id="karten-hinweis" aria-live="polite">Tippe auf einen Punkt oder Pfeil, um Details zu sehen.</p>
+
+  <section class="tafel" id="tafel" aria-live="polite">
+    <!-- Details zu einer Aufgabe oder einem Pfeil -->
+    <div id="t-detail" hidden>
+      <div class="kopfzeile">
+        <p class="obertitel" id="d-art">Aufgabe</p>
+        <h2 id="d-titel">—</h2>
+        <p class="muted" id="d-wer">—</p>
+      </div>
+      <div class="stapel" style="gap:10px; margin-top:12px">
+        <button class="knopf" id="d-bearbeiten" type="button">Bearbeiten</button>
+        <button class="knopf primaer" id="d-erledigt" type="button">Als erledigt markieren</button>
+        <button class="knopf gefahr" id="d-loeschen" type="button">Löschen</button>
+        <div class="rueckfrage" id="d-rueckfrage" hidden>
+          <p class="muted" style="color:var(--ink)">Wirklich löschen? Das lässt sich nicht rückgängig machen.</p>
+          <div class="reihe">
+            <button class="knopf" id="d-loeschen-ja" type="button" style="background:var(--fehler); border-color:var(--fehler); color:#FFFFFF">Ja, löschen</button>
+            <button class="knopf" id="d-loeschen-nein" type="button">Nein</button>
+          </div>
+        </div>
+        <button class="textknopf" id="d-schliessen" type="button">Schließen</button>
+      </div>
+    </div>
+
+    <!-- Formular zum Anlegen und Bearbeiten -->
+    <form id="t-formular" hidden>
+      <div class="stapel">
+        <h2 id="f-titel">Aufgabe an dieser Stelle</h2>
+        <div class="feld">
+          <label for="f-text" id="f-label">Was muss getan werden?</label>
+          <textarea id="f-text" rows="2" maxlength="200" placeholder="Zum Beispiel: Netz am Ballfang prüfen"></textarea>
+        </div>
+        <div class="feld">
+          <span id="f-wer-text">Wer macht das?</span>
+          <div class="personen" role="group" aria-labelledby="f-wer-text" id="f-personen"></div>
+        </div>
+        <p class="muted" id="f-hinweis">Ohne Person bleibt die Aufgabe ungefärbt. Mit Person bekommt sie deren Farbe.</p>
+        <p class="meldung fehler" id="f-fehler" role="alert"></p>
+        <div class="reihe">
+          <button class="knopf" id="f-abbrechen" type="button">Abbrechen</button>
+          <button class="knopf primaer" id="f-speichern" type="submit">Speichern</button>
+        </div>
+      </div>
+    </form>
+
+    <!-- Verlauf -->
+    <div id="t-verlauf" hidden>
+      <div class="stapel">
+        <h2>Verlauf</h2>
+        <p class="muted">Wer hat was erstellt, bearbeitet, erledigt oder gelöscht?</p>
+        <div class="filter" role="group" aria-label="Verlauf filtern" id="v-filter"></div>
+        <ul class="verlauf" id="v-liste"></ul>
+        <p class="muted" id="v-leer" hidden>Keine Einträge in dieser Auswahl.</p>
+        <button class="knopf" id="v-zurueck" type="button">Zurück zur Karte</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="tafel" id="listen-tafel">
+    <h2>Alle Aufgaben</h2>
+    <ul class="verlauf" id="alle-liste" style="max-height:none"></ul>
+    <p class="muted" id="alle-leer" hidden>Noch nichts eingetragen. Tippe oben auf „Aufgabe“ und dann auf den Plan.</p>
+  </section>
+</section>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getDatabase, ref, get, set, update, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { firebaseConfig } from "./js/config.js";
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
+/* Dieselben Personen und Farben wie im Reinigungsplan. */
+const PERSONEN = [
+  { n: "Joel", c: "#2B7BFF" },
+  { n: "Arno", c: "#FFC914" },
+  { n: "Patrick", c: "#A259FF" },
+  { n: "Lukas", c: "#35E0F2" },
+];
+const FARBE_OHNE = "#8A968F";
+const farbeVon = (name) => PERSONEN.find((p) => p.n === name)?.c ?? FARBE_OHNE;
+
+/* Farbschema: dieselbe Einstellung wie auf den anderen Seiten. */
+const wurzel = document.documentElement;
+function thema(dunkel) {
+  wurzel.dataset.theme = dunkel ? "dark" : "light";
+  $("dunkel").setAttribute("aria-pressed", String(dunkel));
+  try { localStorage.setItem("hkh-thema", dunkel ? "dark" : "light"); } catch (e) {}
+}
+let gemerkt = null;
+try { gemerkt = localStorage.getItem("hkh-thema"); } catch (e) {}
+thema(gemerkt ? gemerkt === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+/* Kurz tippen schaltet hell und dunkel um. Gedrückt halten führt zur Auswahl der Bereiche. */
+const HALTEN_MS = 2000;
+const themaKnopf = $("dunkel");
+let halteUhr = 0;
+let gehalten = false;
+themaKnopf.addEventListener("click", () => {
+  if (gehalten) { gehalten = false; return; }
+  thema(wurzel.dataset.theme !== "dark");
+});
+themaKnopf.addEventListener("pointerdown", (e) => {
+  if (e.pointerType === "mouse" && e.button !== 0) return;
+  gehalten = false;
+  clearTimeout(halteUhr);
+  halteUhr = setTimeout(() => { gehalten = true; location.href = "./#auswahl"; }, HALTEN_MS);
+});
+["pointerup", "pointerleave", "pointercancel"].forEach((name) => themaKnopf.addEventListener(name, () => clearTimeout(halteUhr)));
+themaKnopf.addEventListener("contextmenu", (e) => e.preventDefault());
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+const BASIS = "arbeitsplan";
+
+const istRechteFehler = (err) => /PERMISSION_DENIED/.test(`${err?.code ?? ""} ${err?.message ?? ""}`);
+function anmeldeFehler(err) {
+  if (istRechteFehler(err)) return "Der Code stimmt nicht.";
+  switch (err?.code) {
+    case "auth/network-request-failed": return "Keine Verbindung zum Server.";
+    case "auth/too-many-requests": return "Zu viele Versuche. Bitte warte einen Moment.";
+    default: return "Anmeldung hat nicht geklappt. Bitte noch einmal versuchen.";
+  }
+}
+async function zugangAbgelaufen(err) {
+  if (!istRechteFehler(err)) return false;
+  $("anmeldung-fehler").textContent = "Dein Zugang ist nicht mehr gültig. Bitte den Code neu eingeben.";
+  zeigeBereich(false);
+  await signOut(auth).catch(() => {});
+  return true;
+}
+
+let anmeldungLaeuft = false;
+let hoeren = null;
+function zeigeBereich(angemeldet) {
+  $("pruefung").hidden = true;
+  $("anmeldung").hidden = angemeldet;
+  $("panel").hidden = !angemeldet;
+  $("verlauf-knopf").hidden = !angemeldet;
+}
+async function istFreigeschaltet(uid) {
+  const snap = await get(ref(db, `admins/${uid}`));
+  return snap.exists();
+}
+onAuthStateChanged(auth, async (user) => {
+  if (anmeldungLaeuft) return;
+  let frei = false;
+  try { frei = !!user && (await istFreigeschaltet(user.uid)); } catch (err) { console.error(err); }
+  zeigeBereich(frei);
+  if (frei) starteSync();
+});
+
+function augenTaste(knopfId, feldId) {
+  const knopf = $(knopfId);
+  const feld = $(feldId);
+  const setzen = (sichtbar) => {
+    feld.type = sichtbar ? "text" : "password";
+    knopf.setAttribute("aria-pressed", String(sichtbar));
+    const text = sichtbar ? "Code verbergen" : "Code anzeigen";
+    knopf.setAttribute("aria-label", text);
+    knopf.title = text;
+  };
+  knopf.addEventListener("click", () => { setzen(feld.type === "password"); feld.focus(); });
+  return () => setzen(false);
+}
+const codeVerbergen = augenTaste("augen", "code");
+
+$("formular").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const feld = $("code");
+  const knopf = $("anmelden-knopf");
+  const fehler = $("anmeldung-fehler");
+  const code = feld.value.trim();
+  fehler.textContent = "";
+  if (!code) { fehler.textContent = "Bitte den Zugangscode eingeben."; return; }
+  anmeldungLaeuft = true;
+  knopf.disabled = true;
+  try {
+    const { user } = await signInAnonymously(auth);
+    await set(ref(db, `admins/${user.uid}`), code);
+    feld.value = "";
+    codeVerbergen();
+    zeigeBereich(true);
+    starteSync();
+  } catch (err) {
+    console.error(err);
+    fehler.textContent = anmeldeFehler(err);
+    await signOut(auth).catch(() => {});
+  } finally {
+    anmeldungLaeuft = false;
+    knopf.disabled = false;
+  }
+});
+
+/* ---- Zustand ---- */
+const W0 = 740, H0 = 322;
+const S = {
+  modus: "ansehen",
+  ich: PERSONEN[0].n,
+  eintraege: {},
+  verlauf: {},
+  gewaehlt: null,
+  entwurf: null,
+  start: null,
+  bearbeiten: null,
+  person: null,
+  filter: "alle",
+  tafel: "aus",
+};
+try { const g = localStorage.getItem("hkh-arbeitsplan-ich"); if (PERSONEN.some((p) => p.n === g)) S.ich = g; } catch (e) {}
+
+const NS = "http://www.w3.org/2000/svg";
+const svg = $("svg");
+const welt = $("world");
+const map = $("map");
+const ebenePfeile = $("pfeile");
+const ebenePunkte = $("punkte");
+const ebeneEtiketten = $("etiketten");
+const neu = (name, werte) => { const el = document.createElementNS(NS, name); for (const k in werte) el.setAttribute(k, werte[k]); return el; };
+const leeren = (el) => { while (el.firstChild) el.removeChild(el.firstChild); };
+
+/* ---- Ansicht: Zoom und Verschieben ---- */
+const V = { z: 1, cx: W0 / 2, cy: H0 / 2 };
+const klemm = (w, min, max) => Math.min(max, Math.max(min, w));
+let sicht = { x: 0, y: 0, w: W0, h: H0 };
+function ansichtSetzen() {
+  const r = map.getBoundingClientRect();
+  if (r.width < 2 || r.height < 2) return;
+  const ca = r.width / r.height, wa = W0 / H0;
+  let bw, bh;
+  if (ca > wa) { bh = H0 * 1.03; bw = bh * ca; } else { bw = W0 * 1.03; bh = bw / ca; }
+  V.z = klemm(V.z, 1, 8);
+  const w = bw / V.z, h = bh / V.z;
+  V.cx = w >= W0 ? W0 / 2 : klemm(V.cx, w / 2 - 12, W0 - w / 2 + 12);
+  V.cy = h >= H0 ? H0 / 2 : klemm(V.cy, h / 2 - 12, H0 - h / 2 + 12);
+  sicht = { x: V.cx - w / 2, y: V.cy - h / 2, w: w, h: h };
+  svg.setAttribute("viewBox", `${sicht.x.toFixed(2)} ${sicht.y.toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)}`);
+}
+/* Wie viele Planeinheiten sind ein Bildschirmpixel? Daraus ergeben sich Trefferflächen und Schriftgrößen. */
+function proPixel() {
+  const r = map.getBoundingClientRect();
+  return r.width > 2 ? sicht.w / r.width : 1;
+}
+function zuWelt(klientX, klientY) {
+  const m = welt.getScreenCTM();
+  if (!m) return { x: 0, y: 0 };
+  const p = svg.createSVGPoint();
+  p.x = klientX; p.y = klientY;
+  const q = p.matrixTransform(m.inverse());
+  return { x: q.x, y: q.y };
+}
+function zoomAuf(klientX, klientY, z) {
+  const a = zuWelt(klientX, klientY);
+  V.z = klemm(z, 1, 8);
+  ansichtSetzen();
+  const b = zuWelt(klientX, klientY);
+  V.cx += a.x - b.x; V.cy += a.y - b.y;
+  ansichtSetzen();
+  zeichnePlan();
+}
+function zoomKnopf(faktor) {
+  const r = map.getBoundingClientRect();
+  zoomAuf(r.left + r.width / 2, r.top + r.height / 2, V.z * faktor);
+}
+$("z-rein").addEventListener("click", () => zoomKnopf(1.6));
+$("z-raus").addEventListener("click", () => zoomKnopf(1 / 1.6));
+$("z-ganz").addEventListener("click", () => { V.z = 1; V.cx = W0 / 2; V.cy = H0 / 2; ansichtSetzen(); zeichnePlan(); });
+svg.addEventListener("wheel", (e) => { e.preventDefault(); zoomAuf(e.clientX, e.clientY, V.z * (e.deltaY < 0 ? 1.15 : 1 / 1.15)); }, { passive: false });
+window.addEventListener("resize", () => { ansichtSetzen(); zeichnePlan(); });
+
+/* Ziehen verschiebt die Karte. Ein kurzes Tippen ohne Ziehen gilt als Auswahl oder setzt eine Stelle. */
+let zieh = null;
+svg.addEventListener("pointerdown", (e) => {
+  if (e.pointerType === "mouse" && e.button !== 0) return;
+  zieh = { id: e.pointerId, x: e.clientX, y: e.clientY, cx: V.cx, cy: V.cy, bewegt: false };
+  svg.setPointerCapture(e.pointerId);
+});
+svg.addEventListener("pointermove", (e) => {
+  if (!zieh || e.pointerId !== zieh.id) return;
+  const dx = e.clientX - zieh.x, dy = e.clientY - zieh.y;
+  if (!zieh.bewegt && Math.hypot(dx, dy) < 7) return;
+  zieh.bewegt = true;
+  const p = proPixel();
+  V.cx = zieh.cx - dx * p;
+  V.cy = zieh.cy - dy * p;
+  ansichtSetzen();
+});
+svg.addEventListener("pointerup", (e) => {
+  if (!zieh || e.pointerId !== zieh.id) return;
+  const war = zieh;
+  zieh = null;
+  try { svg.releasePointerCapture(e.pointerId); } catch (err) {}
+  if (war.bewegt) { zeichnePlan(); return; }
+  planGetippt(zuWelt(e.clientX, e.clientY));
+});
+svg.addEventListener("pointercancel", () => { zieh = null; });
+
+/* ---- Zeichnen ---- */
+const istPfeil = (e) => e.art === "pfeil";
+const titelVon = (e) => (istPfeil(e) ? `${e.text} dorthin bringen` : e.text);
+const untertitelVon = (e) => {
+  const wer = e.person || "ohne Person";
+  return e.status === "erledigt" ? `✓ ${wer} · erledigt` : `${wer} · offen`;
+};
+const punktFarbe = (e) => (e.status === "erledigt" ? getComputedStyle(wurzel).getPropertyValue("--erledigt").trim() || "#6B7770" : farbeVon(e.person));
+const sortiert = () => Object.entries(S.eintraege).map(([id, e]) => ({ id, ...e })).sort((a, b) => (a.ts || 0) - (b.ts || 0));
+
+function pfeilZeichnen(ziel, x1, y1, x2, y2, farbe, p, gestrichelt) {
+  const dx = x2 - x1, dy = y2 - y1;
+  const laenge = Math.hypot(dx, dy) || 1;
+  const ux = dx / laenge, uy = dy / laenge;
+  const spitze = 9 * p;
+  const bx = x2 - ux * spitze, by = y2 - uy * spitze;
+  const linie = neu("line", { x1: x1, y1: y1, x2: bx, y2: by, stroke: farbe, "stroke-width": 4 * p, class: "strich" });
+  if (gestrichelt) linie.setAttribute("stroke-dasharray", `${6 * p} ${4 * p}`);
+  ziel.appendChild(linie);
+  const ax = bx - uy * spitze * 0.55, ay = by + ux * spitze * 0.55;
+  const cx = bx + uy * spitze * 0.55, cy = by - ux * spitze * 0.55;
+  ziel.appendChild(neu("polygon", { points: `${x2},${y2} ${ax},${ay} ${cx},${cy}`, fill: farbe }));
+}
+
+function zeichnePlan() {
+  leeren(ebenePfeile); leeren(ebenePunkte); leeren(ebeneEtiketten);
+  const p = proPixel();
+  const zeigeText = V.z >= 1.8;
+  const liste = sortiert();
+  liste.filter(istPfeil).forEach((e) => {
+    pfeilZeichnen(ebenePfeile, e.x1, e.y1, e.x2, e.y2, punktFarbe(e), p, false);
+    if (e.id === S.gewaehlt) {
+      ebenePfeile.appendChild(neu("line", { x1: e.x1, y1: e.y1, x2: e.x2, y2: e.y2, stroke: punktFarbe(e), "stroke-width": 9 * p, "stroke-linecap": "round", "stroke-opacity": ".3" }));
+    }
+  });
+  liste.filter((e) => !istPfeil(e)).forEach((e) => {
+    const gewaehlt = e.id === S.gewaehlt;
+    ebenePunkte.appendChild(neu("circle", { cx: e.x, cy: e.y, r: 7 * p, fill: punktFarbe(e), class: "kugel" + (gewaehlt ? " gewaehlt" : ""), "stroke-width": (gewaehlt ? 2.4 : 1.2) * p }));
+  });
+  if (zeigeText) {
+    liste.forEach((e) => {
+      const x = istPfeil(e) ? e.x1 : e.x;
+      const y = istPfeil(e) ? e.y1 : e.y;
+      const rechts = x < W0 * 0.7;
+      const t = neu("text", { x: x + (rechts ? 11 : -11) * p, y: y - 2 * p, "text-anchor": rechts ? "start" : "end", "font-size": 11 * p, "stroke-width": 3 * p });
+      t.textContent = titelVon(e);
+      ebeneEtiketten.appendChild(t);
+      const u = neu("text", { x: x + (rechts ? 11 : -11) * p, y: y + 9 * p, "text-anchor": rechts ? "start" : "end", "font-size": 9 * p, "stroke-width": 3 * p, opacity: ".8" });
+      u.textContent = untertitelVon(e);
+      ebeneEtiketten.appendChild(u);
+    });
+  }
+  if (S.start) {
+    ebenePunkte.appendChild(neu("circle", { cx: S.start.x, cy: S.start.y, r: 8 * p, fill: "none", stroke: farbeVon(S.person), "stroke-width": 2.5 * p, "stroke-dasharray": `${4 * p} ${3 * p}` }));
+  }
+  if (S.entwurf) {
+    const f = S.person ? farbeVon(S.person) : FARBE_OHNE;
+    if (S.entwurf.art === "pfeil") pfeilZeichnen(ebenePfeile, S.entwurf.x1, S.entwurf.y1, S.entwurf.x2, S.entwurf.y2, f, p, true);
+    else ebenePunkte.appendChild(neu("circle", { cx: S.entwurf.x, cy: S.entwurf.y, r: 8 * p, fill: f, stroke: "#FFFFFF", "stroke-width": 2 * p, "fill-opacity": ".85" }));
+  }
+}
+
+/* Abstand eines Punktes zu einer Strecke, für das Antippen von Pfeilen. */
+function abstandStrecke(px, py, x1, y1, x2, y2) {
+  const dx = x2 - x1, dy = y2 - y1;
+  const n = dx * dx + dy * dy;
+  const t = n ? klemm(((px - x1) * dx + (py - y1) * dy) / n, 0, 1) : 0;
+  return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy));
+}
+function trefferBei(punkt) {
+  const grenze = 22 * proPixel();
+  let beste = null, bester = Infinity;
+  sortiert().forEach((e) => {
+    const d = istPfeil(e)
+      ? abstandStrecke(punkt.x, punkt.y, e.x1, e.y1, e.x2, e.y2)
+      : Math.hypot(punkt.x - e.x, punkt.y - e.y);
+    if (d <= grenze && d < bester) { bester = d; beste = e; }
+  });
+  return beste;
+}
+
+function planGetippt(punkt) {
+  if (S.tafel === "formular" && !S.bearbeiten && S.modus === "aufgabe") {
+    /* Noch im Anlegen: ein weiterer Tipp verschiebt die Stelle. */
+    S.entwurf = { art: "aufgabe", x: punkt.x, y: punkt.y };
+    zeichnePlan();
+    return;
+  }
+  if (S.tafel === "formular" || S.tafel === "verlauf") return;
+  if (S.modus === "ansehen") {
+    const treffer = trefferBei(punkt);
+    if (treffer) waehle(treffer.id); else abwaehlen();
+    return;
+  }
+  if (S.modus === "aufgabe") {
+    S.gewaehlt = null;
+    S.entwurf = { art: "aufgabe", x: punkt.x, y: punkt.y };
+    formularOeffnen(null);
+    return;
+  }
+  if (!S.start) {
+    S.gewaehlt = null;
+    S.start = { x: punkt.x, y: punkt.y };
+    S.entwurf = null;
+    hinweisSetzen("Start gesetzt. Jetzt das Ziel antippen.");
+    zeichnePlan();
+    return;
+  }
+  if (Math.hypot(punkt.x - S.start.x, punkt.y - S.start.y) < 12) return;
+  S.entwurf = { art: "pfeil", x1: S.start.x, y1: S.start.y, x2: punkt.x, y2: punkt.y };
+  S.start = null;
+  formularOeffnen(null);
+}
+
+/* ---- Tafel unten ---- */
+const HINWEISE = {
+  ansehen: "Tippe auf einen Punkt oder Pfeil, um Details zu sehen.",
+  aufgabe: "Tippe auf die Karte. Dort entsteht eine neue Aufgabe.",
+  pfeil: "Tippe erst auf den Start, dann auf das Ziel.",
+};
+function hinweisSetzen(text) { $("karten-hinweis").textContent = text; }
+function hinweisZurueck() { hinweisSetzen(HINWEISE[S.modus]); }
+function tafelZeigen(welche) {
+  S.tafel = welche;
+  $("t-detail").hidden = welche !== "detail";
+  $("t-formular").hidden = welche !== "formular";
+  $("t-verlauf").hidden = welche !== "verlauf";
+  $("tafel").hidden = welche === "aus";
+  $("verlauf-knopf").setAttribute("aria-pressed", String(welche === "verlauf"));
+  map.classList.toggle("setzen", welche !== "formular" && welche !== "verlauf" && S.modus !== "ansehen");
+}
+
+function waehle(id) {
+  const e = S.eintraege[id];
+  if (!e) { abwaehlen(); return; }
+  S.gewaehlt = id;
+  S.entwurf = null; S.start = null; S.bearbeiten = null;
+  $("d-rueckfrage").hidden = true;
+  $("d-art").textContent = istPfeil(e) ? "Pfeil" : "Aufgabe";
+  $("d-titel").textContent = titelVon(e);
+  $("d-wer").textContent = untertitelVon(e);
+  $("d-erledigt").textContent = e.status === "erledigt" ? "Wieder öffnen" : "Als erledigt markieren";
+  tafelZeigen("detail");
+  hinweisZurueck();
+  zeichnePlan();
+}
+function abwaehlen() {
+  S.gewaehlt = null; S.entwurf = null; S.start = null; S.bearbeiten = null;
+  $("d-rueckfrage").hidden = true;
+  tafelZeigen("aus");
+  hinweisZurueck();
+  zeichnePlan();
+}
+$("d-schliessen").addEventListener("click", abwaehlen);
+
+/* ---- Formular ---- */
+function formularOeffnen(id) {
+  const e = id ? S.eintraege[id] : null;
+  S.bearbeiten = id;
+  const pfeil = e ? istPfeil(e) : S.entwurf?.art === "pfeil";
+  S.person = e ? (e.person ?? null) : S.person;
+  $("f-titel").textContent = e
+    ? (pfeil ? "Pfeil bearbeiten" : "Aufgabe bearbeiten")
+    : (pfeil ? "Pfeil: dorthin bringen" : "Aufgabe an dieser Stelle");
+  $("f-label").textContent = pfeil ? "Was soll dorthin gebracht werden?" : "Was muss getan werden?";
+  $("f-text").placeholder = pfeil ? "Zum Beispiel: Matten" : "Zum Beispiel: Netz am Ballfang prüfen";
+  $("f-text").value = e ? e.text : "";
+  $("f-hinweis").textContent = pfeil
+    ? "Der Pfeil bekommt die Farbe der Person. Erledigt wird er grau."
+    : "Ohne Person bleibt die Aufgabe ungefärbt. Mit Person bekommt sie deren Farbe.";
+  $("f-fehler").textContent = "";
+  personenZeichnen();
+  tafelZeigen("formular");
+  hinweisSetzen(e ? "Ändere den Text oder die Person." : "Trage ein, was zu tun ist.");
+  zeichnePlan();
+  setTimeout(() => { try { $("f-text").focus(); } catch (err) {} }, 50);
+}
+function formularSchliessen() {
+  const war = S.bearbeiten;
+  S.entwurf = null; S.start = null; S.bearbeiten = null; S.person = null;
+  if (war) waehle(war); else abwaehlen();
+}
+$("f-abbrechen").addEventListener("click", formularSchliessen);
+
+$("t-formular").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const text = $("f-text").value.trim();
+  if (!text) { $("f-fehler").textContent = "Bitte eintragen, was zu tun ist."; $("f-text").focus(); return; }
+  const knopf = $("f-speichern");
+  knopf.disabled = true;
+  try {
+    if (S.bearbeiten) {
+      const alt = S.eintraege[S.bearbeiten];
+      if (!alt) { formularSchliessen(); return; }
+      const neuerStand = { ...alt, text: text, person: S.person ?? null };
+      await schreiben({
+        [`${BASIS}/eintraege/${S.bearbeiten}`]: neuerStand,
+        ...verlaufPaar("bearbeitet", titelVon(neuerStand), S.person ?? null),
+      });
+      const id = S.bearbeiten;
+      S.bearbeiten = null; S.person = null;
+      waehle(id);
+    } else {
+      const id = neueId();
+      const basis = { text: text, person: S.person ?? null, status: "offen", ts: Date.now() };
+      const eintrag = S.entwurf.art === "pfeil"
+        ? { art: "pfeil", ...basis, x1: r2(S.entwurf.x1), y1: r2(S.entwurf.y1), x2: r2(S.entwurf.x2), y2: r2(S.entwurf.y2) }
+        : { art: "aufgabe", ...basis, x: r2(S.entwurf.x), y: r2(S.entwurf.y) };
+      await schreiben({
+        [`${BASIS}/eintraege/${id}`]: eintrag,
+        ...verlaufPaar("erstellt", titelVon(eintrag), eintrag.person),
+      });
+      S.entwurf = null; S.person = null;
+      abwaehlen();
+      hinweisSetzen("Gespeichert. Die Karte zeigt es jetzt.");
+    }
+  } finally {
+    knopf.disabled = false;
+  }
+});
+$("d-bearbeiten").addEventListener("click", () => { if (S.gewaehlt) formularOeffnen(S.gewaehlt); });
+
+$("d-erledigt").addEventListener("click", async () => {
+  const id = S.gewaehlt;
+  const e = id && S.eintraege[id];
+  if (!e) return;
+  const wirdErledigt = e.status !== "erledigt";
+  const neuerStand = { ...e, status: wirdErledigt ? "erledigt" : "offen" };
+  await schreiben({
+    [`${BASIS}/eintraege/${id}`]: neuerStand,
+    ...verlaufPaar(wirdErledigt ? "erledigt" : "geoeffnet", titelVon(e), e.person ?? null),
+  });
+  waehle(id);
+});
+
+$("d-loeschen").addEventListener("click", () => { $("d-rueckfrage").hidden = false; $("d-loeschen-ja").focus(); });
+$("d-loeschen-nein").addEventListener("click", () => { $("d-rueckfrage").hidden = true; $("d-loeschen").focus(); });
+$("d-loeschen-ja").addEventListener("click", async () => {
+  const id = S.gewaehlt;
+  const e = id && S.eintraege[id];
+  if (!e) return;
+  await schreiben({
+    [`${BASIS}/eintraege/${id}`]: null,
+    ...verlaufPaar("geloescht", titelVon(e), e.person ?? null),
+  });
+  abwaehlen();
+  hinweisSetzen("Gelöscht. Der Verlauf zeigt es.");
+});
+
+/* ---- Speichern und Verlauf ---- */
+const neueId = () => "e" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const r2 = (n) => Math.round(n * 100) / 100;
+function verlaufPaar(was, titel, person) {
+  return { [`${BASIS}/verlauf/${neueId()}`]: { wer: S.ich, was: was, titel: String(titel).slice(0, 200), person: person ?? null, ts: Date.now() } };
+}
+async function schreiben(werte) {
+  try {
+    await update(ref(db), werte);
+    aufraeumen();
+    return true;
+  } catch (err) {
+    console.error(err);
+    if (!(await zugangAbgelaufen(err))) hinweisSetzen("Das konnte nicht gespeichert werden. Bitte noch einmal versuchen.");
+    return false;
+  }
+}
+/* Der Verlauf soll nicht endlos wachsen: über 400 Einträgen fallen die ältesten weg. */
+async function aufraeumen() {
+  const alle = Object.entries(S.verlauf);
+  if (alle.length <= 400) return;
+  const weg = alle.sort((a, b) => (a[1]?.ts || 0) - (b[1]?.ts || 0)).slice(0, alle.length - 300);
+  const werte = {};
+  weg.forEach(([id]) => { werte[`${BASIS}/verlauf/${id}`] = null; });
+  try { await update(ref(db), werte); } catch (err) { console.error(err); }
+}
+
+/* ---- Personen ---- */
+function personenZeichnen() {
+  $("ich-wahl").innerHTML = PERSONEN.map((p) =>
+    `<button class="person" type="button" data-ich="${esc(p.n)}" aria-pressed="${S.ich === p.n}"><span class="farbe" style="background:${p.c}"></span>${esc(p.n)}</button>`
+  ).join("");
+  $("f-personen").innerHTML = PERSONEN.map((p) =>
+    `<button class="person" type="button" data-person="${esc(p.n)}" aria-pressed="${S.person === p.n}"><span class="farbe" style="background:${p.c}"></span>${esc(p.n)}${S.person === p.n ? " ✓" : ""}</button>`
+  ).join("");
+}
+$("ich-wahl").addEventListener("click", (e) => {
+  const knopf = e.target.closest("[data-ich]");
+  if (!knopf) return;
+  S.ich = knopf.dataset.ich;
+  try { localStorage.setItem("hkh-arbeitsplan-ich", S.ich); } catch (err) {}
+  personenZeichnen();
+});
+$("f-personen").addEventListener("click", (e) => {
+  const knopf = e.target.closest("[data-person]");
+  if (!knopf) return;
+  S.person = S.person === knopf.dataset.person ? null : knopf.dataset.person;
+  personenZeichnen();
+  zeichnePlan();
+});
+
+/* ---- Verlauf anzeigen ---- */
+const FILTER = [["alle", "Alle"], ["erstellt", "erstellt"], ["bearbeitet", "bearbeitet"], ["erledigt", "erledigt"], ["geloescht", "gelöscht"]];
+const WORT = { erstellt: "erstellt", bearbeitet: "bearbeitet", erledigt: "erledigt", geoeffnet: "wieder geöffnet", geloescht: "gelöscht" };
+function zeitText(ts) {
+  if (!ts) return "";
+  const d = new Date(ts);
+  const uhr = d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+  const tag = (x) => new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Berlin" }).format(x);
+  const heute = tag(new Date());
+  const gestern = tag(new Date(Date.now() - 86400000));
+  if (tag(d) === heute) return `Heute, ${uhr}`;
+  if (tag(d) === gestern) return `Gestern, ${uhr}`;
+  return `${d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" })}, ${uhr}`;
+}
+function filterZeichnen() {
+  $("v-filter").innerHTML = FILTER.map(([wert, text]) =>
+    `<button type="button" data-filter="${wert}" aria-pressed="${S.filter === wert}">${esc(text)}</button>`
+  ).join("");
+}
+$("v-filter").addEventListener("click", (e) => {
+  const knopf = e.target.closest("[data-filter]");
+  if (!knopf) return;
+  S.filter = knopf.dataset.filter;
+  filterZeichnen();
+  verlaufZeichnen();
+});
+function verlaufZeichnen() {
+  const passt = (v) => S.filter === "alle" || v.was === S.filter || (S.filter === "bearbeitet" && v.was === "geoeffnet");
+  const reihe = Object.values(S.verlauf).filter((v) => v && v.titel && passt(v)).sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, 100);
+  $("v-liste").innerHTML = reihe.map((v) =>
+    `<li><span class="farbe" style="background:${farbeVon(v.person)}"></span><span class="zeile"><span><strong>${esc(v.wer || "?")}</strong> hat ${esc(WORT[v.was] || v.was)}: ${esc(v.titel)}</span><span class="wann">${esc(zeitText(v.ts))}</span></span></li>`
+  ).join("");
+  $("v-leer").hidden = reihe.length > 0;
+}
+$("verlauf-knopf").addEventListener("click", () => {
+  if (S.tafel === "verlauf") { S.gewaehlt ? waehle(S.gewaehlt) : abwaehlen(); return; }
+  S.entwurf = null; S.start = null;
+  filterZeichnen();
+  verlaufZeichnen();
+  tafelZeigen("verlauf");
+  zeichnePlan();
+});
+$("v-zurueck").addEventListener("click", () => { S.gewaehlt ? waehle(S.gewaehlt) : abwaehlen(); });
+
+/* ---- Liste aller Aufgaben ---- */
+function alleZeichnen() {
+  const reihe = sortiert().sort((a, b) => (a.status === b.status ? (b.ts || 0) - (a.ts || 0) : a.status === "erledigt" ? 1 : -1));
+  $("alle-liste").innerHTML = reihe.map((e) =>
+    `<li><span class="farbe" style="background:${punktFarbe(e)}"></span><span class="zeile"><button class="textknopf" type="button" data-zeigen="${esc(e.id)}" style="text-align:left; color:var(--ink); min-height:auto">${esc(titelVon(e))}</button><span class="wann">${esc(untertitelVon(e))}</span></span></li>`
+  ).join("");
+  $("alle-leer").hidden = reihe.length > 0;
+}
+$("alle-liste").addEventListener("click", (e) => {
+  const knopf = e.target.closest("[data-zeigen]");
+  if (!knopf) return;
+  waehle(knopf.dataset.zeigen);
+  map.scrollIntoView({ behavior: "smooth", block: "center" });
+});
+
+/* ---- Werkzeuge ---- */
+function modusSetzen(m) {
+  S.modus = m;
+  ["ansehen", "aufgabe", "pfeil"].forEach((name) => $("w-" + name).setAttribute("aria-pressed", String(name === m)));
+  S.entwurf = null; S.start = null; S.person = null; S.bearbeiten = null;
+  if (S.tafel === "formular") tafelZeigen("aus");
+  hinweisZurueck();
+  map.classList.toggle("setzen", m !== "ansehen" && S.tafel !== "verlauf");
+  zeichnePlan();
+}
+["ansehen", "aufgabe", "pfeil"].forEach((name) => $("w-" + name).addEventListener("click", () => modusSetzen(name)));
+
+/* ---- Daten von Firebase ---- */
+/* Die Daten kommen von anderen Geräten. Nur Einträge mit brauchbaren Werten werden übernommen. */
+function sauber(roh) {
+  const zahl = (v) => (typeof v === "number" && isFinite(v) ? v : null);
+  const raus = {};
+  Object.entries(roh || {}).forEach(([id, e]) => {
+    if (!e || typeof e.text !== "string") return;
+    const gemeinsam = {
+      text: e.text.slice(0, 200),
+      person: PERSONEN.some((p) => p.n === e.person) ? e.person : null,
+      status: e.status === "erledigt" ? "erledigt" : "offen",
+      ts: zahl(e.ts) ?? 0,
+    };
+    if (e.art === "pfeil") {
+      const x1 = zahl(e.x1), y1 = zahl(e.y1), x2 = zahl(e.x2), y2 = zahl(e.y2);
+      if (x1 === null || y1 === null || x2 === null || y2 === null) return;
+      raus[id] = { art: "pfeil", ...gemeinsam, x1, y1, x2, y2 };
+    } else {
+      const x = zahl(e.x), y = zahl(e.y);
+      if (x === null || y === null) return;
+      raus[id] = { art: "aufgabe", ...gemeinsam, x, y };
+    }
+  });
+  return raus;
+}
+async function datenFehler(err) {
+  console.error(err);
+  if (await zugangAbgelaufen(err)) return;
+  $("live-text").textContent = "Keine Verbindung. Die Anzeige kann veraltet sein.";
+}
+let syncLaeuft = false;
+function starteSync() {
+  ansichtSetzen();
+  personenZeichnen();
+  filterZeichnen();
+  hinweisZurueck();
+  zeichnePlan();
+  if (syncLaeuft) return;
+  syncLaeuft = true;
+  onValue(ref(db, `${BASIS}/eintraege`), (snap) => {
+    S.eintraege = sauber(snap.val());
+    $("live-text").textContent = "Aufgaben und Pfeile für die ganze Halle. Alle sehen dasselbe.";
+    if (S.gewaehlt && !S.eintraege[S.gewaehlt]) {
+      S.gewaehlt = null;
+      if (S.tafel === "detail") { tafelZeigen("aus"); hinweisSetzen("Der Eintrag wurde inzwischen gelöscht."); }
+    } else if (S.gewaehlt && S.tafel === "detail") {
+      waehle(S.gewaehlt);
+    }
+    ansichtSetzen();
+    zeichnePlan();
+    alleZeichnen();
+  }, datenFehler);
+  onValue(ref(db, `${BASIS}/verlauf`), (snap) => {
+    S.verlauf = snap.val() ?? {};
+    verlaufZeichnen();
+  }, datenFehler);
+}
+
+/* Beim Öffnen steht die Karte auf der ganzen Halle. */
+requestAnimationFrame(() => { ansichtSetzen(); zeichnePlan(); });
+personenZeichnen();
+filterZeichnen();
+hinweisZurueck();
+tafelZeigen("aus");
+</script>
+</body>
+</html>
