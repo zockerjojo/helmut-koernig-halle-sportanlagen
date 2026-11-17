@@ -111,9 +111,10 @@ textarea{resize:vertical; line-height:1.35}
 .zeile-kopf{display:flex; align-items:center; gap:6px}
 .zeile-kopf input{flex:1 1 auto}
 .zeile-weg{flex:none; min-height:36px; padding:0 6px; border:0; background:none; color:var(--ink-2); font:inherit; font-size:14px; font-weight:600; text-decoration:underline; cursor:pointer}
-/* Griff zum Verschieben: gedrückt halten, dann ziehen */
+/* Griff zum Verschieben: anfassen und ziehen, oder kurz gedrückt halten */
 .griff{flex:none; width:36px; min-height:40px; display:inline-flex; align-items:center; justify-content:center; padding:0; border:0; border-radius:8px; background:none; color:var(--ink-2); cursor:grab; touch-action:none; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none}
 .griff:hover{color:var(--ink)}
+.griff:active{cursor:grabbing}
 .griff svg{width:12px; height:18px; fill:currentColor; pointer-events:none}
 .griff-platz{flex:none; width:36px}
 .zieht{position:relative; z-index:5; background:var(--panel); box-shadow:0 10px 24px rgba(0,0,0,.25); border-radius:10px}
@@ -265,7 +266,7 @@ textarea{resize:vertical; line-height:1.35}
 
   <section class="tafel" id="listen-tafel">
     <h2>Alle Aufgaben</h2>
-    <p class="muted">Oben steht die höchste Priorität (Prio 1). Neue Aufgaben kommen unten dazu. Den Griff gedrückt halten und die Aufgabe nach oben oder unten ziehen.</p>
+    <p class="muted">Oben steht die höchste Priorität (Prio 1). Neue Aufgaben kommen unten dazu. Die Aufgabe am Griff nach oben oder unten ziehen.</p>
     <ul class="verlauf" id="alle-liste" style="max-height:none"></ul>
     <p class="muted" id="alle-leer" hidden>Noch nichts eingetragen. Tippe oben auf „Aufgabe“ und dann auf den Plan.</p>
   </section>
@@ -792,7 +793,7 @@ function zeilenZeichnen() {
   $("f-zeilen").innerHTML = S.zeilen.map((z) => `
     <li class="zeile-bearbeiten" data-id="${esc(z.id)}">
       <div class="zeile-kopf">
-        <button class="griff" type="button" aria-label="Textzeile verschieben: gedrückt halten, dann nach oben oder unten ziehen" title="Gedrückt halten, um die Zeile zu verschieben">${GRIFF_SVG}</button>
+        <button class="griff" type="button" aria-label="Textzeile verschieben: nach oben oder unten ziehen" title="Zum Verschieben ziehen">${GRIFF_SVG}</button>
         <input type="text" data-feld="titel" maxlength="80" placeholder="Überschrift, zum Beispiel: Material" value="${esc(z.titel)}" aria-label="Überschrift der Textzeile">
         <button class="zeile-weg" type="button" data-weg="${esc(z.id)}">Entfernen</button>
       </div>
@@ -1038,7 +1039,7 @@ function alleZeichnen() {
     const nr = nummern.get(e.id);
     const farbe = punktFarbe(e);
     const griff = nr
-      ? `<button class="griff" type="button" data-griff="${esc(e.id)}" aria-label="Priorität ändern: gedrückt halten, dann nach oben oder unten ziehen" title="Gedrückt halten, um die Priorität zu ändern">${GRIFF_SVG}</button>`
+      ? `<button class="griff" type="button" data-griff="${esc(e.id)}" aria-label="Priorität ändern: nach oben oder unten ziehen" title="Zum Ändern der Priorität ziehen">${GRIFF_SVG}</button>`
       : `<span class="griff-platz" aria-hidden="true"></span>`;
     return `<li class="${istOffen(e) ? "offen" : "erledigt"}" data-id="${esc(e.id)}">${griff}<span class="abzeichen" style="background:${farbe}; color:${kontrast(farbe)}">${nr ?? ""}</span><span class="zeile"><button class="textknopf" type="button" data-zeigen="${esc(e.id)}" style="text-align:left; color:var(--ink); min-height:auto">${esc(titelVon(e))}</button><span class="wann">${esc(untertitelVon(e))}</span></span></li>`;
   }).join("");
@@ -1055,65 +1056,106 @@ sortierbar($("alle-liste"), "[data-griff]", (von, nach) => {
   reihenfolgeAendern(von, nach);
 }, ":scope > li.offen");
 
-/* Ziehen per Griff: gedrückt halten (etwa 0,35 Sekunden), dann nach oben oder unten schieben.
-   Mit Pfeiltasten geht es auch über die Tastatur. */
+/* Ziehen per Griff: sobald der Finger oder die Maus sich bewegt, sonst nach kurzem Gedrückthalten.
+   Über die Tastatur geht es mit den Pfeiltasten. Der Griff hat touch-action:none, die Seite scrollt
+   dort also nicht weg; darum darf das Ziehen sofort beginnen. */
 function sortierbar(liste, griffWahl, onEnde, listenWahl = ":scope > li") {
+  const SCHWELLE = 5, HALTEN = 350, RAND = 70, SCHRITT = 14;
   let zug = null;
   const markierungLoeschen = () => liste.querySelectorAll(".ziel-oben, .ziel-unten").forEach((el) => el.classList.remove("ziel-oben", "ziel-unten"));
+
+  function starten() {
+    if (!zug || zug.aktiv) return;
+    clearTimeout(zug.uhr);
+    /* Zwischendurch könnte die Liste neu aufgebaut worden sein. */
+    if (!zug.li.isConnected) { zug = null; return; }
+    zug.aktiv = true;
+    zug.li.classList.add("zieht");
+    zug.roller = setInterval(randScrollen, 16);
+  }
+  /* Es zaehlt die vordere Kante der gezogenen Zeile in Zugrichtung: nach oben die Oberkante, nach
+     unten die Unterkante. Die Fingerposition taugt nicht, weil der Griff bei hohen Zeilen ganz oben
+     sitzt. Neu gemessen wird bei jeder Bewegung, weil die Seite zwischendurch scrollen kann. */
+  function zielPlatz(versatz) {
+    const r = zug.li.getBoundingClientRect();
+    const kante = versatz < 0 ? r.top : r.bottom;
+    let vorne = 0;
+    zug.items.forEach((el, i) => {
+      if (i === zug.von) return;
+      const o = el.getBoundingClientRect();
+      if (kante > o.top + o.height / 2) vorne += 1;
+    });
+    return vorne;
+  }
+  function zeichnen(y) {
+    zug.y = y;
+    const versatz = (y + window.scrollY) - zug.seiteY0;
+    zug.li.style.transform = "translateY(" + versatz + "px)";
+    zug.nach = zielPlatz(versatz);
+    markierungLoeschen();
+    const andere = zug.items.filter((_, i) => i !== zug.von);
+    if (zug.nach !== zug.von && andere.length) {
+      if (zug.nach < andere.length) andere[zug.nach].classList.add("ziel-oben");
+      else andere[andere.length - 1].classList.add("ziel-unten");
+    }
+  }
+  /* Am oberen und unteren Rand wandert die Seite mit, sonst käme man bei langen Listen nicht ans Ziel. */
+  function randScrollen() {
+    if (!zug || !zug.aktiv) return;
+    const y = zug.y;
+    const d = y < RAND ? -SCHRITT : y > window.innerHeight - RAND ? SCHRITT : 0;
+    if (!d) return;
+    const vorher = window.scrollY;
+    window.scrollBy(0, d);
+    if (window.scrollY !== vorher) zeichnen(y);
+  }
+
   liste.addEventListener("pointerdown", (e) => {
     const griff = e.target.closest(griffWahl);
     if (!griff || (e.pointerType === "mouse" && e.button !== 0)) return;
     const li = griff.closest("li");
     const items = [...liste.querySelectorAll(listenWahl)];
-    zug = { id: e.pointerId, griff, li, items, von: items.indexOf(li), y0: e.clientY, aktiv: false, nach: null, mitte: [], uhr: 0 };
-    zug.uhr = setTimeout(() => {
-      if (!zug) return;
-      zug.aktiv = true;
-      ziehtGerade = true;
-      zug.mitte = zug.items.map((el) => { const r = el.getBoundingClientRect(); return r.top + r.height / 2; });
-      zug.li.classList.add("zieht");
-      try { zug.griff.setPointerCapture(zug.id); } catch (err) {}
-    }, 350);
+    const von = items.indexOf(li);
+    if (von < 0) return;
+    /* Ab jetzt wird die Liste nicht mehr neu aufgebaut, sonst verschwindet das Element unter dem Finger. */
+    ziehtGerade = true;
+    zug = { id: e.pointerId, griff, li, items, von, y0: e.clientY, y: e.clientY, seiteY0: e.clientY + window.scrollY, aktiv: false, nach: von, uhr: 0, roller: 0 };
+    try { griff.setPointerCapture(e.pointerId); } catch (err) {}
+    zug.uhr = setTimeout(starten, HALTEN);
   });
   liste.addEventListener("pointermove", (e) => {
     if (!zug || e.pointerId !== zug.id) return;
     if (!zug.aktiv) {
-      /* Wer vorher schon scrollt, zieht nichts. */
-      if (Math.abs(e.clientY - zug.y0) > 8) { clearTimeout(zug.uhr); zug = null; }
-      return;
+      if (Math.abs(e.clientY - zug.y0) < SCHWELLE) return;
+      starten();
+      if (!zug) return;
     }
-    zug.li.style.transform = `translateY(${e.clientY - zug.y0}px)`;
-    let vorne = 0;
-    zug.items.forEach((el, i) => { if (i !== zug.von && e.clientY > zug.mitte[i]) vorne += 1; });
-    zug.nach = vorne;
-    markierungLoeschen();
-    const andere = zug.items.filter((_, i) => i !== zug.von);
-    if (vorne !== zug.von && andere.length) {
-      if (vorne < andere.length) andere[vorne].classList.add("ziel-oben");
-      else andere[andere.length - 1].classList.add("ziel-unten");
-    }
+    e.preventDefault();
+    zeichnen(e.clientY);
   });
-  const ende = (e) => {
+  const beenden = (e) => {
     if (!zug || e.pointerId !== zug.id) return;
-    clearTimeout(zug.uhr);
     const war = zug;
     zug = null;
-    markierungLoeschen();
-    if (!war.aktiv) return;
+    clearTimeout(war.uhr);
+    clearInterval(war.roller);
     ziehtGerade = false;
+    markierungLoeschen();
+    try { war.griff.releasePointerCapture(war.id); } catch (err) {}
+    if (!war.aktiv) return;
     war.li.classList.remove("zieht");
     war.li.style.transform = "";
-    onEnde(war.von, war.nach ?? war.von);
+    onEnde(war.von, war.nach);
   };
-  liste.addEventListener("pointerup", ende);
-  liste.addEventListener("pointercancel", ende);
+  liste.addEventListener("pointerup", beenden);
+  liste.addEventListener("pointercancel", beenden);
   liste.addEventListener("keydown", (e) => {
     const griff = e.target.closest(griffWahl);
     if (!griff) return;
     const items = [...liste.querySelectorAll(listenWahl)];
     const von = items.indexOf(griff.closest("li"));
     const nach = e.key === "ArrowUp" ? von - 1 : e.key === "ArrowDown" ? von + 1 : -1;
-    if (nach < 0 || nach >= items.length) return;
+    if (von < 0 || nach < 0 || nach >= items.length) return;
     e.preventDefault();
     onEnde(von, nach);
   });
