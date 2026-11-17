@@ -127,6 +127,26 @@
           "ts": {
             ".validate": "newData.isNumber()"
           },
+          "reihe": {
+            ".validate": "newData.isNumber()"
+          },
+          "zeilen": {
+            "$zeile": {
+              ".validate": "newData.hasChildren(['reihe'])",
+              "titel": {
+                ".validate": "newData.isString() && newData.val().length <= 80"
+              },
+              "text": {
+                ".validate": "newData.isString() && newData.val().length <= 1000"
+              },
+              "reihe": {
+                ".validate": "newData.isNumber()"
+              },
+              "$anderes": {
+                ".validate": false
+              }
+            }
+          },
           "$anderes": {
             ".validate": false
           }

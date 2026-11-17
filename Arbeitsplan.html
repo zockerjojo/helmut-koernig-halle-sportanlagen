@@ -43,6 +43,7 @@ body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); 
 .knopf{font:inherit; font-size:15px; font-weight:600; min-height:44px; padding:8px 18px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer}
 .knopf.primaer{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
 .knopf.gefahr{border-color:var(--fehler); color:var(--fehler); background:var(--panel)}
+.knopf.klein{min-height:36px; padding:6px 14px; font-size:14px}
 .knopf:disabled{opacity:.5; cursor:not-allowed}
 button:focus-visible, input:focus-visible, a:focus-visible, textarea:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
 h1{margin:0; font-family:var(--display); font-weight:600; font-size:clamp(32px, 6vw, 48px); line-height:1; text-transform:uppercase; text-wrap:balance}
@@ -54,7 +55,7 @@ h2{margin:0; font-family:var(--display); font-weight:600; font-size:26px; line-h
 .anmeldung{max-width:420px; margin:48px auto 0; display:flex; flex-direction:column; gap:16px}
 .feld{display:flex; flex-direction:column; gap:6px; font-size:15px; color:var(--ink-2)}
 input[type="password"], input[type="text"], textarea{font:inherit; font-size:16px; color:var(--ink); background:var(--panel); min-height:44px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; width:100%; min-width:0}
-textarea{resize:none; line-height:1.35}
+textarea{resize:vertical; line-height:1.35}
 .feld-eingabe{position:relative; display:flex}
 .feld-eingabe input{padding-right:52px}
 .augen-knopf{position:absolute; top:0; right:0; bottom:0; width:48px; display:flex; align-items:center; justify-content:center; padding:0; border:0; border-radius:0 10px 10px 0; background:none; color:var(--ink-2); cursor:pointer}
@@ -76,37 +77,20 @@ textarea{resize:none; line-height:1.35}
 .person{display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:0 14px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); font:inherit; font-size:15px; font-weight:600; cursor:pointer}
 .person[aria-pressed="true"]{border:2px solid var(--ink)}
 .person .farbe{width:12px; height:12px; border-radius:50%; border:1px solid var(--ink); flex:none}
-/* Karte mit dem Hallenplan */
-.map{position:relative; width:100%; aspect-ratio:740/322; min-height:220px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--panel); touch-action:none}
+/* Karte mit dem Plan */
+.map{position:relative; width:100%; aspect-ratio:793/525.1; min-height:220px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--weiss); touch-action:none}
 #svg{position:absolute; inset:0; width:100%; height:100%; display:block; touch-action:none}
 .map.setzen{cursor:crosshair}
 .zoom{position:absolute; right:8px; bottom:8px; display:flex; flex-direction:column; gap:6px}
 .zb{width:44px; height:44px; border-radius:10px; border:1px solid var(--line); background:var(--panel); color:var(--ink); font:inherit; font-size:22px; font-weight:600; line-height:1; display:flex; align-items:center; justify-content:center; cursor:pointer}
 .zb.klein{font-size:13px; font-weight:600}
-/* Hallenplan */
-.hall{fill:var(--panel); stroke:none}
-.floor{fill:none}
-.track{fill:var(--plan-track)}
-.sand,.mat{fill:none}
-.trib{fill:var(--line)}
-.ln{fill:none; stroke:var(--ink-2); stroke-width:.9}
-.ln.thin{stroke-width:.45}
-.ln.dash{stroke-dasharray:3 2}
-.hallwall{fill:none; stroke:var(--ink); stroke-width:2.4; stroke-linejoin:round}
-.gate{display:none}
-.wall{fill:none; stroke:var(--ink); stroke-width:1.6; stroke-linejoin:round}
-.fence{fill:none; stroke:var(--ink); stroke-width:2; stroke-dasharray:5 2.2; stroke-linejoin:round}
-.zgate{fill:none; stroke:var(--ink); stroke-width:1.2}
-.wpan{fill:var(--ink); stroke:var(--ink); stroke-width:.6; stroke-linejoin:round}
-.pil{fill:var(--panel); stroke:var(--ink); stroke-width:1.1}
 /* Aufgaben und Pfeile im Plan */
-#punkte circle.treffer{fill:transparent; stroke:none}
-#punkte circle.kugel{stroke:var(--ink); stroke-width:1.2}
+#punkte circle.kugel{stroke:#14201B; stroke-width:1.2}
 #punkte circle.kugel.gewaehlt{stroke-width:2.4}
+#punkte .nummer{font-family:var(--body); font-weight:700; pointer-events:none}
 #etiketten text{font-family:var(--body)}
-#etiketten rect{fill:var(--panel); stroke:var(--line)}
+#etiketten rect{fill:#FFFFFF; stroke:#C3CCC6}
 #pfeile line.strich{stroke-linecap:round}
-#pfeile line.treffer{stroke:transparent; stroke-width:16}
 /* Tafel unten: Hinweis, Details, Formular, Verlauf */
 .tafel{border:1px solid var(--line); border-radius:16px; background:var(--panel); padding:16px; display:flex; flex-direction:column; gap:12px}
 .tafel .kopfzeile{display:flex; flex-direction:column; gap:4px}
@@ -114,8 +98,28 @@ textarea{resize:none; line-height:1.35}
 .rueckfrage{display:flex; flex-direction:column; gap:8px; padding:12px; border:1px solid var(--fehler); border-radius:12px; background:var(--bg)}
 .reihe{display:flex; gap:10px; flex-wrap:wrap}
 .reihe > *{flex:1 1 140px}
+.aktionen{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
 .textknopf{min-height:40px; border:0; background:none; color:var(--ink-2); font:inherit; font-size:15px; font-weight:600; text-decoration:underline; cursor:pointer}
-/* Verlauf */
+/* Textzeilen in der Ansicht */
+.zeilen-ansicht{display:flex; flex-direction:column; gap:12px; padding-top:12px; border-top:1px solid var(--line)}
+.zeile-block{display:flex; flex-direction:column; gap:2px; min-width:0}
+.zeile-titel{margin:0; font-size:15px; font-weight:600; overflow-wrap:anywhere}
+.zeile-text{margin:0; font-size:15px; white-space:pre-wrap; overflow-wrap:anywhere}
+/* Textzeilen im Formular */
+.zeilen-liste{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px}
+.zeile-bearbeiten{display:flex; flex-direction:column; gap:6px; padding:8px; border:1px solid var(--line); border-radius:12px; background:var(--bg)}
+.zeile-kopf{display:flex; align-items:center; gap:6px}
+.zeile-kopf input{flex:1 1 auto}
+.zeile-weg{flex:none; min-height:36px; padding:0 6px; border:0; background:none; color:var(--ink-2); font:inherit; font-size:14px; font-weight:600; text-decoration:underline; cursor:pointer}
+/* Griff zum Verschieben: gedrückt halten, dann ziehen */
+.griff{flex:none; width:36px; min-height:40px; display:inline-flex; align-items:center; justify-content:center; padding:0; border:0; border-radius:8px; background:none; color:var(--ink-2); cursor:grab; touch-action:none; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none}
+.griff:hover{color:var(--ink)}
+.griff svg{width:12px; height:18px; fill:currentColor; pointer-events:none}
+.griff-platz{flex:none; width:36px}
+.zieht{position:relative; z-index:5; background:var(--panel); box-shadow:0 10px 24px rgba(0,0,0,.25); border-radius:10px}
+.ziel-oben{box-shadow:inset 0 3px 0 var(--accent)}
+.ziel-unten{box-shadow:inset 0 -3px 0 var(--accent)}
+/* Verlauf und Liste */
 .filter{display:flex; flex-wrap:wrap; gap:8px}
 .filter button{min-height:36px; padding:0 12px; border-radius:999px; border:1px solid var(--line); background:var(--bg); color:var(--ink); font:inherit; font-size:14px; font-weight:600; cursor:pointer}
 .filter button[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
@@ -125,6 +129,9 @@ textarea{resize:none; line-height:1.35}
 .verlauf .farbe{width:12px; height:12px; margin-top:5px; border-radius:50%; border:1px solid var(--ink); flex:none}
 .verlauf .zeile{display:flex; flex-direction:column; gap:2px; min-width:0}
 .verlauf .wann{font-size:13px; color:var(--ink-2)}
+#alle-liste li{align-items:center}
+#alle-liste .zeile{flex:1 1 auto}
+.abzeichen{flex:none; width:28px; height:28px; border-radius:50%; border:1px solid var(--ink); display:inline-flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; line-height:1}
 </style>
 </head>
 <body>
@@ -175,57 +182,10 @@ textarea{resize:none; line-height:1.35}
   </div>
 
   <div class="map" id="map">
-    <svg id="svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hallenplan von oben">
-      <defs><filter id="etikett-schatten" x="-20%" y="-30%" width="140%" height="170%"><feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-opacity=".22"></feDropShadow></filter><clipPath id="inf"><path d="M268 93 H552 A80 80 0 0 1 552 253 H268 A80 80 0 0 1 268 93 Z"/></clipPath><clipPath id="outc"><path clip-rule="evenodd" d="M35 6 H675 L687 16 H737 V64 H697 Q703 160 694 255 L681 316 H31 L17 286 L14 226 Q-2 130 19 25 Z M268 60 H552 A113 113 0 0 1 552 286 H268 A113 113 0 0 1 268 60 Z M661 202 L655 277 L640 296 L597 296 L597 276.65 A113 113 0 0 0 661 202 Z M158 303 H563 V315 H158 Z M351 286 H364 V303 H351 Z M159 288.5 H351 V303 H159 Z M364 288.5 H563 V303 H364 Z"/></clipPath><clipPath id="noblk"><path clip-rule="evenodd" d="M-60 -60 H820 V400 H-60 Z M159 288.5 h192 v14.5 h-192 Z M364 288.5 h199 v14.5 h-199 Z M12 160 h87 v76 h-87 Z M117 66 h35 v40 h-35 Z M563 196 h43 v22 h-43 Z"/></clipPath><clipPath id="zaunc"><path d="M661 202 L655 277 L640 296 L597 296 L597 276.65 A113 113 0 0 0 661 202 Z"/></clipPath></defs>
+    <svg id="svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Plan der Halle, Ebene -4, mit Aufgaben und Pfeilen">
+      <defs><filter id="etikett-schatten" x="-20%" y="-30%" width="140%" height="170%"><feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-opacity=".22"></feDropShadow></filter></defs>
       <g id="world">
-        <path class="hall" id="hallp" d="M35 6 H675 L687 16 H737 V64 H697 Q703 160 694 255 L681 316 H31 L17 286 L14 226 Q-2 130 19 25 Z"/>
-        <rect class="trib" x="160" y="8" width="520" height="6"/>
-        <rect class="track" x="31" y="18" width="700" height="39"/>
-        <path class="track" fill-rule="evenodd" d="M268 60 H552 A113 113 0 0 1 552 286 H268 A113 113 0 0 1 268 60 Z M268 93 H552 A80 80 0 0 1 552 253 H268 A80 80 0 0 1 268 93 Z"/>
-        <path class="floor" d="M268 93 H552 A80 80 0 0 1 552 253 H268 A80 80 0 0 1 268 93 Z"/>
-        <rect class="track" x="119" y="60" width="31" height="254"/>
-        <rect class="mat" x="117" y="66" width="35" height="40"/>
-        <rect class="mat" x="12" y="160" width="87" height="76"/>
-        <rect class="track" x="200" y="137" width="339" height="53"/>
-        <rect class="track" x="358" y="111" width="231" height="7.5"/>
-        <rect class="mat" x="314" y="98" width="44" height="33"/>
-        <rect class="track" x="252" y="201" width="311" height="13.5"/>
-        <rect class="sand" x="563" y="196" width="43" height="22"/>
-        <rect class="mat" x="250" y="100" width="63" height="31"/>
-        <rect class="mat" x="250" y="192" width="61" height="36.5"/>
-        <rect class="mat" x="314" y="192" width="43" height="36.5"/>
-        <rect class="trib" x="161" y="289.5" width="58" height="12.5"/><rect class="trib" x="228" y="289.5" width="58" height="12.5"/><rect class="trib" x="295" y="289.5" width="58" height="12.5"/><rect class="trib" x="362" y="289.5" width="58" height="12.5"/><rect class="trib" x="429" y="289.5" width="58" height="12.5"/><rect class="trib" x="496" y="289.5" width="58" height="12.5"/>
-        <g id="lanes" fill="none" stroke="none"></g>
-        <g id="paint" fill="none" clip-path="url(#noblk)"></g>
-        <g>
-          <path class="hallwall" d="M35 6 H675 L687 16 H737 V64 H697 Q703 160 694 255 L681 316 H31 L17 286 L14 226 Q-2 130 19 25 Z"/>
-          <rect class="ln" x="31" y="18" width="700" height="39"/>
-          <path class="ln thin" d="M31 24.5 H731 M31 31 H731 M31 37.5 H731 M31 44 H731 M31 50.5 H731"/>
-          <path class="ln" d="M268 60 H552 A113 113 0 0 1 552 286 H268 A113 113 0 0 1 268 60 Z"/>
-          <path class="ln thin" d="M268 65.5 H552 A107.5 107.5 0 0 1 552 280.5 H268 A107.5 107.5 0 0 1 268 65.5 Z"/> <path class="ln thin" d="M268 71 H552 A102 102 0 0 1 552 275 H268 A102 102 0 0 1 268 71 Z"/> <path class="ln thin" d="M268 76.5 H552 A96.5 96.5 0 0 1 552 269.5 H268 A96.5 96.5 0 0 1 268 76.5 Z"/> <path class="ln thin" d="M268 82 H552 A91 91 0 0 1 552 264 H268 A91 91 0 0 1 268 82 Z"/> <path class="ln thin" d="M268 87.5 H552 A85.5 85.5 0 0 1 552 258.5 H268 A85.5 85.5 0 0 1 268 87.5 Z"/>
-          <path class="ln" d="M268 93 H552 A80 80 0 0 1 552 253 H268 A80 80 0 0 1 268 93 Z"/>
-          <rect class="ln" x="200" y="137" width="339" height="53"/>
-          <path class="ln thin" d="M200 143.625 H539 M200 150.25 H539 M200 156.875 H539 M200 163.5 H539 M200 170.125 H539 M200 176.75 H539 M200 183.375 H539 M217 137 V190"/>
-          <rect class="ln" x="119" y="60" width="31" height="254"/>
-          <path class="ln thin" d="M126.75 60 V314 M134.5 60 V314 M142.25 60 V314"/>
-          <rect class="ln dash" x="117" y="66" width="35" height="40"/>
-          <rect class="ln dash" x="12" y="160" width="87" height="76"/>
-          <circle class="ln dash" cx="36" cy="142" r="6"/><circle class="ln dash" cx="42" cy="102" r="6"/><circle class="ln dash" cx="24" cy="122" r="6"/><circle class="ln dash" cx="76" cy="132" r="6"/>
-          <rect class="ln" x="358" y="111" width="231" height="7.5"/>
-          <rect class="ln" x="314" y="98" width="44" height="33"/>
-          <rect class="ln" x="252" y="201" width="311" height="13.5"/>
-          <path class="ln thin" d="M252 207.75 H563"/>
-          <rect class="ln" x="563" y="196" width="43" height="22"/>
-          <rect class="ln" x="250" y="100" width="63" height="31"/>
-          <rect class="ln" x="250" y="192" width="61" height="36.5"/>
-          <rect class="ln" x="314" y="192" width="43" height="36.5"/>
-          <path class="gate" d="M371.5 111 L375.3 109 V113 Z"/><path class="gate" d="M371.5 118.5 L375.3 116.5 V120.5 Z"/><path class="gate" d="M398.6 111 L402.4 109 V113 Z"/><path class="gate" d="M398.6 118.5 L402.4 116.5 V120.5 Z"/><path class="gate" d="M425.7 111 L429.5 109 V113 Z"/><path class="gate" d="M425.7 118.5 L429.5 116.5 V120.5 Z"/><path class="gate" d="M452.2 111 L456 109 V113 Z"/><path class="gate" d="M452.2 118.5 L456 116.5 V120.5 Z"/><path class="gate" d="M441.1 201 L437.3 199 V203 Z"/><path class="gate" d="M441.1 207.75 L437.3 205.75 V209.75 Z"/><path class="gate" d="M467.9 201 L464.1 199 V203 Z"/><path class="gate" d="M467.9 207.75 L464.1 205.75 V209.75 Z"/><path class="gate" d="M494.7 201 L490.9 199 V203 Z"/><path class="gate" d="M494.7 207.75 L490.9 205.75 V209.75 Z"/><path class="gate" d="M521.5 201 L517.7 199 V203 Z"/><path class="gate" d="M521.5 207.75 L517.7 205.75 V209.75 Z"/><path class="gate" d="M548.3 201 L544.5 199 V203 Z"/><path class="gate" d="M548.3 207.75 L544.5 205.75 V209.75 Z"/>
-        </g>
-        <g>
-          <rect class="wall" x="159" y="288.5" width="192" height="14.5"/><rect class="wall" x="364" y="288.5" width="199" height="14.5"/>
-          <path class="fence" d="M661 202 L655 277 L640 296 L597 296 M597 284 L597 276.65"/><path class="zgate" d="M597 296 L589 289"/><path class="wpan" d="M24 84.6 H80 V87.4 H26.8 V112 H24 Z"/><rect class="wpan" x="99" y="84.6" width="12" height="2.8"/><circle class="pil" cx="114" cy="80.5" r="2.6"/><circle class="pil" cx="676" cy="78" r="2.6"/><circle class="pil" cx="676" cy="103" r="2.6"/><circle class="pil" cx="676" cy="128" r="2.6"/><circle class="pil" cx="676" cy="153" r="2.6"/><circle class="pil" cx="676" cy="178" r="2.6"/><circle class="pil" cx="661" cy="202" r="2.6"/><circle class="pil" cx="658" cy="240" r="2.6"/><circle class="pil" cx="655" cy="277" r="2.6"/><circle class="pil" cx="640" cy="296" r="2.6"/><circle class="pil" cx="618.5" cy="296" r="2.6"/><circle class="pil" cx="597" cy="296" r="2.6"/>
-          <path class="gate" d="M479.5 71.0 L483.3 69.0 L483.3 73.0 Z"/><path class="gate" d="M479.5 65.5 L483.3 63.5 L483.3 67.5 Z"/><path class="gate" d="M540.3 93.0 L544.1 91.0 L544.1 95.0 Z"/><path class="gate" d="M540.3 87.5 L544.1 85.5 L544.1 89.5 Z"/><path class="gate" d="M540.3 82.0 L544.1 80.0 L544.1 84.0 Z"/><path class="gate" d="M268.3 93.0 L272.1 91.0 L272.1 95.0 Z"/><path class="gate" d="M268.3 87.5 L272.1 85.5 L272.1 89.5 Z"/><path class="gate" d="M268.3 82.0 L272.1 80.0 L272.1 84.0 Z"/><path class="gate" d="M284.3 253.0 L280.5 255.0 L280.5 251.0 Z"/><path class="gate" d="M284.3 258.5 L280.5 260.5 L280.5 256.5 Z"/><path class="gate" d="M284.3 264.0 L280.5 266.0 L280.5 262.0 Z"/><path class="gate" d="M284.3 275.0 L280.5 277.0 L280.5 273.0 Z"/><path class="gate" d="M284.3 280.5 L280.5 282.5 L280.5 278.5 Z"/><path class="gate" d="M553.6 253.0 L549.8 255.0 L549.8 251.0 Z"/><path class="gate" d="M553.6 258.5 L549.8 260.5 L549.8 256.5 Z"/><path class="gate" d="M553.6 264.0 L549.8 266.0 L549.8 262.0 Z"/><path class="gate" d="M553.6 275.0 L549.8 277.0 L549.8 273.0 Z"/><path class="gate" d="M553.6 280.5 L549.8 282.5 L549.8 278.5 Z"/><path class="gate" d="M209.4 89.5 L211.4 85.7 L213.7 89.0 Z"/><path class="gate" d="M206.3 84.9 L208.4 81.2 L210.6 84.5 Z"/><path class="gate" d="M169.6 200.1 L166.8 197.0 L170.6 196.0 Z"/><path class="gate" d="M164.3 201.5 L161.4 198.3 L165.3 197.3 Z"/><path class="gate" d="M647.2 209.6 L647.6 213.9 L643.9 212.4 Z"/><path class="gate" d="M652.3 211.7 L652.7 215.9 L649.0 214.4 Z"/>
-        </g>
+        <image id="plan" href="./bilder/hallenplan-ebene-4.svg" x="30.6" y="23" width="793" height="525.1" aria-hidden="true"></image>
         <g id="pfeile"></g>
         <g id="punkte"></g>
         <g id="etiketten"></g>
@@ -234,45 +194,52 @@ textarea{resize:none; line-height:1.35}
     <div class="zoom">
       <button class="zb" id="z-rein" type="button" aria-label="Näher heranzoomen" title="Näher heran">+</button>
       <button class="zb" id="z-raus" type="button" aria-label="Weiter weg zoomen" title="Weiter weg">−</button>
-      <button class="zb klein" id="z-ganz" type="button" aria-label="Ganze Halle zeigen" title="Ganze Halle">Alles</button>
+      <button class="zb klein" id="z-ganz" type="button" aria-label="Ganzen Plan zeigen" title="Ganzer Plan">Alles</button>
     </div>
   </div>
   <p class="meldung" id="karten-hinweis" aria-live="polite">Tippe auf einen Punkt oder Pfeil, um Details zu sehen.</p>
 
   <section class="tafel" id="tafel" aria-live="polite">
-    <!-- Details zu einer Aufgabe oder einem Pfeil -->
+    <!-- Details zu einer Aufgabe oder einem Pfeil: nur lesen -->
     <div id="t-detail" hidden>
       <div class="kopfzeile">
         <p class="obertitel" id="d-art">Aufgabe</p>
         <h2 id="d-titel">—</h2>
         <p class="muted" id="d-wer">—</p>
       </div>
-      <div class="stapel" style="gap:10px; margin-top:12px">
-        <button class="knopf" id="d-bearbeiten" type="button">Bearbeiten</button>
-        <button class="knopf primaer" id="d-erledigt" type="button">Als erledigt markieren</button>
-        <button class="knopf gefahr" id="d-loeschen" type="button">Löschen</button>
-        <div class="rueckfrage" id="d-rueckfrage" hidden>
-          <p class="muted" style="color:var(--ink)">Wirklich löschen? Das lässt sich nicht rückgängig machen.</p>
-          <div class="reihe">
-            <button class="knopf" id="d-loeschen-ja" type="button" style="background:var(--fehler); border-color:var(--fehler); color:#FFFFFF">Ja, löschen</button>
-            <button class="knopf" id="d-loeschen-nein" type="button">Nein</button>
-          </div>
-        </div>
-        <button class="textknopf" id="d-schliessen" type="button">Schließen</button>
+      <div class="zeilen-ansicht" id="d-zeilen" hidden></div>
+      <div class="aktionen" style="margin-top:4px">
+        <button class="knopf klein" id="d-bearbeiten" type="button">Bearbeiten</button>
+        <button class="knopf klein" id="d-erledigt" type="button">Als erledigt markieren</button>
+        <button class="knopf klein gefahr" id="d-loeschen" type="button">Löschen</button>
       </div>
+      <div class="rueckfrage" id="d-rueckfrage" hidden>
+        <p class="muted" style="color:var(--ink)">Wirklich löschen? Das lässt sich nicht rückgängig machen.</p>
+        <div class="reihe">
+          <button class="knopf" id="d-loeschen-ja" type="button" style="background:var(--fehler); border-color:var(--fehler); color:#FFFFFF">Ja, löschen</button>
+          <button class="knopf" id="d-loeschen-nein" type="button">Nein</button>
+        </div>
+      </div>
+      <button class="textknopf" id="d-schliessen" type="button" style="margin-top:4px">Schließen</button>
     </div>
 
-    <!-- Formular zum Anlegen und Bearbeiten -->
+    <!-- Anlegen und Bearbeiten: ein Titel, dazu beliebig viele Textzeilen -->
     <form id="t-formular" hidden>
       <div class="stapel">
         <h2 id="f-titel">Aufgabe an dieser Stelle</h2>
         <div class="feld">
           <label for="f-text" id="f-label">Was muss getan werden?</label>
-          <textarea id="f-text" rows="2" maxlength="200" placeholder="Zum Beispiel: Netz am Ballfang prüfen"></textarea>
+          <input type="text" id="f-text" maxlength="200" autocomplete="off" placeholder="Zum Beispiel: Netz am Ballfang prüfen">
         </div>
         <div class="feld">
           <span id="f-wer-text">Wer macht das? Darf frei bleiben.</span>
           <div class="personen" role="group" aria-labelledby="f-wer-text" id="f-personen"></div>
+        </div>
+        <div class="feld" style="gap:8px">
+          <span id="f-zeilen-text">Textzeilen (optional)</span>
+          <ul class="zeilen-liste" id="f-zeilen" aria-labelledby="f-zeilen-text"></ul>
+          <p class="muted" id="f-zeilen-leer">Noch keine Textzeilen. Mit „+ Textzeile“ kommt eine dazu.</p>
+          <div><button class="knopf klein" id="f-zeile-neu" type="button">+ Textzeile</button></div>
         </div>
         <p class="muted" id="f-hinweis">Bleibt die Person frei, gilt die Aufgabe für das ganze Personal.</p>
         <p class="meldung fehler" id="f-fehler" role="alert"></p>
@@ -287,7 +254,7 @@ textarea{resize:none; line-height:1.35}
     <div id="t-verlauf" hidden>
       <div class="stapel">
         <h2>Verlauf</h2>
-        <p class="muted">Wer hat was erstellt, bearbeitet, erledigt oder gelöscht?</p>
+        <p class="muted">Wer hat was erstellt, bearbeitet, verschoben, erledigt oder gelöscht?</p>
         <div class="filter" role="group" aria-label="Verlauf filtern" id="v-filter"></div>
         <ul class="verlauf" id="v-liste"></ul>
         <p class="muted" id="v-leer" hidden>Keine Einträge in dieser Auswahl.</p>
@@ -298,6 +265,7 @@ textarea{resize:none; line-height:1.35}
 
   <section class="tafel" id="listen-tafel">
     <h2>Alle Aufgaben</h2>
+    <p class="muted">Oben steht die höchste Priorität (Prio 1). Neue Aufgaben kommen unten dazu. Den Griff gedrückt halten und die Aufgabe nach oben oder unten ziehen.</p>
     <ul class="verlauf" id="alle-liste" style="max-height:none"></ul>
     <p class="muted" id="alle-leer" hidden>Noch nichts eingetragen. Tippe oben auf „Aufgabe“ und dann auf den Plan.</p>
   </section>
@@ -321,13 +289,18 @@ const PERSONEN = [
   { n: "Patrick", c: "#A259FF" },
   { n: "Lukas", c: "#35E0F2" },
 ];
-/* Ohne Person gilt die Aufgabe fuer das ganze Personal. Sie bekommt die Schriftfarbe,
-   damit sie sich klar von einer erledigten (grauen) Aufgabe unterscheidet. */
+/* Der Plan: Ebene -4 aus dem Fluchtwegeplan, ohne Fluchtzeichen, rote Linien und Feuermelder.
+   Der Rand um das Gebäude gehört dazu, damit man auch draußen etwas eintragen kann. */
+const PLAN = { x: 30.6, y: 23, w: 793, h: 525.1 };
+/* Symbol zum Verschieben: sechs Punkte. */
+const GRIFF_SVG = '<svg viewBox="0 0 12 18" aria-hidden="true" focusable="false"><circle cx="3" cy="3" r="1.7"/><circle cx="9" cy="3" r="1.7"/><circle cx="3" cy="9" r="1.7"/><circle cx="9" cy="9" r="1.7"/><circle cx="3" cy="15" r="1.7"/><circle cx="9" cy="15" r="1.7"/></svg>';
+
+/* Farben aus dem Farbschema der Seite. Ohne Person gilt die Aufgabe für das ganze Personal. */
+const wurzel = document.documentElement;
 const stilWert = (name, ersatz) => getComputedStyle(wurzel).getPropertyValue(name).trim() || ersatz;
 const farbeVon = (name) => PERSONEN.find((p) => p.n === name)?.c ?? stilWert("--ink", "#14201B");
 
 /* Farbschema: dieselbe Einstellung wie auf den anderen Seiten. */
-const wurzel = document.documentElement;
 function thema(dunkel) {
   wurzel.dataset.theme = dunkel ? "dark" : "light";
   $("dunkel").setAttribute("aria-pressed", String(dunkel));
@@ -345,7 +318,6 @@ let gehalten = false;
 themaKnopf.addEventListener("click", () => {
   if (gehalten) { gehalten = false; return; }
   thema(wurzel.dataset.theme !== "dark");
-  /* Aufgaben ohne Person nehmen die Schriftfarbe an: nach dem Wechsel neu zeichnen. */
   try { zeichnePlan(); alleZeichnen(); verlaufZeichnen(); } catch (err) {}
 });
 themaKnopf.addEventListener("pointerdown", (e) => {
@@ -372,21 +344,17 @@ function anmeldeFehler(err) {
   }
 }
 /* Lehnt die Datenbank den Arbeitsplan ab, heißt das fast immer: für den Zweig "arbeitsplan"
-   fehlen noch die Regeln. Das ist kein abgelaufener Zugang, also bleibt das Gerät angemeldet.
-   Ob der Code noch gilt, wird beim Öffnen der Seite ohnehin geprüft. */
+   fehlen noch die Regeln. Das ist kein abgelaufener Zugang, also bleibt das Gerät angemeldet. */
 const NICHT_FREI = "Kein Zugriff auf den Arbeitsplan. Entweder gilt der Code nicht mehr, oder in der Datenbank fehlt der Zugang für den Arbeitsplan.";
 
 let anmeldungLaeuft = false;
-let hoeren = null;
 function zeigeBereich(angemeldet) {
   $("pruefung").hidden = true;
   $("anmeldung").hidden = angemeldet;
   $("panel").hidden = !angemeldet;
   $("verlauf-knopf").hidden = !angemeldet;
 }
-/* Der Arbeitsplan hat einen eigenen Code. Freigeschaltete Geräte stehen deshalb
-   nicht unter admins, sondern unter arbeitsplanzugang. Wer nur den Code für
-   Reinigung und Sportanlagen hat, kommt hier nicht hinein. */
+/* Der Arbeitsplan hat einen eigenen Code. Freigeschaltete Geräte stehen unter arbeitsplanzugang. */
 const ZUGANG = "arbeitsplanzugang";
 async function istFreigeschaltet(uid) {
   const snap = await get(ref(db, `${ZUGANG}/${uid}`));
@@ -443,7 +411,6 @@ $("formular").addEventListener("submit", async (e) => {
 });
 
 /* ---- Zustand ---- */
-const W0 = 740, H0 = 322;
 const S = {
   modus: "ansehen",
   ich: PERSONEN[0].n,
@@ -454,9 +421,12 @@ const S = {
   start: null,
   bearbeiten: null,
   person: null,
+  zeilen: [],
   filter: "alle",
   tafel: "aus",
 };
+/* Während eine Zeile in der Liste gezogen wird, wird die Liste nicht neu aufgebaut. */
+let ziehtGerade = false;
 try { const g = localStorage.getItem("hkh-arbeitsplan-ich"); if (PERSONEN.some((p) => p.n === g)) S.ich = g; } catch (e) {}
 
 const NS = "http://www.w3.org/2000/svg";
@@ -470,19 +440,22 @@ const neu = (name, werte) => { const el = document.createElementNS(NS, name); fo
 const leeren = (el) => { while (el.firstChild) el.removeChild(el.firstChild); };
 
 /* ---- Ansicht: Zoom und Verschieben ---- */
-const V = { z: 1, cx: W0 / 2, cy: H0 / 2 };
+const V = { z: 1, cx: PLAN.x + PLAN.w / 2, cy: PLAN.y + PLAN.h / 2 };
 const klemm = (w, min, max) => Math.min(max, Math.max(min, w));
-let sicht = { x: 0, y: 0, w: W0, h: H0 };
+/* Zoom bis halb heraus, damit der Bereich um den Plan sichtbar und antippbar ist. Die Mitte darf
+   eine ganze Planbreite über den Rand hinauswandern. */
+const ZOOM_MIN = 0.5, ZOOM_MAX = 8, UMGEBUNG = 1;
+let sicht = { x: PLAN.x, y: PLAN.y, w: PLAN.w, h: PLAN.h };
 function ansichtSetzen() {
   const r = map.getBoundingClientRect();
   if (r.width < 2 || r.height < 2) return;
-  const ca = r.width / r.height, wa = W0 / H0;
+  const ca = r.width / r.height, wa = PLAN.w / PLAN.h;
   let bw, bh;
-  if (ca > wa) { bh = H0 * 1.03; bw = bh * ca; } else { bw = W0 * 1.03; bh = bw / ca; }
-  V.z = klemm(V.z, 1, 8);
+  if (ca > wa) { bh = PLAN.h * 1.03; bw = bh * ca; } else { bw = PLAN.w * 1.03; bh = bw / ca; }
+  V.z = klemm(V.z, ZOOM_MIN, ZOOM_MAX);
   const w = bw / V.z, h = bh / V.z;
-  V.cx = w >= W0 ? W0 / 2 : klemm(V.cx, w / 2 - 12, W0 - w / 2 + 12);
-  V.cy = h >= H0 ? H0 / 2 : klemm(V.cy, h / 2 - 12, H0 - h / 2 + 12);
+  V.cx = klemm(V.cx, PLAN.x - UMGEBUNG * PLAN.w, PLAN.x + (1 + UMGEBUNG) * PLAN.w);
+  V.cy = klemm(V.cy, PLAN.y - UMGEBUNG * PLAN.h, PLAN.y + (1 + UMGEBUNG) * PLAN.h);
   sicht = { x: V.cx - w / 2, y: V.cy - h / 2, w: w, h: h };
   svg.setAttribute("viewBox", `${sicht.x.toFixed(2)} ${sicht.y.toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)}`);
 }
@@ -501,7 +474,7 @@ function zuWelt(klientX, klientY) {
 }
 function zoomAuf(klientX, klientY, z) {
   const a = zuWelt(klientX, klientY);
-  V.z = klemm(z, 1, 8);
+  V.z = klemm(z, ZOOM_MIN, ZOOM_MAX);
   ansichtSetzen();
   const b = zuWelt(klientX, klientY);
   V.cx += a.x - b.x; V.cy += a.y - b.y;
@@ -514,7 +487,7 @@ function zoomKnopf(faktor) {
 }
 $("z-rein").addEventListener("click", () => zoomKnopf(1.6));
 $("z-raus").addEventListener("click", () => zoomKnopf(1 / 1.6));
-$("z-ganz").addEventListener("click", () => { V.z = 1; V.cx = W0 / 2; V.cy = H0 / 2; ansichtSetzen(); zeichnePlan(); });
+$("z-ganz").addEventListener("click", () => { V.z = 1; V.cx = PLAN.x + PLAN.w / 2; V.cy = PLAN.y + PLAN.h / 2; ansichtSetzen(); zeichnePlan(); });
 svg.addEventListener("wheel", (e) => { e.preventDefault(); zoomAuf(e.clientX, e.clientY, V.z * (e.deltaY < 0 ? 1.15 : 1 / 1.15)); }, { passive: false });
 window.addEventListener("resize", () => { ansichtSetzen(); zeichnePlan(); });
 
@@ -545,15 +518,38 @@ svg.addEventListener("pointerup", (e) => {
 });
 svg.addEventListener("pointercancel", () => { zieh = null; });
 
-/* ---- Zeichnen ---- */
+/* ---- Einträge, Reihenfolge und Anzeige ---- */
 const istPfeil = (e) => e.art === "pfeil";
-const titelVon = (e) => (istPfeil(e) ? `${e.text} dorthin bringen` : e.text);
+const istOffen = (e) => e.status !== "erledigt";
+/* Der Titel ist die Aufgabe selbst. Die Textzeilen stehen nur in der Ansicht und im Formular. */
+const titelVon = (e) => e.text;
 const untertitelVon = (e) => {
-  if (e.status === "erledigt") return e.person ? `✓ ${e.person} · erledigt` : "✓ erledigt";
+  if (!istOffen(e)) return e.person ? `✓ ${e.person} · erledigt` : "✓ erledigt";
   return e.person ? `${e.person} · offen` : "Für alle · offen";
 };
-const punktFarbe = (e) => (e.status === "erledigt" ? stilWert("--erledigt", "#6B7770") : farbeVon(e.person));
-const sortiert = () => Object.entries(S.eintraege).map(([id, e]) => ({ id, ...e })).sort((a, b) => (a.ts || 0) - (b.ts || 0));
+const punktFarbe = (e) => (istOffen(e) ? farbeVon(e.person) : stilWert("--erledigt", "#6B7770"));
+/* Die Karte bleibt immer weiß, auch im Dunkelmodus. Ihre Farben sind darum fest. Die Liste nimmt die Themenfarben. */
+const KARTE_DUNKEL = "#14201B", KARTE_ERLEDIGT = "#6B7770";
+const kartenFarbe = (e) => (istOffen(e) ? (e.person ? farbeVon(e.person) : KARTE_DUNKEL) : KARTE_ERLEDIGT);
+/* Schrift im Kreis: dunkel auf hellen Farben, hell auf dunklen. */
+const kontrast = (hex) => {
+  const text = String(hex);
+  if (text.length !== 7 || !/^#[0-9a-fA-F]{6}$/.test(text)) return "#14201B";
+  const n = parseInt(text.slice(1), 16);
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  return 0.299 * r + 0.587 * g + 0.114 * b > 150 ? "#14201B" : "#FFFFFF";
+};
+/* Reihenfolge: je kleiner der Schlüssel, desto höher steht der Eintrag. Alte Einträge ohne Schlüssel
+   werden nach dem Zeitpunkt ihres Eintrags eingeordnet. */
+const schluessel = (e) => (typeof e.reihe === "number" ? e.reihe : e.ts || 0);
+const sortiert = () => Object.entries(S.eintraege).map(([id, e]) => ({ id, ...e })).sort((a, b) => schluessel(a) - schluessel(b));
+const offene = () => sortiert().filter(istOffen);
+const neueReihe = () => Math.max(Date.now(), ...Object.values(S.eintraege).map(schluessel)) + 1000;
+/* Prio 1 steht ganz oben unter den offenen Einträgen. Erledigte bekommen keine Prio. */
+const nummerVon = (id) => {
+  const i = offene().findIndex((e) => e.id === id);
+  return i < 0 ? null : i + 1;
+};
 
 function pfeilZeichnen(ziel, x1, y1, x2, y2, farbe, p, gestrichelt) {
   const dx = x2 - x1, dy = y2 - y1;
@@ -569,63 +565,75 @@ function pfeilZeichnen(ziel, x1, y1, x2, y2, farbe, p, gestrichelt) {
   ziel.appendChild(neu("polygon", { points: `${x2},${y2} ${ax},${ay} ${cx},${cy}`, fill: farbe }));
 }
 
+/* Kreis mit Prio-Zahl: bei einer Aufgabe der Punkt, bei einem Pfeil der Anfang. */
+function kreisZeichnen(ziel, x, y, e, nummer, p, gewaehlt) {
+  const farbe = kartenFarbe(e);
+  ziel.appendChild(neu("circle", {
+    cx: x, cy: y, r: 8 * p, fill: farbe,
+    class: "kugel" + (gewaehlt ? " gewaehlt" : ""),
+    "stroke-width": (gewaehlt ? 2.4 : 1.2) * p,
+  }));
+  if (!nummer) return;
+  const t = neu("text", { x: x, y: y + 3.6 * p, "text-anchor": "middle", "font-size": 10 * p, fill: kontrast(farbe), class: "nummer" });
+  t.textContent = String(nummer);
+  ziel.appendChild(t);
+}
+
 function zeichnePlan() {
   leeren(ebenePfeile); leeren(ebenePunkte); leeren(ebeneEtiketten);
   const p = proPixel();
   const zeigeText = V.z >= 1.8;
-  const liste = sortiert();
-  liste.filter(istPfeil).forEach((e) => {
-    pfeilZeichnen(ebenePfeile, e.x1, e.y1, e.x2, e.y2, punktFarbe(e), p, false);
+  const nummern = new Map(offene().map((e, i) => [e.id, i + 1]));
+  const alle = sortiert();
+  alle.filter(istPfeil).forEach((e) => {
+    pfeilZeichnen(ebenePfeile, e.x1, e.y1, e.x2, e.y2, kartenFarbe(e), p, false);
     if (e.id === S.gewaehlt) {
-      ebenePfeile.appendChild(neu("line", { x1: e.x1, y1: e.y1, x2: e.x2, y2: e.y2, stroke: punktFarbe(e), "stroke-width": 9 * p, "stroke-linecap": "round", "stroke-opacity": ".3" }));
+      ebenePfeile.appendChild(neu("line", { x1: e.x1, y1: e.y1, x2: e.x2, y2: e.y2, stroke: kartenFarbe(e), "stroke-width": 9 * p, "stroke-linecap": "round", "stroke-opacity": ".3" }));
     }
   });
-  liste.filter((e) => !istPfeil(e)).forEach((e) => {
-    const gewaehlt = e.id === S.gewaehlt;
-    ebenePunkte.appendChild(neu("circle", { cx: e.x, cy: e.y, r: 7 * p, fill: punktFarbe(e), class: "kugel" + (gewaehlt ? " gewaehlt" : ""), "stroke-width": (gewaehlt ? 2.4 : 1.2) * p }));
+  alle.forEach((e) => {
+    const x = istPfeil(e) ? e.x1 : e.x, y = istPfeil(e) ? e.y1 : e.y;
+    kreisZeichnen(ebenePunkte, x, y, e, nummern.get(e.id), p, e.id === S.gewaehlt);
   });
   if (zeigeText) {
     const schatten = $("etikett-schatten")?.firstElementChild;
     if (schatten) { schatten.setAttribute("dy", 1 * p); schatten.setAttribute("stdDeviation", 1.2 * p); }
     const belegt = [];
-    liste.forEach((e) => {
-      etikettZeichnen(istPfeil(e) ? e.x1 : e.x, istPfeil(e) ? e.y1 : e.y, titelVon(e), untertitelVon(e), p, belegt);
+    alle.forEach((e) => {
+      etikettZeichnen(istPfeil(e) ? e.x1 : e.x, istPfeil(e) ? e.y1 : e.y, titelVon(e), p, belegt);
     });
   }
   if (S.start) {
-    ebenePunkte.appendChild(neu("circle", { cx: S.start.x, cy: S.start.y, r: 8 * p, fill: "none", stroke: farbeVon(S.person), "stroke-width": 2.5 * p, "stroke-dasharray": `${4 * p} ${3 * p}` }));
+    ebenePunkte.appendChild(neu("circle", { cx: S.start.x, cy: S.start.y, r: 8 * p, fill: "none", stroke: S.person ? farbeVon(S.person) : KARTE_DUNKEL, "stroke-width": 2.5 * p, "stroke-dasharray": `${4 * p} ${3 * p}` }));
   }
   if (S.entwurf) {
-    const f = farbeVon(S.person);
+    const f = S.person ? farbeVon(S.person) : KARTE_DUNKEL;
     if (S.entwurf.art === "pfeil") pfeilZeichnen(ebenePfeile, S.entwurf.x1, S.entwurf.y1, S.entwurf.x2, S.entwurf.y2, f, p, true);
     else ebenePunkte.appendChild(neu("circle", { cx: S.entwurf.x, cy: S.entwurf.y, r: 8 * p, fill: f, stroke: "#FFFFFF", "stroke-width": 2 * p, "fill-opacity": ".85" }));
   }
 }
 
-/* Aufgabe und Person stehen in einer eigenen Box, damit sie auf dem bunten
-   Plan lesbar bleiben. Die Breite ergibt sich erst nach dem Messen des Textes,
+/* Nur der Titel steht in einer Box neben dem Punkt. Die Breite ergibt sich erst nach dem Messen,
    deshalb wird zuerst gezeichnet und danach die Box gesetzt. */
-function etikettZeichnen(x, y, titel, unter, p, belegt) {
+function etikettZeichnen(x, y, titel, p, belegt) {
   const g = neu("g", {});
   const kasten = neu("rect", { rx: 3 * p, ry: 3 * p, "stroke-width": p, filter: "url(#etikett-schatten)" });
-  const t1 = neu("text", { "font-size": 11 * p, "font-weight": "600", fill: stilWert("--ink", "#14201B") });
-  const t2 = neu("text", { "font-size": 9 * p, "font-weight": "500", fill: stilWert("--ink-2", "#55635C") });
-  t1.textContent = titel;
-  t2.textContent = unter;
-  g.appendChild(kasten); g.appendChild(t1); g.appendChild(t2);
+  const t = neu("text", { "font-size": 11 * p, "font-weight": "600", fill: KARTE_DUNKEL });
+  t.textContent = titel;
+  g.appendChild(kasten); g.appendChild(t);
   ebeneEtiketten.appendChild(g);
 
-  /* Sehr langer Text würde über die halbe Karte laufen und wird gekürzt. */
+  /* Sehr langer Titel würde über die halbe Karte laufen und wird gekürzt. */
   const platz = sicht.w * 0.45;
-  if (t1.getComputedTextLength() > platz) {
+  if (t.getComputedTextLength() > platz) {
     let text = titel;
-    while (text.length > 6 && t1.getComputedTextLength() > platz) {
+    while (text.length > 6 && t.getComputedTextLength() > platz) {
       text = text.slice(0, -2);
-      t1.textContent = text + "…";
+      t.textContent = text + "…";
     }
   }
-  const breite = Math.max(t1.getComputedTextLength(), t2.getComputedTextLength()) + 11 * p;
-  const hoehe = 26 * p;
+  const breite = t.getComputedTextLength() + 11 * p;
+  const hoehe = 19 * p;
   /* Die Box steht rechts vom Punkt. Passt sie dort nicht mehr ins Bild, springt sie nach links. */
   const rechtsRand = sicht.x + sicht.w;
   const passtRechts = x + 12 * p + breite <= rechtsRand;
@@ -639,13 +647,11 @@ function etikettZeichnen(x, y, titel, unter, p, belegt) {
     if (!stoesst) break;
     by += hoehe + 2 * p;
   }
-  /* Am oberen und unteren Rand bleibt die Box im Bild. */
   by = Math.min(Math.max(by, sicht.y + 2 * p), sicht.y + sicht.h - hoehe - 2 * p);
   belegt.push({ x: bx, y: by, b: breite, h: hoehe });
   kasten.setAttribute("x", bx); kasten.setAttribute("y", by);
   kasten.setAttribute("width", breite); kasten.setAttribute("height", hoehe);
-  t1.setAttribute("x", bx + 5.5 * p); t1.setAttribute("y", by + 11.5 * p);
-  t2.setAttribute("x", bx + 5.5 * p); t2.setAttribute("y", by + 21.5 * p);
+  t.setAttribute("x", bx + 5.5 * p); t.setAttribute("y", by + 13.2 * p);
 }
 
 /* Abstand eines Punktes zu einer Strecke, für das Antippen von Pfeilen. */
@@ -655,8 +661,8 @@ function abstandStrecke(px, py, x1, y1, x2, y2) {
   const t = n ? klemm(((px - x1) * dx + (py - y1) * dy) / n, 0, 1) : 0;
   return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy));
 }
-function trefferBei(punkt) {
-  const grenze = 22 * proPixel();
+function trefferBei(punkt, pixel) {
+  const grenze = pixel * proPixel();
   let beste = null, bester = Infinity;
   sortiert().forEach((e) => {
     const d = istPfeil(e)
@@ -675,11 +681,10 @@ function planGetippt(punkt) {
     return;
   }
   if (S.tafel === "formular" || S.tafel === "verlauf") return;
-  if (S.modus === "ansehen") {
-    const treffer = trefferBei(punkt);
-    if (treffer) waehle(treffer.id); else abwaehlen();
-    return;
-  }
+  /* Wer auf einen bestehenden Eintrag tippt, öffnet ihn. Im Ansehen-Modus reicht ein größerer Bereich. */
+  const treffer = trefferBei(punkt, S.modus === "ansehen" ? 22 : 12);
+  if (treffer) { waehle(treffer.id); return; }
+  if (S.modus === "ansehen") { abwaehlen(); return; }
   if (S.modus === "aufgabe") {
     S.gewaehlt = null;
     S.entwurf = { art: "aufgabe", x: punkt.x, y: punkt.y };
@@ -703,7 +708,7 @@ function planGetippt(punkt) {
 /* ---- Tafel unten ---- */
 const HINWEISE = {
   ansehen: "Tippe auf einen Punkt oder Pfeil, um Details zu sehen.",
-  aufgabe: "Tippe auf die Karte. Dort entsteht eine neue Aufgabe.",
+  aufgabe: "Tippe auf den Plan, auch draußen. Dort entsteht eine neue Aufgabe.",
   pfeil: "Tippe erst auf den Start, dann auf das Ziel.",
 };
 function hinweisSetzen(text) { $("karten-hinweis").textContent = text; }
@@ -718,6 +723,7 @@ function tafelZeigen(welche) {
   map.classList.toggle("setzen", welche !== "formular" && welche !== "verlauf" && S.modus !== "ansehen");
 }
 
+/* Nur lesen: Titel, Textzeilen und Stand. Bearbeiten geht erst über den Knopf „Bearbeiten“. */
 function waehle(id) {
   const e = S.eintraege[id];
   if (!e) { abwaehlen(); return; }
@@ -726,8 +732,10 @@ function waehle(id) {
   $("d-rueckfrage").hidden = true;
   $("d-art").textContent = istPfeil(e) ? "Pfeil" : "Aufgabe";
   $("d-titel").textContent = titelVon(e);
-  $("d-wer").textContent = untertitelVon(e);
-  $("d-erledigt").textContent = e.status === "erledigt" ? "Wieder öffnen" : "Als erledigt markieren";
+  const nr = nummerVon(id);
+  $("d-wer").textContent = untertitelVon(e) + (nr ? ` · Prio ${nr}` : "");
+  $("d-erledigt").textContent = istOffen(e) ? "Als erledigt markieren" : "Wieder öffnen";
+  zeilenAnsichtZeichnen(e);
   tafelZeigen("detail");
   hinweisZurueck();
   zeichnePlan();
@@ -741,12 +749,21 @@ function abwaehlen() {
 }
 $("d-schliessen").addEventListener("click", abwaehlen);
 
-/* ---- Formular ---- */
+function zeilenAnsichtZeichnen(e) {
+  const zeilen = e.zeilen ?? [];
+  $("d-zeilen").innerHTML = zeilen.map((z) =>
+    `<div class="zeile-block">${z.titel ? `<p class="zeile-titel">${esc(z.titel)}</p>` : ""}<p class="zeile-text">${esc(z.text)}</p></div>`
+  ).join("");
+  $("d-zeilen").hidden = zeilen.length === 0;
+}
+
+/* ---- Formular: ein Titel, dazu Textzeilen mit Überschrift und Text ---- */
 function formularOeffnen(id) {
   const e = id ? S.eintraege[id] : null;
   S.bearbeiten = id;
   const pfeil = e ? istPfeil(e) : S.entwurf?.art === "pfeil";
-  S.person = e ? (e.person ?? null) : S.person;
+  S.person = e ? (e.person ?? null) : null;
+  S.zeilen = e ? (e.zeilen ?? []).map((z) => ({ id: z.id, titel: z.titel ?? "", text: z.text ?? "" })) : [];
   $("f-titel").textContent = e
     ? (pfeil ? "Pfeil bearbeiten" : "Aufgabe bearbeiten")
     : (pfeil ? "Pfeil: dorthin bringen" : "Aufgabe an dieser Stelle");
@@ -758,47 +775,108 @@ function formularOeffnen(id) {
     : "Bleibt die Person frei, gilt die Aufgabe für das ganze Personal. Mit Person bekommt sie deren Farbe.";
   $("f-fehler").textContent = "";
   personenZeichnen();
+  zeilenZeichnen();
   tafelZeigen("formular");
-  hinweisSetzen(e ? "Ändere den Text oder die Person." : "Trage ein, was zu tun ist.");
+  hinweisSetzen(e ? "Ändere den Titel, die Textzeilen oder die Person." : "Trage den Titel ein. Mit „+ Textzeile“ kommen weitere Zeilen dazu.");
   zeichnePlan();
   setTimeout(() => { try { $("f-text").focus(); } catch (err) {} }, 50);
 }
 function formularSchliessen() {
   const war = S.bearbeiten;
-  S.entwurf = null; S.start = null; S.bearbeiten = null; S.person = null;
+  S.entwurf = null; S.start = null; S.bearbeiten = null; S.person = null; S.zeilen = [];
   if (war) waehle(war); else abwaehlen();
 }
 $("f-abbrechen").addEventListener("click", formularSchliessen);
 
+function zeilenZeichnen() {
+  $("f-zeilen").innerHTML = S.zeilen.map((z) => `
+    <li class="zeile-bearbeiten" data-id="${esc(z.id)}">
+      <div class="zeile-kopf">
+        <button class="griff" type="button" aria-label="Textzeile verschieben: gedrückt halten, dann nach oben oder unten ziehen" title="Gedrückt halten, um die Zeile zu verschieben">${GRIFF_SVG}</button>
+        <input type="text" data-feld="titel" maxlength="80" placeholder="Überschrift, zum Beispiel: Material" value="${esc(z.titel)}" aria-label="Überschrift der Textzeile">
+        <button class="zeile-weg" type="button" data-weg="${esc(z.id)}">Entfernen</button>
+      </div>
+      <textarea data-feld="text" rows="2" maxlength="1000" placeholder="Was soll in dieser Zeile stehen?" aria-label="Text der Textzeile">${esc(z.text)}</textarea>
+    </li>`).join("");
+  $("f-zeilen-leer").hidden = S.zeilen.length > 0;
+}
+/* Eingaben werden sofort im Speicher der Seite festgehalten. Gespeichert wird erst beim Knopf „Speichern“. */
+$("f-zeilen").addEventListener("input", (e) => {
+  const feld = e.target.dataset?.feld;
+  if (!feld) return;
+  const id = e.target.closest("[data-id]")?.dataset.id;
+  const z = S.zeilen.find((x) => x.id === id);
+  if (z) z[feld] = e.target.value;
+});
+$("f-zeilen").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && e.target.dataset?.feld === "titel") e.preventDefault();
+});
+$("f-zeilen").addEventListener("click", (e) => {
+  const weg = e.target.closest("[data-weg]");
+  if (!weg) return;
+  S.zeilen = S.zeilen.filter((x) => x.id !== weg.dataset.weg);
+  zeilenZeichnen();
+});
+$("f-zeile-neu").addEventListener("click", () => {
+  const z = { id: neueId(), titel: "", text: "" };
+  S.zeilen.push(z);
+  zeilenZeichnen();
+  const feld = $("f-zeilen").querySelector(`[data-id="${z.id}"] [data-feld="titel"]`);
+  if (feld) { feld.focus(); feld.scrollIntoView({ block: "center", behavior: "smooth" }); }
+});
+sortierbar($("f-zeilen"), ".griff", (von, nach) => {
+  if (von !== nach) {
+    const [z] = S.zeilen.splice(von, 1);
+    S.zeilen.splice(nach, 0, z);
+  }
+  zeilenZeichnen();
+});
+/* Leere Zeilen werden beim Speichern nicht übernommen. Nummern ergeben sich aus der Reihenfolge. */
+function zeilenFuerSpeichern() {
+  const ausgabe = {};
+  S.zeilen.forEach((z) => {
+    const titel = (z.titel || "").trim().slice(0, 80);
+    const text = (z.text || "").trim().slice(0, 1000);
+    if (!titel && !text) return;
+    ausgabe[z.id] = { titel, text, reihe: (Object.keys(ausgabe).length + 1) * 1000 };
+  });
+  return Object.keys(ausgabe).length ? ausgabe : null;
+}
+
 $("t-formular").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const text = $("f-text").value.trim();
-  if (!text) { $("f-fehler").textContent = "Bitte eintragen, was zu tun ist."; $("f-text").focus(); return; }
+  const titel = $("f-text").value.trim();
+  if (!titel) { $("f-fehler").textContent = "Bitte den Titel eintragen."; $("f-text").focus(); return; }
+  const zeilen = zeilenFuerSpeichern();
   const knopf = $("f-speichern");
   knopf.disabled = true;
   try {
     if (S.bearbeiten) {
-      const alt = S.eintraege[S.bearbeiten];
-      if (!alt) { formularSchliessen(); return; }
-      const neuerStand = { ...alt, text: text, person: S.person ?? null };
-      await schreiben({
-        [`${BASIS}/eintraege/${S.bearbeiten}`]: neuerStand,
-        ...verlaufPaar("bearbeitet", titelVon(neuerStand), S.person ?? null),
-      });
       const id = S.bearbeiten;
-      S.bearbeiten = null; S.person = null;
+      if (!S.eintraege[id]) { formularSchliessen(); return; }
+      /* Nur die geänderten Felder schreiben, damit nichts anderes überschrieben wird. */
+      const ok = await schreiben({
+        [`${BASIS}/eintraege/${id}/text`]: titel,
+        [`${BASIS}/eintraege/${id}/person`]: S.person ?? null,
+        [`${BASIS}/eintraege/${id}/zeilen`]: zeilen,
+        ...verlaufPaar("bearbeitet", titel, S.person ?? null),
+      });
+      if (!ok) return;
+      S.bearbeiten = null; S.person = null; S.zeilen = [];
       waehle(id);
     } else {
       const id = neueId();
-      const basis = { text: text, person: S.person ?? null, status: "offen", ts: Date.now() };
+      const basis = { text: titel, person: S.person ?? null, status: "offen", ts: Date.now(), reihe: neueReihe() };
+      if (zeilen) basis.zeilen = zeilen;
       const eintrag = S.entwurf.art === "pfeil"
         ? { art: "pfeil", ...basis, x1: r2(S.entwurf.x1), y1: r2(S.entwurf.y1), x2: r2(S.entwurf.x2), y2: r2(S.entwurf.y2) }
         : { art: "aufgabe", ...basis, x: r2(S.entwurf.x), y: r2(S.entwurf.y) };
-      await schreiben({
+      const ok = await schreiben({
         [`${BASIS}/eintraege/${id}`]: eintrag,
-        ...verlaufPaar("erstellt", titelVon(eintrag), eintrag.person),
+        ...verlaufPaar("erstellt", titel, eintrag.person),
       });
-      S.entwurf = null; S.person = null;
+      if (!ok) return;
+      S.entwurf = null; S.person = null; S.zeilen = [];
       abwaehlen();
       hinweisSetzen("Gespeichert. Die Karte zeigt es jetzt.");
     }
@@ -806,16 +884,16 @@ $("t-formular").addEventListener("submit", async (e) => {
     knopf.disabled = false;
   }
 });
+
 $("d-bearbeiten").addEventListener("click", () => { if (S.gewaehlt) formularOeffnen(S.gewaehlt); });
 
 $("d-erledigt").addEventListener("click", async () => {
   const id = S.gewaehlt;
   const e = id && S.eintraege[id];
   if (!e) return;
-  const wirdErledigt = e.status !== "erledigt";
-  const neuerStand = { ...e, status: wirdErledigt ? "erledigt" : "offen" };
+  const wirdErledigt = istOffen(e);
   await schreiben({
-    [`${BASIS}/eintraege/${id}`]: neuerStand,
+    [`${BASIS}/eintraege/${id}/status`]: wirdErledigt ? "erledigt" : "offen",
     ...verlaufPaar(wirdErledigt ? "erledigt" : "geoeffnet", titelVon(e), e.person ?? null),
   });
   waehle(id);
@@ -834,6 +912,33 @@ $("d-loeschen-ja").addEventListener("click", async () => {
   abwaehlen();
   hinweisSetzen("Gelöscht. Der Verlauf zeigt es.");
 });
+
+/* ---- Prio: Reihenfolge der offenen Einträge ändern ---- */
+/* Verschiebt einen Eintrag von Platz „von“ nach Platz „nach“ (0 = ganz oben). Geschrieben wird nur
+   der neue Schlüssel des verschobenen Eintrags, außer die Zwischenräume sind aufgebraucht. */
+async function reihenfolgeAendern(von, nach) {
+  const liste = offene();
+  if (von < 0 || nach < 0 || von >= liste.length || nach >= liste.length || von === nach) { alleZeichnen(); return; }
+  const [e] = liste.splice(von, 1);
+  liste.splice(nach, 0, e);
+  const davor = liste[nach - 1], danach = liste[nach + 1];
+  let neuerSchluessel;
+  if (davor && danach) neuerSchluessel = (schluessel(davor) + schluessel(danach)) / 2;
+  else if (davor) neuerSchluessel = schluessel(davor) + 1000;
+  else if (danach) neuerSchluessel = schluessel(danach) - 1000;
+  else neuerSchluessel = schluessel(e);
+  const werte = {};
+  if (davor && danach && !(schluessel(davor) < neuerSchluessel && neuerSchluessel < schluessel(danach))) {
+    liste.forEach((x, i) => { werte[`${BASIS}/eintraege/${x.id}/reihe`] = (i + 1) * 1000; });
+  } else {
+    werte[`${BASIS}/eintraege/${e.id}/reihe`] = neuerSchluessel;
+  }
+  await schreiben({
+    ...werte,
+    ...verlaufPaar("verschoben", `${e.text} · Prio ${nach + 1}`, e.person ?? null),
+  });
+  alleZeichnen();
+}
 
 /* ---- Speichern und Verlauf ---- */
 const neueId = () => "e" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -880,7 +985,7 @@ $("f-personen").addEventListener("click", (e) => {
 
 /* ---- Verlauf anzeigen ---- */
 const FILTER = [["alle", "Alle"], ["erstellt", "erstellt"], ["bearbeitet", "bearbeitet"], ["erledigt", "erledigt"], ["geloescht", "gelöscht"]];
-const WORT = { erstellt: "erstellt", bearbeitet: "bearbeitet", erledigt: "erledigt", geoeffnet: "wieder geöffnet", geloescht: "gelöscht" };
+const WORT = { erstellt: "erstellt", bearbeitet: "bearbeitet", erledigt: "erledigt", geoeffnet: "wieder geöffnet", geloescht: "gelöscht", verschoben: "verschoben" };
 function zeitText(ts) {
   if (!ts) return "";
   const d = new Date(ts);
@@ -922,13 +1027,22 @@ $("verlauf-knopf").addEventListener("click", () => {
 });
 $("v-zurueck").addEventListener("click", () => { S.gewaehlt ? waehle(S.gewaehlt) : abwaehlen(); });
 
-/* ---- Liste aller Aufgaben ---- */
+/* ---- Liste aller Aufgaben: offene nach Prio, erledigte darunter ---- */
 function alleZeichnen() {
-  const reihe = sortiert().sort((a, b) => (a.status === b.status ? (b.ts || 0) - (a.ts || 0) : a.status === "erledigt" ? 1 : -1));
-  $("alle-liste").innerHTML = reihe.map((e) =>
-    `<li><span class="farbe" style="background:${punktFarbe(e)}"></span><span class="zeile"><button class="textknopf" type="button" data-zeigen="${esc(e.id)}" style="text-align:left; color:var(--ink); min-height:auto">${esc(titelVon(e))}</button><span class="wann">${esc(untertitelVon(e))}</span></span></li>`
-  ).join("");
-  $("alle-leer").hidden = reihe.length > 0;
+  if (ziehtGerade) return;
+  const alle = sortiert();
+  const offen = alle.filter(istOffen);
+  const erledigt = alle.filter((e) => !istOffen(e));
+  const nummern = new Map(offen.map((e, i) => [e.id, i + 1]));
+  $("alle-liste").innerHTML = [...offen, ...erledigt].map((e) => {
+    const nr = nummern.get(e.id);
+    const farbe = punktFarbe(e);
+    const griff = nr
+      ? `<button class="griff" type="button" data-griff="${esc(e.id)}" aria-label="Priorität ändern: gedrückt halten, dann nach oben oder unten ziehen" title="Gedrückt halten, um die Priorität zu ändern">${GRIFF_SVG}</button>`
+      : `<span class="griff-platz" aria-hidden="true"></span>`;
+    return `<li class="${istOffen(e) ? "offen" : "erledigt"}" data-id="${esc(e.id)}">${griff}<span class="abzeichen" style="background:${farbe}; color:${kontrast(farbe)}">${nr ?? ""}</span><span class="zeile"><button class="textknopf" type="button" data-zeigen="${esc(e.id)}" style="text-align:left; color:var(--ink); min-height:auto">${esc(titelVon(e))}</button><span class="wann">${esc(untertitelVon(e))}</span></span></li>`;
+  }).join("");
+  $("alle-leer").hidden = alle.length > 0;
 }
 $("alle-liste").addEventListener("click", (e) => {
   const knopf = e.target.closest("[data-zeigen]");
@@ -936,6 +1050,74 @@ $("alle-liste").addEventListener("click", (e) => {
   waehle(knopf.dataset.zeigen);
   map.scrollIntoView({ behavior: "smooth", block: "center" });
 });
+sortierbar($("alle-liste"), "[data-griff]", (von, nach) => {
+  if (von === nach) { alleZeichnen(); return; }
+  reihenfolgeAendern(von, nach);
+}, ":scope > li.offen");
+
+/* Ziehen per Griff: gedrückt halten (etwa 0,35 Sekunden), dann nach oben oder unten schieben.
+   Mit Pfeiltasten geht es auch über die Tastatur. */
+function sortierbar(liste, griffWahl, onEnde, listenWahl = ":scope > li") {
+  let zug = null;
+  const markierungLoeschen = () => liste.querySelectorAll(".ziel-oben, .ziel-unten").forEach((el) => el.classList.remove("ziel-oben", "ziel-unten"));
+  liste.addEventListener("pointerdown", (e) => {
+    const griff = e.target.closest(griffWahl);
+    if (!griff || (e.pointerType === "mouse" && e.button !== 0)) return;
+    const li = griff.closest("li");
+    const items = [...liste.querySelectorAll(listenWahl)];
+    zug = { id: e.pointerId, griff, li, items, von: items.indexOf(li), y0: e.clientY, aktiv: false, nach: null, mitte: [], uhr: 0 };
+    zug.uhr = setTimeout(() => {
+      if (!zug) return;
+      zug.aktiv = true;
+      ziehtGerade = true;
+      zug.mitte = zug.items.map((el) => { const r = el.getBoundingClientRect(); return r.top + r.height / 2; });
+      zug.li.classList.add("zieht");
+      try { zug.griff.setPointerCapture(zug.id); } catch (err) {}
+    }, 350);
+  });
+  liste.addEventListener("pointermove", (e) => {
+    if (!zug || e.pointerId !== zug.id) return;
+    if (!zug.aktiv) {
+      /* Wer vorher schon scrollt, zieht nichts. */
+      if (Math.abs(e.clientY - zug.y0) > 8) { clearTimeout(zug.uhr); zug = null; }
+      return;
+    }
+    zug.li.style.transform = `translateY(${e.clientY - zug.y0}px)`;
+    let vorne = 0;
+    zug.items.forEach((el, i) => { if (i !== zug.von && e.clientY > zug.mitte[i]) vorne += 1; });
+    zug.nach = vorne;
+    markierungLoeschen();
+    const andere = zug.items.filter((_, i) => i !== zug.von);
+    if (vorne !== zug.von && andere.length) {
+      if (vorne < andere.length) andere[vorne].classList.add("ziel-oben");
+      else andere[andere.length - 1].classList.add("ziel-unten");
+    }
+  });
+  const ende = (e) => {
+    if (!zug || e.pointerId !== zug.id) return;
+    clearTimeout(zug.uhr);
+    const war = zug;
+    zug = null;
+    markierungLoeschen();
+    if (!war.aktiv) return;
+    ziehtGerade = false;
+    war.li.classList.remove("zieht");
+    war.li.style.transform = "";
+    onEnde(war.von, war.nach ?? war.von);
+  };
+  liste.addEventListener("pointerup", ende);
+  liste.addEventListener("pointercancel", ende);
+  liste.addEventListener("keydown", (e) => {
+    const griff = e.target.closest(griffWahl);
+    if (!griff) return;
+    const items = [...liste.querySelectorAll(listenWahl)];
+    const von = items.indexOf(griff.closest("li"));
+    const nach = e.key === "ArrowUp" ? von - 1 : e.key === "ArrowDown" ? von + 1 : -1;
+    if (nach < 0 || nach >= items.length) return;
+    e.preventDefault();
+    onEnde(von, nach);
+  });
+}
 
 /* ---- Werkzeuge ---- */
 function modusSetzen(m) {
@@ -956,11 +1138,22 @@ function sauber(roh) {
   const raus = {};
   Object.entries(roh || {}).forEach(([id, e]) => {
     if (!e || typeof e.text !== "string") return;
+    const zeilen = Object.entries(e.zeilen || {})
+      .map(([zid, z]) => ({
+        id: zid,
+        titel: typeof z?.titel === "string" ? z.titel.slice(0, 80) : "",
+        text: typeof z?.text === "string" ? z.text.slice(0, 1000) : "",
+        reihe: zahl(z?.reihe) ?? 0,
+      }))
+      .filter((z) => z.titel || z.text)
+      .sort((a, b) => a.reihe - b.reihe);
     const gemeinsam = {
       text: e.text.slice(0, 200),
       person: PERSONEN.some((p) => p.n === e.person) ? e.person : null,
       status: e.status === "erledigt" ? "erledigt" : "offen",
       ts: zahl(e.ts) ?? 0,
+      reihe: zahl(e.reihe),
+      zeilen,
     };
     if (e.art === "pfeil") {
       const x1 = zahl(e.x1), y1 = zahl(e.y1), x2 = zahl(e.x2), y2 = zahl(e.y2);
@@ -1006,9 +1199,10 @@ function starteSync() {
   }, datenFehler);
 }
 
-/* Beim Öffnen steht die Karte auf der ganzen Halle. */
+/* Beim Öffnen steht die Karte auf dem ganzen Plan. */
 requestAnimationFrame(() => { ansichtSetzen(); zeichnePlan(); });
 personenZeichnen();
+zeilenZeichnen();
 filterZeichnen();
 hinweisZurueck();
 tafelZeigen("aus");
