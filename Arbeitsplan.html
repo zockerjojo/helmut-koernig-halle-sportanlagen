@@ -420,6 +420,7 @@ const S = {
   gewaehlt: null,
   entwurf: null,
   start: null,
+  verschiebt: null,
   bearbeiten: null,
   person: null,
   zeilen: [],
@@ -489,35 +490,141 @@ function zoomKnopf(faktor) {
 $("z-rein").addEventListener("click", () => zoomKnopf(1.6));
 $("z-raus").addEventListener("click", () => zoomKnopf(1 / 1.6));
 $("z-ganz").addEventListener("click", () => { V.z = 1; V.cx = PLAN.x + PLAN.w / 2; V.cy = PLAN.y + PLAN.h / 2; ansichtSetzen(); zeichnePlan(); });
-svg.addEventListener("wheel", (e) => { e.preventDefault(); zoomAuf(e.clientX, e.clientY, V.z * (e.deltaY < 0 ? 1.15 : 1 / 1.15)); }, { passive: false });
+/* Mausrad und Trackpad: kraeftiges Scrollen zoomt staerker. deltaMode rechnet Zeilen und Seiten um. */
+svg.addEventListener("wheel", (e) => {
+  e.preventDefault();
+  const einheit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1;
+  const schritt = klemm((e.deltaY * einheit) / 100, -6, 6);
+  zoomAuf(e.clientX, e.clientY, V.z * Math.pow(1.15, -schritt));
+}, { passive: false });
 window.addEventListener("resize", () => { ansichtSetzen(); zeichnePlan(); });
 
-/* Ziehen verschiebt die Karte. Ein kurzes Tippen ohne Ziehen gilt als Auswahl oder setzt eine Stelle. */
-let zieh = null;
+/* Zeiger auf der Karte: ein Finger schiebt die Karte, zwei Finger zoomen, und wer einen Eintrag
+   kurz gedrueckt haelt, nimmt ihn auf und kann ihn versetzen. Kurzes Tippen oeffnet ihn. */
+const HALTEN_KARTE = 350;
+const zeiger = new Map();
+let geste = null;
+
+function zweiFinger() {
+  const [a, b] = [...zeiger.values()];
+  return { d: Math.hypot(a.x - b.x, a.y - b.y), mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 };
+}
 svg.addEventListener("pointerdown", (e) => {
   if (e.pointerType === "mouse" && e.button !== 0) return;
-  zieh = { id: e.pointerId, x: e.clientX, y: e.clientY, cx: V.cx, cy: V.cy, bewegt: false };
-  svg.setPointerCapture(e.pointerId);
+  zeiger.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  try { svg.setPointerCapture(e.pointerId); } catch (err) {}
+  if (zeiger.size === 2) {
+    /* Der zweite Finger beendet alles andere: ab jetzt wird gezoomt. */
+    if (geste) clearTimeout(geste.uhr);
+    if (S.verschiebt) { S.verschiebt = null; hinweisZurueck(); }
+    const z = zweiFinger();
+    geste = { art: "zoom", d0: Math.max(z.d, 1), z0: V.z, welt0: zuWelt(z.mx, z.my), uhr: 0 };
+    zeichnePlan();
+    return;
+  }
+  if (zeiger.size > 2) return;
+  const welt = zuWelt(e.clientX, e.clientY);
+  geste = { art: "karte", id: e.pointerId, x: e.clientX, y: e.clientY, cx: V.cx, cy: V.cy, bewegt: false, uhr: 0 };
+  /* Aufnehmen geht nur beim Ansehen, nicht waehrend man etwas Neues setzt. */
+  if (S.modus === "ansehen" && S.tafel !== "formular" && S.tafel !== "verlauf") {
+    const griff = griffBei(welt);
+    if (griff) {
+      geste.uhr = setTimeout(() => {
+        if (!geste || geste.art !== "karte" || geste.bewegt) return;
+        geste = { art: "eintrag", id: e.pointerId, welt0: welt, uhr: 0 };
+        S.verschiebt = { id: griff.e.id, teil: griff.teil, dx: 0, dy: 0 };
+        hinweisSetzen(istPfeil(griff.e)
+          ? (griff.teil === "ganz" ? "Pfeil ziehen und loslassen." : "Pfeilende ziehen und loslassen.")
+          : "Aufgabe ziehen und loslassen.");
+        zeichnePlan();
+      }, HALTEN_KARTE);
+    }
+  }
 });
 svg.addEventListener("pointermove", (e) => {
-  if (!zieh || e.pointerId !== zieh.id) return;
-  const dx = e.clientX - zieh.x, dy = e.clientY - zieh.y;
-  if (!zieh.bewegt && Math.hypot(dx, dy) < 7) return;
-  zieh.bewegt = true;
+  if (!zeiger.has(e.pointerId)) return;
+  zeiger.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (!geste) return;
+  if (geste.art === "zoom") {
+    if (zeiger.size < 2) return;
+    const z = zweiFinger();
+    V.z = klemm(geste.z0 * (z.d / geste.d0), ZOOM_MIN, ZOOM_MAX);
+    ansichtSetzen();
+    /* Die Stelle zwischen den Fingern bleibt unter den Fingern stehen. */
+    const jetzt = zuWelt(z.mx, z.my);
+    V.cx += geste.welt0.x - jetzt.x;
+    V.cy += geste.welt0.y - jetzt.y;
+    ansichtSetzen();
+    zeichnePlan();
+    return;
+  }
+  if (e.pointerId !== geste.id) return;
+  if (geste.art === "eintrag") {
+    const jetzt = zuWelt(e.clientX, e.clientY);
+    S.verschiebt.dx = jetzt.x - geste.welt0.x;
+    S.verschiebt.dy = jetzt.y - geste.welt0.y;
+    zeichnePlan();
+    return;
+  }
+  const dx = e.clientX - geste.x, dy = e.clientY - geste.y;
+  if (!geste.bewegt) {
+    if (Math.hypot(dx, dy) < 7) return;
+    geste.bewegt = true;
+    clearTimeout(geste.uhr);
+  }
   const p = proPixel();
-  V.cx = zieh.cx - dx * p;
-  V.cy = zieh.cy - dy * p;
+  V.cx = geste.cx - dx * p;
+  V.cy = geste.cy - dy * p;
   ansichtSetzen();
 });
-svg.addEventListener("pointerup", (e) => {
-  if (!zieh || e.pointerId !== zieh.id) return;
-  const war = zieh;
-  zieh = null;
+const zeigerWeg = (e) => {
+  if (!zeiger.delete(e.pointerId)) return;
   try { svg.releasePointerCapture(e.pointerId); } catch (err) {}
+  if (!geste) return;
+  if (geste.art === "zoom") {
+    /* Bleibt ein Finger liegen, schiebt er weiter die Karte; das Loslassen gilt nicht als Tippen. */
+    if (zeiger.size === 1) {
+      const [id] = [...zeiger.keys()];
+      const q = zeiger.get(id);
+      geste = { art: "karte", id, x: q.x, y: q.y, cx: V.cx, cy: V.cy, bewegt: true, uhr: 0 };
+    } else if (zeiger.size === 0) {
+      geste = null;
+    }
+    zeichnePlan();
+    return;
+  }
+  if (e.pointerId !== geste.id) return;
+  const war = geste;
+  geste = null;
+  clearTimeout(war.uhr);
+  if (war.art === "eintrag") { versetzenSpeichern(); return; }
   if (war.bewegt) { zeichnePlan(); return; }
   planGetippt(zuWelt(e.clientX, e.clientY));
-});
-svg.addEventListener("pointercancel", () => { zieh = null; });
+};
+svg.addEventListener("pointerup", zeigerWeg);
+svg.addEventListener("pointercancel", zeigerWeg);
+
+/* Nur die geaenderten Koordinaten schreiben. Ein Aufnehmen ohne Bewegung aendert nichts. */
+async function versetzenSpeichern() {
+  const v = S.verschiebt;
+  S.verschiebt = null;
+  hinweisZurueck();
+  zeichnePlan();
+  if (!v) return;
+  const e = S.eintraege[v.id];
+  if (!e) return;
+  if (Math.abs(v.dx) < 0.3 && Math.abs(v.dy) < 0.3) return;
+  const pfad = `${BASIS}/eintraege/${v.id}`;
+  const werte = {};
+  if (istPfeil(e)) {
+    if (v.teil === "anfang" || v.teil === "ganz") { werte[`${pfad}/x1`] = r2(e.x1 + v.dx); werte[`${pfad}/y1`] = r2(e.y1 + v.dy); }
+    if (v.teil === "ende" || v.teil === "ganz") { werte[`${pfad}/x2`] = r2(e.x2 + v.dx); werte[`${pfad}/y2`] = r2(e.y2 + v.dy); }
+  } else {
+    werte[`${pfad}/x`] = r2(e.x + v.dx);
+    werte[`${pfad}/y`] = r2(e.y + v.dy);
+  }
+  await schreiben({ ...werte, ...verlaufPaar("versetzt", titelVon(e), e.person ?? null) });
+}
 
 /* ---- Einträge, Reihenfolge und Anzeige ---- */
 const istPfeil = (e) => e.art === "pfeil";
@@ -580,12 +687,32 @@ function kreisZeichnen(ziel, x, y, e, nummer, p, gewaehlt) {
   ziel.appendChild(t);
 }
 
+/* Waehrend des Versetzens zeigt die Karte den Eintrag schon an der neuen Stelle. */
+function mitVersatz(e) {
+  const v = S.verschiebt;
+  if (!v || v.id !== e.id) return e;
+  if (!istPfeil(e)) return { ...e, x: e.x + v.dx, y: e.y + v.dy };
+  const a = v.teil === "anfang" || v.teil === "ganz";
+  const b = v.teil === "ende" || v.teil === "ganz";
+  return { ...e, x1: e.x1 + (a ? v.dx : 0), y1: e.y1 + (a ? v.dy : 0), x2: e.x2 + (b ? v.dx : 0), y2: e.y2 + (b ? v.dy : 0) };
+}
+/* Ein weicher Ring zeigt, dass der Eintrag aufgenommen ist. */
+function haloZeichnen(alle, p) {
+  const e = alle.find((x) => x.id === S.verschiebt.id);
+  if (!e) return;
+  const t = S.verschiebt.teil;
+  const x = !istPfeil(e) ? e.x : t === "ende" ? e.x2 : t === "ganz" ? (e.x1 + e.x2) / 2 : e.x1;
+  const y = !istPfeil(e) ? e.y : t === "ende" ? e.y2 : t === "ganz" ? (e.y1 + e.y2) / 2 : e.y1;
+  ebenePunkte.appendChild(neu("circle", { cx: x, cy: y, r: 16 * p, fill: kartenFarbe(e), "fill-opacity": ".22" }));
+}
+
 function zeichnePlan() {
   leeren(ebenePfeile); leeren(ebenePunkte); leeren(ebeneEtiketten);
   const p = proPixel();
   const zeigeText = V.z >= 1.8;
   const nummern = new Map(offene().map((e, i) => [e.id, i + 1]));
-  const alle = sortiert();
+  const alle = sortiert().map(mitVersatz);
+  if (S.verschiebt) haloZeichnen(alle, p);
   alle.filter(istPfeil).forEach((e) => {
     pfeilZeichnen(ebenePfeile, e.x1, e.y1, e.x2, e.y2, kartenFarbe(e), p, false);
     if (e.id === S.gewaehlt) {
@@ -674,6 +801,28 @@ function trefferBei(punkt, pixel) {
   return beste;
 }
 
+/* Welcher Teil liegt unter dem Finger? Die Enden eines Pfeils gehen vor seiner Linie. */
+function griffBei(punkt) {
+  const grenze = 16 * proPixel();
+  let beste = null, bester = Infinity;
+  sortiert().forEach((e) => {
+    if (istPfeil(e)) {
+      const da = Math.hypot(punkt.x - e.x1, punkt.y - e.y1);
+      const db = Math.hypot(punkt.x - e.x2, punkt.y - e.y2);
+      if (da <= grenze && da < bester) { bester = da; beste = { e, teil: "anfang" }; }
+      if (db <= grenze && db < bester) { bester = db; beste = { e, teil: "ende" }; }
+      if (da > grenze && db > grenze) {
+        const dl = abstandStrecke(punkt.x, punkt.y, e.x1, e.y1, e.x2, e.y2);
+        if (dl <= grenze && dl < bester) { bester = dl; beste = { e, teil: "ganz" }; }
+      }
+    } else {
+      const d = Math.hypot(punkt.x - e.x, punkt.y - e.y);
+      if (d <= grenze && d < bester) { bester = d; beste = { e, teil: "punkt" }; }
+    }
+  });
+  return beste;
+}
+
 function planGetippt(punkt) {
   if (S.tafel === "formular" && !S.bearbeiten && S.modus === "aufgabe") {
     /* Noch im Anlegen: ein weiterer Tipp verschiebt die Stelle. */
@@ -708,7 +857,7 @@ function planGetippt(punkt) {
 
 /* ---- Tafel unten ---- */
 const HINWEISE = {
-  ansehen: "Tippe auf einen Punkt oder Pfeil, um Details zu sehen.",
+  ansehen: "Tippen öffnet einen Punkt oder Pfeil. Gedrückt halten und ziehen versetzt ihn. Zoomen mit zwei Fingern oder dem Mausrad.",
   aufgabe: "Tippe auf den Plan, auch draußen. Dort entsteht eine neue Aufgabe.",
   pfeil: "Tippe erst auf den Start, dann auf das Ziel.",
 };
@@ -986,7 +1135,7 @@ $("f-personen").addEventListener("click", (e) => {
 
 /* ---- Verlauf anzeigen ---- */
 const FILTER = [["alle", "Alle"], ["erstellt", "erstellt"], ["bearbeitet", "bearbeitet"], ["erledigt", "erledigt"], ["geloescht", "gelöscht"]];
-const WORT = { erstellt: "erstellt", bearbeitet: "bearbeitet", erledigt: "erledigt", geoeffnet: "wieder geöffnet", geloescht: "gelöscht", verschoben: "verschoben" };
+const WORT = { erstellt: "erstellt", bearbeitet: "bearbeitet", erledigt: "erledigt", geoeffnet: "wieder geöffnet", geloescht: "gelöscht", verschoben: "verschoben", versetzt: "auf der Karte versetzt" };
 function zeitText(ts) {
   if (!ts) return "";
   const d = new Date(ts);
@@ -1165,7 +1314,7 @@ function sortierbar(liste, griffWahl, onEnde, listenWahl = ":scope > li") {
 function modusSetzen(m) {
   S.modus = m;
   ["ansehen", "aufgabe", "pfeil"].forEach((name) => $("w-" + name).setAttribute("aria-pressed", String(name === m)));
-  S.entwurf = null; S.start = null; S.person = null; S.bearbeiten = null;
+  S.entwurf = null; S.start = null; S.person = null; S.bearbeiten = null; S.verschiebt = null;
   if (S.tafel === "formular") tafelZeigen("aus");
   hinweisZurueck();
   map.classList.toggle("setzen", m !== "ansehen" && S.tafel !== "verlauf");
