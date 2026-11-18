@@ -172,6 +172,8 @@ textarea:focus-visible,.tf:focus-visible{outline:3px solid var(--accent);outline
 .top{padding:6px 12px 2px}
 .top h1{font-size:16px;white-space:nowrap;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .thb{flex:none;width:30px;height:30px;padding:0;border:1px solid var(--line);border-radius:50%;background:var(--panel);font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+/* Knopf mit Wort darin: rechteckig mit runden Ecken, wie die übrigen Knöpfe */
+.thb.weit{width:auto;height:auto;min-height:30px;padding:4px 12px;border-radius:10px;font-size:13px;font-weight:500}
 .logo{height:28px}
 #prog{font-size:13px}
 .ctl{gap:6px;padding:4px 12px 6px}
@@ -232,7 +234,7 @@ a.ghost{display:flex;align-items:center;justify-content:center;gap:2px;color:var
   <header class="top">
     <div class="brand"><a class="logo-link" href="./" aria-label="Zur Startseite"><img class="logo" src="./bilder/logo.png" alt="Dortmunder Sportstätten" width="480" height="241"></a><h1>Reinigungsplan HKH</h1></div>
     <div class="hr"><span id="prog" aria-live="polite"></span><button class="live s-none" id="live" type="button" aria-label="Live-Abgleich und Zugangscode"><span class="ld"></span><span id="live-t">Nur dieses Gerät</span></button></div>
-    <button class="thb" id="logout" type="button" aria-label="Abmelden" title="Abmelden" style="width:auto;padding:0 12px;font-size:13px">Abmelden</button>
+    <button class="thb weit" id="logout" type="button" aria-label="Abmelden" title="Abmelden">Abmelden</button>
     <button class="thb" id="theme" type="button" aria-label="Hell oder dunkel umschalten" title="Hell / Dunkel">&#9790;</button>
   </header>
 
@@ -559,7 +561,11 @@ var STATE_LONG={
   fail:"Die Verbindung konnte nicht aufgebaut werden. Prüf das WLAN und lade die Seite neu."};
 function setState(s){sync.state=s;$("live").className="live s-"+s;$("live-t").textContent=STATE_TXT[s]}
 function enc(v){return v.p+"|"+v.d}
-function dec(t){if(typeof t!=="string")return null;var i=t.indexOf("|");if(i<1)return null;var p=+t.slice(0,i);if(!(p>=0))return null;return{p:p,d:t.slice(i+1)}}
+/* Vor dem Strich steht, wer gewischt hat. Neu ist das die Benutzerkennung, früher
+   war es eine Nummer aus ALT_PEOPLE. Eine reine Zahl bleibt darum eine Zahl,
+   alles andere bleibt Text; person() unterscheidet danach. */
+function pid(v){var s=String(v==null?"":v);return /^[0-9]+$/.test(s)?+s:s}
+function dec(t){if(typeof t!=="string")return null;var i=t.indexOf("|");if(i<1)return null;return{p:pid(t.slice(0,i)),d:t.slice(i+1)}}
 function newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 function noteById(id){for(var i=0;i<notes.length;i++){if(notes[i].id===id)return notes[i]}return null}
 function noteIdx(id){for(var i=0;i<notes.length;i++){if(notes[i].id===id)return i}return -1}
@@ -767,7 +773,7 @@ function freeCancel(){
 }
 function applyFree(snap){
   var arr=[];
-  snap.forEach(function(c){var o=c.val();if(o&&typeof o.pts==="string"){var pts=decPts(o.pts);if(pts.length)arr.push({id:c.key,p:+o.p||0,d:String(o.d||""),pts:pts})}});
+  snap.forEach(function(c){var o=c.val();if(o&&typeof o.pts==="string"){var pts=decPts(o.pts);if(pts.length)arr.push({id:c.key,p:pid(o.p),d:String(o.d||""),pts:pts})}});
   if(fr&&!fr.erase&&fr.s)arr.push(fr.s);
   free=arr;renderFree();lazySave();
 }
