@@ -105,6 +105,7 @@ legend{font-size:14px; color:var(--ink-2); padding:0 0 6px}
     <img src="./bilder/logo.png" alt="Dortmunder Sportstätten" width="480" height="241">
     <span class="marke">Helmut-Körnig-Halle · Personal</span>
   </a>
+  <button class="knopf" id="abmelden" type="button" hidden style="min-height:36px; padding:6px 14px; font-size:14px">Abmelden</button>
   <button class="thema-knopf" id="dunkel" type="button" aria-pressed="false" aria-label="Dunkelmodus" title="Dunkelmodus"><svg class="mond" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sonne" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></button>
 </header>
 
@@ -130,17 +131,10 @@ legend{font-size:14px; color:var(--ink-2); padding:0 0 6px}
   <p class="muted">Änderungen erscheinen sofort auf der öffentlichen Anzeige.</p>
   <div class="werkzeuge">
     <button class="knopf primaer" id="startliste" type="button" hidden>Startliste anlegen</button>
-    <button class="knopf" id="besucher" type="button">Besucher anzeigen</button>
+    <a class="knopf" id="adminpanel" href="./Adminpanel" hidden>Admin Panel</a>
     <span class="meldung" id="startliste-meldung" aria-live="polite"></span>
-    <span class="meldung" id="besucher-meldung" aria-live="polite"></span>
   </div>
 
-  <section class="karte" id="besucher-karte" hidden>
-    <h2 style="margin:0; font-family:var(--display); font-weight:600; font-size:26px; line-height:1; text-transform:uppercase">Besucher</h2>
-    <div class="zahlen" id="besucher-zahlen"></div>
-    <div class="balken" id="besucher-tage"></div>
-    <p class="muted">Gezählt wird die öffentliche Anzeige, jedes Gerät einmal pro Tag. Die Personal-Seiten zählen nicht mit.</p>
-  </section>
   <div class="liste" id="liste"></div>
 </section>
 
@@ -151,6 +145,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, onAuthStateChanged, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getDatabase, ref, get, set, onValue, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { firebaseConfig } from "./js/config.js";
+import { sitzung, anmelden as zugangAnmelden, abmelden, darf } from "./js/zugang.js";
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -218,21 +213,26 @@ function zeigeBereich(angemeldet) {
   $("pruefung").hidden = true;
   $("anmeldung").hidden = angemeldet;
   $("panel").hidden = !angemeldet;
+  $("abmelden").hidden = !angemeldet;
 }
-async function istFreigeschaltet(uid) {
-  const snap = await get(ref(db, `admins/${uid}`));
-  return snap.exists();
-}
-onAuthStateChanged(auth, async (user) => {
-  if (anmeldungLaeuft) return;
-  let freigeschaltet = false;
-  try {
-    freigeschaltet = !!user && (await istFreigeschaltet(user.uid));
-  } catch (err) {
-    console.error(err);
+/* Wer angemeldet ist, sieht diese Seite nur mit dem Recht für Sportanlagen. */
+async function starten() {
+  let s = null;
+  try { s = await sitzung(); } catch (err) { console.error(err); }
+  if (!s) { zeigeBereich(false); return; }
+  if (!darf(s, "sportanlagen")) {
+    zeigeBereich(false);
+    $("anmeldung-fehler").textContent = "Dieser Zugang darf die Sportanlagen nicht einstellen.";
+    return;
   }
-  zeigeBereich(freigeschaltet);
+  $("adminpanel").hidden = !s.istAdmin;
+  zeigeBereich(true);
+}
+$("abmelden").addEventListener("click", async () => {
+  await abmelden().catch(() => {});
+  location.reload();
 });
+starten();
 /* Augen-Taste: der Code lässt sich zum Nachsehen kurz sichtbar machen. Nach dem Anmelden wird er wieder verdeckt. */
 function augenTaste(knopfId, feldId) {
   const knopf = $(knopfId);
@@ -266,11 +266,10 @@ $("formular").addEventListener("submit", async (e) => {
   anmeldungLaeuft = true;
   knopf.disabled = true;
   try {
-    const { user } = await signInAnonymously(auth);
-    await set(ref(db, `admins/${user.uid}`), code);
+    await zugangAnmelden(code);
     feld.value = "";
     codeVerbergen();
-    zeigeBereich(true);
+    await starten();
   } catch (err) {
     console.error(err);
     fehler.textContent = anmeldeFehler(err);
@@ -280,62 +279,12 @@ $("formular").addEventListener("submit", async (e) => {
     knopf.disabled = false;
   }
 });
-/* Besucherzahlen der öffentlichen Anzeige. Lesen darf sie nur ein freigeschaltetes Gerät. */
-const tagText = (d) => new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Berlin" }).format(d);
-function letzteTage(anzahl) {
-  const jetzt = Date.now();
-  return Array.from({ length: anzahl }, (_, i) => tagText(new Date(jetzt - (anzahl - 1 - i) * 86400000)));
-}
-$("besucher").addEventListener("click", async () => {
-  const karte = $("besucher-karte");
-  const knopf = $("besucher");
-  const meldung = $("besucher-meldung");
-  if (!karte.hidden) {
-    karte.hidden = true;
-    knopf.textContent = "Besucher anzeigen";
-    return;
-  }
-  meldung.textContent = "Wird geladen …";
-  knopf.disabled = true;
-  try {
-    const daten = (await get(ref(db, "besuche"))).val() ?? {};
-    const tage = daten.tage ?? {};
-    const reihe = letzteTage(14);
-    const zahl = (t) => (typeof tage[t] === "number" ? tage[t] : 0);
-    const werte = [
-      ["Heute", zahl(reihe[reihe.length - 1])],
-      ["Letzte 7 Tage", reihe.slice(-7).reduce((summe, t) => summe + zahl(t), 0)],
-      ["Gesamt", typeof daten.gesamt === "number" ? daten.gesamt : 0],
-    ];
-    $("besucher-zahlen").innerHTML = werte
-      .map(([text, wert]) => `<div class="zahl"><b>${wert}</b><span>${esc(text)}</span></div>`)
-      .join("");
-    const hoechst = Math.max(1, ...reihe.map(zahl));
-    $("besucher-tage").innerHTML = reihe
-      .map((t) => {
-        const wert = zahl(t);
-        const [jahr, monat, tag] = t.split("-");
-        const breite = Math.round((wert / hoechst) * 100);
-        return `<div class="balken-zeile"><span class="balken-tag">${tag}.${monat}.</span><span class="balken-feld"><span class="balken-strich" style="width:${wert ? Math.max(breite, 3) : 0}%"></span></span><span class="balken-zahl">${wert}</span></div>`;
-      })
-      .join("");
-    karte.hidden = false;
-    knopf.textContent = "Besucher ausblenden";
-    meldung.textContent = "";
-  } catch (err) {
-    console.error(err);
-    if (await zugangAbgelaufen(err)) { meldung.textContent = ""; return; }
-    meldung.textContent = "Die Zahlen konnten nicht geladen werden.";
-  } finally {
-    knopf.disabled = false;
-  }
-});
-
 /* Lehnt die Datenbank den Zugang ab (z. B. weil der Code geändert wurde), wird abgemeldet */
 async function zugangAbgelaufen(err) {
   if (!istRechteFehler(err)) return false;
   $("anmeldung-fehler").textContent = "Dein Zugang ist nicht mehr gültig. Bitte den Code neu eingeben.";
-  await signOut(auth).catch(() => {});
+  await abmelden().catch(() => {});
+  zeigeBereich(false);
   return true;
 }
 
