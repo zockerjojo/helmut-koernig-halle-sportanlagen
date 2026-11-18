@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="apple-mobile-web-app-title" content="helmut-körnig-halle-sportanlagen/Admin">
+<title>helmut-körnig-halle-sportanlagen/Admin Panel</title>
+<link rel="icon" type="image/png" href="./bilder/favicon.png">
+<link rel="apple-touch-icon" href="./bilder/symbol.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9EDEA; --panel:#F7F9F7; --ink:#14201B; --ink-2:#55635C; --line:#C3CCC6;
+  --accent:#17694B; --on-accent:#FFFFFF; --fehler:#B3261E; --erledigt:#6B7770; --weiss:#FFFFFF;
+  --display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --body:Barlow,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#0F1512; --panel:#18211C; --ink:#E7EEE9; --ink-2:#9BAAA1; --line:#33413A;
+  --accent:#4CC38A; --on-accent:#06150E; --fehler:#F2766B; --erledigt:#7F8D85;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:16px; line-height:1.4}
+.wrap{max-width:900px; margin:0 auto; padding:0 20px 40px}
+.kopf{display:flex; justify-content:space-between; align-items:center; gap:12px 16px; flex-wrap:wrap; padding-top:24px}
+.marke{font-family:var(--display); font-weight:600; font-size:24px; line-height:1; letter-spacing:.04em; text-transform:uppercase}
+.kopf-knoepfe{display:flex; gap:10px; flex:none; align-items:center}
+.rund-knopf{display:inline-flex; align-items:center; justify-content:center; flex:none; width:44px; height:44px; padding:0; border-radius:50%; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; touch-action:manipulation}
+.rund-knopf:hover{border-color:var(--ink)}
+.rund-knopf svg{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+.rund-knopf .sonne{display:none}
+:root[data-theme="dark"] #dunkel .sonne{display:block}
+:root[data-theme="dark"] #dunkel .mond{display:none}
+.knopf{font:inherit; font-size:15px; font-weight:600; min-height:44px; padding:8px 18px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer}
+.knopf.primaer{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
+.knopf.gefahr{border-color:var(--fehler); color:var(--fehler); background:var(--panel)}
+.knopf.klein{min-height:36px; padding:6px 14px; font-size:14px}
+.knopf:disabled{opacity:.5; cursor:not-allowed}
+.logo-link{display:inline-flex; align-items:center; gap:10px; min-width:0; text-decoration:none; color:inherit; border-radius:6px}
+button:focus-visible, input:focus-visible, a:focus-visible, summary:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+h1{margin:0; font-family:var(--display); font-weight:600; font-size:clamp(32px,6vw,48px); line-height:1; text-transform:uppercase}
+h2{margin:0; font-family:var(--display); font-weight:600; font-size:26px; line-height:1.05; text-transform:uppercase}
+h3{margin:0; font-size:15px; font-weight:600}
+.muted{margin:0; font-size:15px; color:var(--ink-2)}
+.meldung{margin:0; min-height:20px; font-size:14px; color:var(--ink-2)}
+.meldung.fehler{color:var(--fehler)}
+.stapel{display:flex; flex-direction:column; gap:20px; margin-top:20px}
+.karte{border:1px solid var(--line); border-radius:16px; background:var(--panel); padding:16px; display:flex; flex-direction:column; gap:14px}
+.kopfzeile{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap}
+.anmeldung{max-width:420px; margin:48px auto 0; display:flex; flex-direction:column; gap:16px}
+.feld{display:flex; flex-direction:column; gap:6px; font-size:15px; color:var(--ink-2)}
+input[type="password"], input[type="text"]{font:inherit; font-size:16px; color:var(--ink); background:var(--weiss); min-height:44px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; width:100%; min-width:0}
+:root[data-theme="dark"] input[type="password"], :root[data-theme="dark"] input[type="text"]{background:#0E1512}
+.feld-eingabe{position:relative; display:flex}
+.feld-eingabe input{padding-right:52px}
+.augen-knopf{position:absolute; top:0; right:0; bottom:0; width:48px; display:flex; align-items:center; justify-content:center; padding:0; border:0; border-radius:0 10px 10px 0; background:none; color:var(--ink-2); cursor:pointer}
+.augen-knopf svg{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+.augen-knopf .auge-zu{display:none}
+.augen-knopf[aria-pressed="true"] .auge-auf{display:none}
+.augen-knopf[aria-pressed="true"] .auge-zu{display:block}
+/* Benutzer, zugeklappt */
+details.nutzer{border:1px solid var(--line); border-radius:14px; background:var(--bg)}
+details.nutzer.gesperrt{border-style:dashed; opacity:.8}
+details.nutzer > summary{list-style:none; cursor:pointer; padding:12px 14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; border-radius:14px}
+details.nutzer > summary::-webkit-details-marker{display:none}
+details.nutzer > summary:hover{background:var(--panel)}
+.pfeil{margin-left:auto; flex:none; width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; color:var(--ink-2); transition:transform .15s}
+details[open] > summary .pfeil{transform:rotate(90deg)}
+.inhalt{padding:12px 14px 14px; display:flex; flex-direction:column; gap:12px; border-top:1px solid var(--line)}
+.punkt{width:22px; height:22px; border-radius:50%; border:1px solid var(--ink); flex:none}
+.nname{font-family:var(--display); font-weight:600; font-size:22px; text-transform:uppercase; line-height:1}
+.marke-klein{font-size:12px; font-weight:600; padding:3px 9px; border-radius:999px; border:1px solid var(--line); color:var(--ink-2)}
+.marke-klein.an{border-color:var(--accent); color:var(--accent)}
+.marke-klein.aus{color:var(--ink-2); text-decoration:line-through}
+.marke-klein.sperre{border-color:var(--fehler); color:var(--fehler)}
+.code{display:flex; align-items:center; gap:8px; font-size:15px; color:var(--ink-2); flex-wrap:wrap}
+.code code{font-family:ui-monospace,Menlo,Consolas,monospace; font-size:15px; letter-spacing:.1em; color:var(--ink); word-break:break-all}
+.aktionen{display:flex; gap:8px; flex-wrap:wrap}
+.farben{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.farbwahl{width:36px; height:36px; padding:0; border-radius:50%; border:2px solid var(--line); cursor:pointer}
+.farbwahl[aria-pressed="true"]{border-color:var(--ink); box-shadow:0 0 0 3px var(--accent)}
+.eigene-farbe{width:44px; height:36px; padding:2px; border:1px solid var(--line); border-radius:8px; background:var(--panel); cursor:pointer}
+.kreuze{display:flex; flex-direction:column; gap:10px; border:1px solid var(--line); border-radius:12px; padding:12px; background:var(--panel)}
+.kreuz{display:flex; align-items:flex-start; gap:10px; font-size:15px; color:var(--ink)}
+.kreuz input{width:22px; height:22px; margin:1px 0 0; accent-color:var(--accent); flex:none}
+.kreuz .txt{display:flex; flex-direction:column}
+.kreuz .zusatz{font-size:13px; color:var(--ink-2)}
+.unter{margin-left:32px; display:flex; flex-direction:column; gap:10px; padding-left:12px; border-left:2px solid var(--line)}
+.hinweis{border:1px dashed var(--line); border-radius:12px; padding:12px; font-size:14px; color:var(--ink-2); background:var(--bg)}
+.notfall{font-size:13px; color:var(--ink-2); margin:0}
+details.sicher > summary{list-style:none; cursor:pointer; display:inline-flex}
+details.sicher > summary::-webkit-details-marker{display:none}
+.sich{display:flex; flex-direction:column; gap:4px; margin-top:14px}
+.sz{display:flex; align-items:center; gap:10px; justify-content:space-between; border-bottom:1px solid var(--line); padding:8px 0; flex-wrap:wrap}
+.sz:last-child{border-bottom:0}
+.sz .wann{font-size:14px; color:var(--ink-2)}
+.zahlen{display:flex; gap:18px; flex-wrap:wrap}
+.zahl{display:flex; flex-direction:column}
+.zahl b{font-family:var(--display); font-size:30px; line-height:1}
+.zahl span{font-size:13px; color:var(--ink-2)}
+.rueckfrage{border:1px solid var(--fehler); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kopf">
+    <a class="logo-link marke" href="./">Helmut-Körnig-Halle · Personal</a>
+    <div class="kopf-knoepfe">
+      <button class="knopf klein" id="abmelden" type="button" hidden>Abmelden</button>
+      <button class="rund-knopf" id="dunkel" type="button" aria-pressed="false" aria-label="Dunkelmodus" title="Dunkelmodus">
+        <svg class="mond" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="sonne" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <p class="muted" id="pruefung" style="margin-top:40px">Einen Moment …</p>
+
+  <form class="anmeldung" id="anmeldung" hidden>
+    <h1>Admin Panel</h1>
+    <p class="muted">Gib deinen Code ein. Name, Farbe und Rechte kommen automatisch dazu.</p>
+    <label class="feld">Code
+      <span class="feld-eingabe">
+        <input id="code" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="60">
+        <button class="augen-knopf" id="augen" type="button" aria-pressed="false" aria-label="Code anzeigen" title="Code anzeigen">
+          <svg class="auge-auf" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg class="auge-zu" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20C5 20 1 12 1 12a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg>
+        </button>
+      </span>
+    </label>
+    <p class="meldung fehler" id="anmeldung-fehler" role="alert"></p>
+    <button class="knopf primaer" id="anmelden-knopf" type="submit">Anmelden</button>
+  </form>
+
+  <section id="kein-zugriff" class="anmeldung" hidden>
+    <h1>Kein Zugriff</h1>
+    <p class="muted">Dieser Zugang darf das Admin Panel nicht öffnen. Wende dich an einen Admin.</p>
+    <a class="knopf" href="./">Zur Startseite</a>
+  </section>
+
+  <section id="panel" class="stapel" hidden>
+    <div>
+      <h1>Admin Panel</h1>
+      <p class="muted" id="wer"></p>
+    </div>
+
+    <section class="karte">
+      <div class="kopfzeile">
+        <h2>Benutzer</h2>
+        <button class="knopf primaer" id="neu" type="button">+ Benutzer hinzufügen</button>
+      </div>
+      <div id="liste" class="stapel" style="margin-top:0"></div>
+      <p class="muted" id="liste-leer" hidden>Noch keine Benutzer. Lege den ersten an.</p>
+      <p class="meldung" id="listen-meldung" aria-live="polite"></p>
+    </section>
+
+    <form class="karte" id="formular" hidden>
+      <h2 id="f-titel">Benutzer hinzufügen</h2>
+      <label class="feld">Name
+        <input id="f-name" type="text" maxlength="40" autocomplete="off">
+      </label>
+      <div class="feld">Farbe des Benutzers
+        <div class="farben" id="f-farben"></div>
+      </div>
+      <label class="feld">Code, den er immer benutzen kann
+        <span class="feld-eingabe">
+          <input id="f-code" type="text" maxlength="60" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="letter-spacing:.1em">
+        </span>
+      </label>
+      <p class="muted" style="font-size:14px">Mindestens 6 Zeichen. Der Code wird nur hier gezeigt, gib ihn der Person persönlich weiter.</p>
+
+      <div class="feld">Was darf die Person sehen?
+        <div class="kreuze" id="f-bereiche"></div>
+      </div>
+
+      <div class="feld">Was darf sie im Arbeitsplan tun?
+        <div class="kreuze">
+          <label class="kreuz"><input type="checkbox" id="r-erstellen"><span class="txt"><span>Aufgaben erstellen</span></span></label>
+          <div class="unter">
+            <h3>Eigene Aufgaben</h3>
+            <label class="kreuz"><input type="checkbox" id="r-bearbeitenEigene"><span class="txt"><span>bearbeiten</span></span></label>
+            <label class="kreuz"><input type="checkbox" id="r-verschiebenEigene"><span class="txt"><span>verschieben</span></span></label>
+            <label class="kreuz"><input type="checkbox" id="r-loeschenEigene"><span class="txt"><span>löschen</span></span></label>
+            <h3 style="margin-top:4px">Aufgaben von anderen</h3>
+            <label class="kreuz"><input type="checkbox" id="r-bearbeitenFremde"><span class="txt"><span>bearbeiten</span></span></label>
+            <label class="kreuz"><input type="checkbox" id="r-verschiebenFremde"><span class="txt"><span>verschieben</span></span></label>
+            <label class="kreuz"><input type="checkbox" id="r-loeschenFremde"><span class="txt"><span>löschen</span></span></label>
+            <label class="kreuz"><input type="checkbox" id="r-erledigenFremde"><span class="txt"><span>als erledigt abhaken</span><span class="zusatz">Die eigenen darf ohnehin jeder abhaken</span></span></label>
+          </div>
+        </div>
+      </div>
+      <p class="hinweis">Ohne Haken bei „Aufgaben von anderen“ sieht die Person fremde Aufgaben, kann sie aber nicht anfassen. Ihre eigenen Aufgaben darf sie immer abhaken.</p>
+      <p class="meldung fehler" id="f-fehler" role="alert"></p>
+      <div class="aktionen">
+        <button class="knopf" id="f-abbrechen" type="button">Abbrechen</button>
+        <button class="knopf primaer" id="f-speichern" type="submit">Speichern</button>
+      </div>
+    </form>
+
+    <section class="karte">
+      <div class="kopfzeile">
+        <div>
+          <h2>Sicherungen</h2>
+          <p class="notfall">Nur für den Notfall. Jede Nacht um 0 Uhr, die sieben neuesten bleiben.</p>
+        </div>
+        <details class="sicher">
+          <summary class="knopf klein">Sicherungen öffnen</summary>
+          <div style="min-width:min(520px,78vw)">
+            <div class="sich" id="sicherungen"></div>
+            <p class="muted" id="sicherungen-leer" hidden>Noch keine Sicherung vorhanden.</p>
+            <p class="meldung" id="sicherung-meldung" aria-live="polite"></p>
+            <div class="aktionen" style="margin-top:10px">
+              <button class="knopf klein" id="jetzt-sichern" type="button">Jetzt sichern</button>
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section class="karte">
+      <h2>Besucher</h2>
+      <p class="muted">Gezählt wird die öffentliche Anzeige, jedes Gerät einmal pro Tag. Die Personal-Seiten zählen nicht mit.</p>
+      <div class="zahlen" id="besucher-zahlen"></div>
+    </section>
+  </section>
+</div>
+
+<script type="module">
+import {
+  db, ref, get, set, update, onValue, remove,
+  sitzung, anmelden, abmelden, anmeldeFehler, istRechteFehler, BEREICHE, AP_RECHTE,
+} from "./js/zugang.js";
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
+/* Farbschema wie auf den anderen Seiten */
+const wurzel = document.documentElement;
+function thema(dunkel) {
+  wurzel.dataset.theme = dunkel ? "dark" : "light";
+  $("dunkel").setAttribute("aria-pressed", String(dunkel));
+  try { localStorage.setItem("hkh-thema", dunkel ? "dark" : "light"); } catch (e) {}
+}
+let gemerkt = null;
+try { gemerkt = localStorage.getItem("hkh-thema"); } catch (e) {}
+thema(gemerkt ? gemerkt === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches);
+$("dunkel").addEventListener("click", () => thema(wurzel.dataset.theme !== "dark"));
+
+/* Auswahl an Farben. Bewusst viele und gut unterscheidbar, dazu eine freie Wahl. */
+const FARBEN = [
+  "#2B7BFF", "#1E4FD8", "#35E0F2", "#00B8A9", "#4CC38A", "#7DD321",
+  "#FFC914", "#F2A900", "#FF7A1A", "#F2766B", "#E33B3B", "#C2185B",
+  "#E0458A", "#A259FF", "#6E4BD8", "#8D6E63", "#5C6BC0", "#6E7F80",
+];
+
+let ich = null;          // die angemeldete Person
+let benutzer = {};       // alle Benutzer
+let geraete = {};        // angemeldete Geräte
+let sicherungen = {};
+let bearbeite = null;    // Kennung des Benutzers im Formular, oder null für neu
+let farbe = FARBEN[0];
+
+/* ---- Anmeldung ---- */
+function zeige(welcher) {
+  $("pruefung").hidden = welcher !== "pruefung";
+  $("anmeldung").hidden = welcher !== "anmeldung";
+  $("kein-zugriff").hidden = welcher !== "kein-zugriff";
+  $("panel").hidden = welcher !== "panel";
+  $("abmelden").hidden = welcher === "pruefung" || welcher === "anmeldung";
+}
+$("augen").addEventListener("click", () => {
+  const feld = $("code");
+  const sichtbar = feld.type === "password";
+  feld.type = sichtbar ? "text" : "password";
+  $("augen").setAttribute("aria-pressed", String(sichtbar));
+  feld.focus();
+});
+$("anmeldung").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const code = $("code").value.trim();
+  $("anmeldung-fehler").textContent = "";
+  if (!code) { $("anmeldung-fehler").textContent = "Bitte den Code eingeben."; return; }
+  $("anmelden-knopf").disabled = true;
+  try {
+    await anmelden(code);
+    $("code").value = "";
+    $("code").type = "password";
+    $("augen").setAttribute("aria-pressed", "false");
+    await starten();
+  } catch (err) {
+    console.error(err);
+    $("anmeldung-fehler").textContent = anmeldeFehler(err);
+  } finally {
+    $("anmelden-knopf").disabled = false;
+  }
+});
+$("abmelden").addEventListener("click", async () => {
+  await abmelden().catch(() => {});
+  location.reload();
+});
+
+/* ---- Laden ---- */
+async function starten() {
+  ich = await sitzung();
+  if (!ich) { zeige("anmeldung"); return; }
+  if (!ich.istAdmin) { zeige("kein-zugriff"); return; }
+  $("wer").innerHTML = `Benutzer, Codes und Rechte. Angemeldet als <strong>${esc(ich.name)}</strong>${ich.bid ? "" : " · über den Admin-Code"}`;
+  zeige("panel");
+  horchen();
+}
+function fehlerAnzeigen(err) {
+  console.error(err);
+  $("listen-meldung").textContent = istRechteFehler(err)
+    ? "Kein Zugriff mehr. Bitte neu anmelden."
+    : "Keine Verbindung. Die Anzeige kann veraltet sein.";
+}
+let horchtSchon = false;
+function horchen() {
+  if (horchtSchon) return;
+  horchtSchon = true;
+  onValue(ref(db, "benutzer"), (s) => { benutzer = s.val() ?? {}; zeichneListe(); }, fehlerAnzeigen);
+  onValue(ref(db, "geraete"), (s) => { geraete = s.val() ?? {}; zeichneListe(); }, fehlerAnzeigen);
+  onValue(ref(db, "sicherungen"), (s) => { sicherungen = s.val() ?? {}; zeichneSicherungen(); }, () => {});
+  onValue(ref(db, "besuche"), (s) => zeichneBesucher(s.val() ?? {}), () => {});
+}
+
+/* ---- Benutzerliste ---- */
+const geraeteVon = (bid) => Object.values(geraete).filter((g) => g && g.benutzer === bid).length;
+const sortiert = () => Object.entries(benutzer).map(([bid, b]) => ({ bid, ...b })).sort((a, b) => (a.name || "").localeCompare(b.name || "", "de"));
+
+/* Kurze Namen für die Marken in der zugeklappten Zeile */
+const KURZ = { reinigung: "Reinigung", sportanlagen: "Sportanlagen", arbeitsplan: "Arbeitsplan", admin: "Admin" };
+function marken(b) {
+  return BEREICHE.map((f) => {
+    const an = b.rechte?.[f.id] === true;
+    return `<span class="marke-klein ${an ? "an" : "aus"}">${esc(KURZ[f.id] ?? f.name)}</span>`;
+  }).join("");
+}
+function beschreibung(b) {
+  if (b.rechte?.arbeitsplan !== true) return "Kein Zugriff auf den Arbeitsplan.";
+  const t = b.rechte?.arbeitsplan_tun ?? {};
+  const teile = [];
+  teile.push(t.erstellen ? "darf Aufgaben erstellen" : "darf keine Aufgaben erstellen");
+  const eigen = ["bearbeitenEigene", "verschiebenEigene", "loeschenEigene"].filter((k) => t[k]).length;
+  const fremd = ["bearbeitenFremde", "verschiebenFremde", "loeschenFremde"].filter((k) => t[k]).length;
+  teile.push(eigen === 3 ? "eigene Aufgaben voll ändern" : eigen === 0 ? "eigene Aufgaben nicht ändern" : "eigene Aufgaben teilweise ändern");
+  teile.push(fremd === 3 ? "fremde Aufgaben voll ändern" : fremd === 0 ? "fremde nur ansehen" : "fremde teilweise ändern");
+  if (t.erledigenFremde) teile.push("fremde abhaken");
+  return "Arbeitsplan: " + teile.join(", ") + ".";
+}
+function zeichneListe() {
+  const alle = sortiert();
+  $("liste-leer").hidden = alle.length > 0;
+  $("liste").innerHTML = alle.map((b) => {
+    const offen = $("liste").querySelector(`details[data-bid="${b.bid}"]`)?.open ? " open" : "";
+    const n = geraeteVon(b.bid);
+    const selbst = b.bid === ich?.bid;
+    return `<details class="nutzer${b.gesperrt ? " gesperrt" : ""}" data-bid="${esc(b.bid)}"${offen}>
+      <summary>
+        <span class="punkt" style="background:${esc(b.farbe || "#55635C")}"></span>
+        <span class="nname">${esc(b.name || "Ohne Namen")}</span>
+        ${b.gesperrt ? '<span class="marke-klein sperre">Code gesperrt</span>' : ""}
+        ${marken(b)}
+        <svg class="pfeil" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+      </summary>
+      <div class="inhalt">
+        <div class="code">Code <code data-code="${esc(b.bid)}">${"•".repeat(Math.min(14, (b.code || "").length || 8))}</code>
+          <button class="knopf klein" type="button" data-zeigen="${esc(b.bid)}">Anzeigen</button>
+        </div>
+        <p class="muted" style="font-size:14px">${esc(beschreibung(b))} · ${n === 1 ? "1 Gerät angemeldet" : n + " Geräte angemeldet"}${selbst ? " · Das bist du." : ""}</p>
+        <div class="aktionen">
+          <button class="knopf klein" type="button" data-bearbeiten="${esc(b.bid)}">Bearbeiten</button>
+          <button class="knopf klein" type="button" data-abmelden="${esc(b.bid)}"${selbst || n === 0 ? " disabled" : ""}>Geräte abmelden${n ? ` (${n})` : ""}</button>
+          <button class="knopf klein ${b.gesperrt ? "primaer" : "gefahr"}" type="button" data-sperre="${esc(b.bid)}"${selbst ? " disabled" : ""}>${b.gesperrt ? "Code wieder freigeben" : "Code sperren"}</button>
+          <button class="knopf klein gefahr" type="button" data-loeschen="${esc(b.bid)}"${selbst ? " disabled" : ""}>Löschen</button>
+        </div>
+        <div class="rueckfrage" data-frage="${esc(b.bid)}" hidden>
+          <span>Benutzer wirklich löschen? Der Code gilt dann nicht mehr, und alle Geräte verlieren den Zugang.</span>
+          <div class="aktionen">
+            <button class="knopf klein" type="button" data-nein="${esc(b.bid)}">Abbrechen</button>
+            <button class="knopf klein gefahr" type="button" data-ja="${esc(b.bid)}">Ja, löschen</button>
+          </div>
+        </div>
+      </div>
+    </details>`;
+  }).join("");
+}
+
+$("liste").addEventListener("click", async (e) => {
+  const z = e.target.closest("[data-zeigen]");
+  if (z) {
+    const b = benutzer[z.dataset.zeigen];
+    const feld = $("liste").querySelector(`[data-code="${z.dataset.zeigen}"]`);
+    const sichtbar = z.textContent === "Verbergen";
+    feld.textContent = sichtbar ? "•".repeat(Math.min(14, (b?.code || "").length || 8)) : (b?.code || "—");
+    z.textContent = sichtbar ? "Anzeigen" : "Verbergen";
+    return;
+  }
+  const bearb = e.target.closest("[data-bearbeiten]");
+  if (bearb) { formularOeffnen(bearb.dataset.bearbeiten); return; }
+  const ab = e.target.closest("[data-abmelden]");
+  if (ab) {
+    await schreiben({ [`benutzer/${ab.dataset.abmelden}/stand`]: Date.now() },
+      "Alle Geräte dieses Codes sind abgemeldet.");
+    return;
+  }
+  const sp = e.target.closest("[data-sperre]");
+  if (sp) {
+    const bid = sp.dataset.sperre;
+    const neu = !(benutzer[bid]?.gesperrt === true);
+    await schreiben({ [`benutzer/${bid}/gesperrt`]: neu, [`benutzer/${bid}/stand`]: Date.now() },
+      neu ? "Code gesperrt. Alle Geräte sind abgemeldet." : "Code wieder freigegeben.");
+    return;
+  }
+  const lo = e.target.closest("[data-loeschen]");
+  if (lo) { $("liste").querySelector(`[data-frage="${lo.dataset.loeschen}"]`).hidden = false; return; }
+  const nein = e.target.closest("[data-nein]");
+  if (nein) { $("liste").querySelector(`[data-frage="${nein.dataset.nein}"]`).hidden = true; return; }
+  const ja = e.target.closest("[data-ja]");
+  if (ja) {
+    const bid = ja.dataset.ja;
+    await schreiben({ [`benutzer/${bid}`]: null, [`kennungen/${bid}`]: null, [`namen/${bid}`]: null }, "Benutzer gelöscht.");
+    return;
+  }
+});
+
+async function schreiben(werte, erfolg) {
+  try {
+    await update(ref(db), werte);
+    $("listen-meldung").textContent = erfolg;
+    $("listen-meldung").classList.remove("fehler");
+  } catch (err) {
+    console.error(err);
+    $("listen-meldung").textContent = istRechteFehler(err) ? "Das darfst du nicht." : "Das konnte nicht gespeichert werden.";
+    $("listen-meldung").classList.add("fehler");
+  }
+}
+
+/* ---- Formular ---- */
+function farbenZeichnen() {
+  $("f-farben").innerHTML = FARBEN.map((f) =>
+    `<button class="farbwahl" type="button" data-farbe="${f}" aria-pressed="${f === farbe}" style="background:${f}" aria-label="Farbe ${f}"></button>`
+  ).join("") + `<input class="eigene-farbe" type="color" id="f-eigene" value="${farbe}" aria-label="Eigene Farbe">`;
+  $("f-eigene").addEventListener("input", (e) => { farbe = e.target.value; farbenZeichnen(); });
+}
+$("f-farben").addEventListener("click", (e) => {
+  const k = e.target.closest("[data-farbe]");
+  if (!k) return;
+  farbe = k.dataset.farbe;
+  farbenZeichnen();
+});
+function bereicheZeichnen(rechte) {
+  $("f-bereiche").innerHTML = BEREICHE.map((f) =>
+    `<label class="kreuz"><input type="checkbox" data-bereich="${f.id}"${rechte?.[f.id] === true ? " checked" : ""}>
+      <span class="txt"><span>${esc(f.name)}</span><span class="zusatz">${esc(f.zusatz)}</span></span></label>`
+  ).join("");
+}
+function formularOeffnen(bid) {
+  bearbeite = bid;
+  const b = bid ? benutzer[bid] : null;
+  $("f-titel").textContent = b ? `${b.name} bearbeiten` : "Benutzer hinzufügen";
+  $("f-name").value = b?.name ?? "";
+  $("f-code").value = b?.code ?? "";
+  farbe = b?.farbe ?? FARBEN[0];
+  farbenZeichnen();
+  bereicheZeichnen(b?.rechte);
+  const t = b?.rechte?.arbeitsplan_tun ?? (b ? {} : { erstellen: true, bearbeitenEigene: true, verschiebenEigene: true, loeschenEigene: true });
+  AP_RECHTE.forEach((r) => { $("r-" + r).checked = t[r] === true; });
+  $("f-fehler").textContent = "";
+  $("formular").hidden = false;
+  $("formular").scrollIntoView({ behavior: "smooth", block: "start" });
+  setTimeout(() => $("f-name").focus(), 60);
+}
+$("neu").addEventListener("click", () => formularOeffnen(null));
+$("f-abbrechen").addEventListener("click", () => { $("formular").hidden = true; bearbeite = null; });
+
+$("formular").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const name = $("f-name").value.trim();
+  const code = $("f-code").value.trim();
+  if (!name) { $("f-fehler").textContent = "Bitte einen Namen eintragen."; return; }
+  if (code.length < 6) { $("f-fehler").textContent = "Der Code braucht mindestens 6 Zeichen."; return; }
+  const doppelt = Object.entries(benutzer).some(([k, b]) => k !== bearbeite && (b.code || "").toLowerCase() === code.toLowerCase());
+  if (doppelt) { $("f-fehler").textContent = "Diesen Code hat schon jemand anderes."; return; }
+  const bid = bearbeite || ("b" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6));
+  const rechte = {};
+  $("f-bereiche").querySelectorAll("[data-bereich]").forEach((k) => { rechte[k.dataset.bereich] = k.checked; });
+  rechte.arbeitsplan_tun = Object.fromEntries(AP_RECHTE.map((r) => [r, $("r-" + r).checked]));
+  const alt = benutzer[bid];
+  const eintrag = {
+    name, farbe, code, stand: alt?.stand ?? Date.now(),
+    gesperrt: alt?.gesperrt === true,
+    angelegt: alt?.angelegt ?? Date.now(),
+    rechte,
+  };
+  // Wird der Code geändert, sind die alten Geräte nicht mehr gültig.
+  if (alt && alt.code !== code) eintrag.stand = Date.now();
+  $("f-speichern").disabled = true;
+  try {
+    await update(ref(db), {
+      [`benutzer/${bid}`]: eintrag,
+      [`kennungen/${bid}`]: true,
+      [`namen/${bid}`]: { name, farbe },
+    });
+    $("formular").hidden = true;
+    bearbeite = null;
+    $("listen-meldung").textContent = alt ? "Gespeichert." : "Benutzer angelegt.";
+    $("listen-meldung").classList.remove("fehler");
+  } catch (err) {
+    console.error(err);
+    $("f-fehler").textContent = istRechteFehler(err) ? "Das darfst du nicht." : "Speichern hat nicht geklappt.";
+  } finally {
+    $("f-speichern").disabled = false;
+  }
+});
+
+/* ---- Sicherungen ---- */
+const BEREICHE_SICHERUNG = ["putzplan", "arbeitsplan", "matten"];
+const datumSchluessel = (d) => new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Berlin" }).format(d);
+function zeitText(ts) {
+  if (!ts) return "";
+  const d = new Date(ts);
+  return d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" }) + ", " +
+         d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+}
+function zeichneSicherungen() {
+  const reihe = Object.entries(sicherungen).sort((a, b) => b[0].localeCompare(a[0]));
+  $("sicherungen-leer").hidden = reihe.length > 0;
+  const heute = datumSchluessel(new Date());
+  $("sicherungen").innerHTML = reihe.map(([tag, s]) =>
+    `<div class="sz">
+      <span>${tag === heute ? "<strong>Heute</strong> · " : ""}${esc(zeitText(s?.erstellt))}</span>
+      <span class="wann">${s?.groesse ? Math.round(s.groesse / 1024) + " KB" : ""}</span>
+      <button class="knopf klein" type="button" data-zurueck="${esc(tag)}">Wiederherstellen</button>
+    </div>`).join("");
+}
+$("jetzt-sichern").addEventListener("click", async () => {
+  const knopf = $("jetzt-sichern");
+  knopf.disabled = true;
+  $("sicherung-meldung").textContent = "Wird gesichert …";
+  try {
+    const daten = {};
+    for (const b of BEREICHE_SICHERUNG) daten[b] = (await get(ref(db, b))).val() ?? null;
+    const tag = datumSchluessel(new Date());
+    const groesse = JSON.stringify(daten).length;
+    await set(ref(db, `sicherungen/${tag}`), { erstellt: Date.now(), groesse, daten });
+    await aeltereWegwerfen();
+    $("sicherung-meldung").textContent = "Gesichert.";
+  } catch (err) {
+    console.error(err);
+    $("sicherung-meldung").textContent = istRechteFehler(err) ? "Das darfst du nicht." : "Die Sicherung hat nicht geklappt.";
+  } finally {
+    knopf.disabled = false;
+  }
+});
+async function aeltereWegwerfen() {
+  const alle = Object.keys((await get(ref(db, "sicherungen"))).val() ?? {}).sort().reverse();
+  const weg = alle.slice(7);
+  if (!weg.length) return;
+  await update(ref(db), Object.fromEntries(weg.map((t) => [`sicherungen/${t}`, null])));
+}
+$("sicherungen").addEventListener("click", async (e) => {
+  const k = e.target.closest("[data-zurueck]");
+  if (!k) return;
+  if (k.dataset.sicher !== "ja") {
+    k.dataset.sicher = "ja";
+    k.textContent = "Wirklich zurücksetzen?";
+    k.classList.add("gefahr");
+    setTimeout(() => { if (k.isConnected) { k.dataset.sicher = ""; k.textContent = "Wiederherstellen"; k.classList.remove("gefahr"); } }, 6000);
+    return;
+  }
+  const tag = k.dataset.zurueck;
+  $("sicherung-meldung").textContent = "Wird zurückgesetzt …";
+  try {
+    const daten = (await get(ref(db, `sicherungen/${tag}/daten`))).val() ?? {};
+    const werte = {};
+    for (const b of BEREICHE_SICHERUNG) werte[b] = daten[b] ?? null;
+    await update(ref(db), werte);
+    $("sicherung-meldung").textContent = `Stand vom ${tag} wiederhergestellt.`;
+  } catch (err) {
+    console.error(err);
+    $("sicherung-meldung").textContent = istRechteFehler(err) ? "Das darfst du nicht." : "Das Zurücksetzen hat nicht geklappt.";
+  }
+});
+
+/* ---- Besucher ---- */
+function zeichneBesucher(b) {
+  const tage = b?.tage ?? {};
+  const heute = datumSchluessel(new Date());
+  const woche = Object.entries(tage)
+    .filter(([t]) => t > datumSchluessel(new Date(Date.now() - 7 * 86400000)))
+    .reduce((s, [, n]) => s + (Number(n) || 0), 0);
+  const werte = [["heute", tage[heute] ?? 0], ["diese Woche", woche], ["gesamt", b?.gesamt ?? 0]];
+  $("besucher-zahlen").innerHTML = werte
+    .map(([t, n]) => `<div class="zahl"><b>${Number(n).toLocaleString("de-DE")}</b><span>${t}</span></div>`).join("");
+}
+
+zeige("pruefung");
+starten().catch((err) => { console.error(err); zeige("anmeldung"); });
+</script>
+</body>
+</html>
