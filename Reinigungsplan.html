@@ -232,14 +232,15 @@ a.ghost{display:flex;align-items:center;justify-content:center;gap:2px;color:var
   <header class="top">
     <div class="brand"><a class="logo-link" href="./" aria-label="Zur Startseite"><img class="logo" src="./bilder/logo.png" alt="Dortmunder Sportstätten" width="480" height="241"></a><h1>Reinigungsplan HKH</h1></div>
     <div class="hr"><span id="prog" aria-live="polite"></span><button class="live s-none" id="live" type="button" aria-label="Live-Abgleich und Zugangscode"><span class="ld"></span><span id="live-t">Nur dieses Gerät</span></button></div>
+    <button class="thb" id="logout" type="button" aria-label="Abmelden" title="Abmelden" style="width:auto;padding:0 12px;font-size:13px">Abmelden</button>
     <button class="thb" id="theme" type="button" aria-label="Hell oder dunkel umschalten" title="Hell / Dunkel">&#9790;</button>
   </header>
 
   <section class="ctl" aria-label="Bedienung">
     <div class="r1">
       <div class="who">
-        <button class="b wbtn" id="who-btn" type="button" aria-haspopup="true" aria-expanded="false"><span class="dot" id="who-dot"></span><span id="who-name">Joel</span><span class="car" aria-hidden="true">&#9662;</span></button>
-        <div class="wmenu" id="people" role="menu" aria-label="Wer putzt"></div>
+        <span class="b wbtn" id="who-btn" title="Angemeldet"><span class="dot" id="who-dot"></span><span id="who-name">…</span></span>
+        <div class="wmenu" id="people" role="menu" aria-label="Wer putzt" hidden></div>
       </div>
       <div class="sl3 two" id="art-sl" data-pos="0" role="group" aria-label="Art: Bahnen oder Frei">
         <span class="knob3" aria-hidden="true"></span>
@@ -404,10 +405,18 @@ a.ghost{display:flex;align-items:center;justify-content:center;gap:2px;color:var
 (function(){
 "use strict";
 var NS="http://www.w3.org/2000/svg";
-var PEOPLE=[{n:"Joel",c:"#2B7BFF"},{n:"Arno",c:"#FFC914"},{n:"Patrick",c:"#A259FF"},{n:"Lukas",c:"#35E0F2"}];
+/* Frueher stand bei jedem Eintrag eine Nummer aus dieser festen Liste. Damit alte
+   Eintraege weiter stimmen, bleibt sie zum Nachschlagen erhalten. Neue Eintraege
+   tragen die Kennung des angemeldeten Benutzers. */
+var ALT_PEOPLE=[{n:"Joel",c:"#2B7BFF"},{n:"Arno",c:"#FFC914"},{n:"Patrick",c:"#A259FF"},{n:"Lukas",c:"#35E0F2"}];
+var NAMEN={};
+function person(p){
+  if(typeof p==="number")return ALT_PEOPLE[p]||{n:"?",c:"#6B7770"};
+  var x=NAMEN[p];return x?{n:x.name,c:x.farbe}:{n:"?",c:"#6B7770"};
+}
 var KEY="hkh-putzplan-v1";
 var W0=740,H0=322;
-var S={who:0,mode:"paint",brush:"all",view:"plan",art:"lanes",dir:"down"};
+var S={who:"",mode:"paint",brush:"all",view:"plan",art:"lanes",dir:"down"};
 var notes=[];
 var free=[];
 var $=function(id){return document.getElementById(id)};
@@ -483,7 +492,7 @@ function near(l,p){var b=null,bd=1e9;for(var i=0;i<l.pts.length;i++){var q=l.pts
 function key(v){return v?v.p+"|"+v.d:""}
 function seg(l,a,len,v){
   var el=document.createElementNS(NS,"path");el.setAttribute("d",l.d);
-  if(v)el.setAttribute("stroke",(PEOPLE[v.p]||PEOPLE[0]).c);else el.setAttribute("class","nichtgereinigt");
+  if(v)el.setAttribute("stroke",person(v.p).c);else el.setAttribute("class","nichtgereinigt");
   el.setAttribute("stroke-width",l.w);
   if(len<l.L-0.01){el.setAttribute("stroke-dasharray",len.toFixed(2)+" "+(l.L-len+0.01).toFixed(2));el.setAttribute("stroke-dashoffset",(-a).toFixed(2))}
   l.g.appendChild(el);
@@ -514,7 +523,7 @@ function progress(){
 
 /* ---------- Speichern (nur dieses Gerät) ---------- */
 function save(){
-  try{localStorage.setItem(KEY,JSON.stringify({who:S.who,brush:S.brush,view:S.view,art:S.art,dir:S.dir,free:free,notes:notes,
+  try{localStorage.setItem(KEY,JSON.stringify({brush:S.brush,view:S.view,art:S.art,dir:S.dir,free:free,notes:notes,
     lanes:lanes.map(function(l){return l.st.map(function(v){return v?[v.p,v.d]:0})})}))}catch(e){}
 }
 function load(){
@@ -525,7 +534,7 @@ function load(){
     lanes.forEach(function(l,i){l.st=o.lanes[i].map(function(v){return v?{p:v[0],d:v[1]}:null})});
     notes=Array.isArray(o.notes)?o.notes:[];
     notes.forEach(function(n,i){if(!n.id)n.id="alt"+i;if(!n.ts)n.ts=i});
-    if(PEOPLE[o.who])S.who=o.who;
+
     if(o.brush==="one"||o.brush==="all"||o.brush==="mid")S.brush=o.brush;
     if(o.view==="plan"||o.view==="color")S.view=o.view;
     if(o.art==="lanes"||o.art==="free")S.art=o.art;
@@ -618,8 +627,16 @@ function startSync(){
   sync.on=true;setState("connecting");
   import(ZUGANG).then(function(Z){
     sync.Z=Z;
-    return Z.istFreigeschaltet().then(function(frei){
-      if(!frei){sync.on=false;sync.outbox=[];sync.pending={};setState("nocode");openCode("");return}
+    return Z.sitzung().then(function(ich){
+      if(!ich||!Z.darf(ich,"reinigung")){
+        sync.on=false;sync.outbox=[];sync.pending={};setState("nocode");
+        openCode(ich?"Dieser Zugang darf die Hallenreinigung nicht sehen.":"");
+        return;
+      }
+      S.who=ich.bid||"admin";
+      NAMEN[S.who]={name:ich.name,farbe:ich.farbe};
+      syncButtons();
+      Z.namen().then(function(n){Object.keys(n||{}).forEach(function(k){NAMEN[k]=n[k]});NAMEN[S.who]={name:ich.name,farbe:ich.farbe};syncButtons();lanes.forEach(render);});
       var db=Z.db,base=sync.base;
       sync.fn=Z;sync.db=db;
       Z.onValue(Z.ref(db,".info/connected"),function(s){sync.conn=s.val()===true;checkLive()});
@@ -655,6 +672,10 @@ function openCode(msg){
   if(gate)setTimeout(function(){try{$("code-in").focus()}catch(e){}},50);
 }
 $("live").addEventListener("click",function(){openCode("")});
+$("logout").addEventListener("click",function(){
+  if(!sync.Z){location.reload();return}
+  sync.Z.abmelden().then(function(){location.reload()},function(){location.reload()});
+});
 $("code-cancel").addEventListener("click",function(){show("sh-code",false)});
 function codeGo(){
   var c=String($("code-in").value||"").trim(),btn=$("code-go");
@@ -705,7 +726,7 @@ function renderFree(){
     if(!s.pts.length)return;
     var el=document.createElementNS(NS,"path");
     el.setAttribute("d","M"+s.pts.map(function(q){return q[0].toFixed(1)+" "+q[1].toFixed(1)}).join(" L"));
-    el.setAttribute("fill","none");el.setAttribute("stroke",(PEOPLE[s.p]||PEOPLE[0]).c);
+    el.setAttribute("fill","none");el.setAttribute("stroke",person(s.p).c);
     el.setAttribute("stroke-width","6");el.setAttribute("stroke-linecap","round");el.setAttribute("stroke-linejoin","round");
     freeG.appendChild(el);
   });
@@ -715,7 +736,7 @@ function freeStart(e){
   if(S.mode==="erase"){fr={erase:true,removed:[]};freeEraseAt(p);renderFree();return}
   var s={id:newId(),p:S.who,d:dstr(0),pts:[[p.x,p.y],[p.x,p.y]]};
   fr={erase:false,s:s,last:p};free.push(s);renderFree();
-  say(PEOPLE[S.who].n+" malt frei.",false);
+  say(person(S.who).n+" malt frei.",false);
 }
 function freeMove(e){
   var p=toWorld(e.clientX,e.clientY);
@@ -850,7 +871,7 @@ function strokeMove(e){
     fill(l,it.prev,it.prev+d,v,it.undo);it.prev=s;render(l);
   });
   act.changed=true;
-  say(S.mode==="paint"?PEOPLE[S.who].n+" trägt geputzt ein.":"Wird wieder auf offen gesetzt.",false);
+  say(S.mode==="paint"?person(S.who).n+" trägt geputzt ein.":"Wird wieder auf offen gesetzt.",false);
 }
 function cancelStroke(){
   if(act&&act.items)act.items.forEach(function(it){
@@ -872,7 +893,7 @@ function tap(x,y){
   var h=hit(p);
   if(!h){say("Hier ist kein Bereich zum Eintragen hinterlegt.",false);return}
   var v=h.l.st[Math.min(h.l.n-1,Math.floor(h.s/h.l.ps))];
-  if(v)say(h.l.label+": geputzt von "+(PEOPLE[v.p]||{n:"?"}).n+" am "+v.d,true);
+  if(v)say(h.l.label+": geputzt von "+person(v.p).n+" am "+v.d,true);
   else say(h.l.label+": noch offen.",false);
 }
 svg.addEventListener("pointerdown",function(e){
@@ -958,7 +979,7 @@ function show(id,on){$(id).classList.toggle("open",on)}
 var pend=null;
 function openEdit(p){
   pend={x:Math.round(p.x),y:Math.round(p.y)};
-  $("edit-who").textContent="Notiz von "+PEOPLE[S.who].n+" für die angetippte Stelle.";
+  $("edit-who").textContent="Notiz von "+person(S.who).n+" für die angetippte Stelle.";
   $("note-text").value="";$("note-err").textContent="";show("sh-edit",true);
   setTimeout(function(){try{$("note-text").focus()}catch(e){}},50);
 }
@@ -967,7 +988,7 @@ $("edit-cancel").addEventListener("click",function(){show("sh-edit",false);pend=
 $("edit-save").addEventListener("click",function(){
   var t=$("note-text").value.trim();
   if(!t){$("note-err").textContent="Schreib erst einen Satz in das Feld.";return}
-  var nw={id:newId(),ts:Date.now(),x:pend.x,y:pend.y,t:t,by:PEOPLE[S.who].n,d:dstr(0)};
+  var nw={id:newId(),ts:Date.now(),x:pend.x,y:pend.y,t:t,by:person(S.who).n,d:dstr(0)};
   notes.push(nw);pend=null;putNote(nw);pushOp({k:"note-add",n:JSON.parse(JSON.stringify(nw))});
   show("sh-edit",false);drawPins();save();say("Notiz "+notes.length+" gespeichert.",true);
 });
@@ -1018,26 +1039,22 @@ var HINT={paint:"Mit dem Finger über einen Bereich ziehen. Zwei Finger zoomen u
   note:"Auf eine Stelle tippen, um eine Notiz zu setzen. Eine Notiz anfassen und ziehen versetzt sie.",
   move:"Eine Notiz anfassen und ziehen versetzt sie. Daneben ziehen schiebt den Plan."};
 function syncButtons(){
-  document.querySelectorAll("[data-k]").forEach(function(b){b.setAttribute("aria-pressed",String(S[b.dataset.k]===b.dataset.v||(b.dataset.k==="who"&&S.who===+b.dataset.v)))});
+  document.querySelectorAll("[data-k]").forEach(function(b){b.setAttribute("aria-pressed",String(S[b.dataset.k]===b.dataset.v))});
   map.classList.toggle("color",S.view==="color");
-  var pe=PEOPLE[S.who];$("who-name").textContent=pe.n;$("who-dot").style.background=pe.c;
+  var pe=person(S.who);$("who-name").textContent=pe.n;$("who-dot").style.background=pe.c;
   $("dir-sw").setAttribute("data-d",S.dir);
   $("view-sw").setAttribute("data-d",S.view);
   $("art-sl").setAttribute("data-pos",S.art==="free"?"1":"0");
   $("brush-sl").setAttribute("data-pos",{all:"0",mid:"1",one:"2"}[S.brush]);
   svg.style.cursor=S.mode==="move"||S.mode==="note"?"grab":"crosshair";
 }
-PEOPLE.forEach(function(p,i){
-  var b=document.createElement("button");b.className="b";b.id="who-"+i;b.dataset.k="who";b.dataset.v=String(i);
-  var d=document.createElement("span");d.className="dot";d.style.background=p.c;
-  b.appendChild(d);b.appendChild(document.createTextNode(p.n));$("people").appendChild(b);
-});
+/* Wer man ist, kommt aus der Anmeldung und wird nicht mehr ausgewaehlt. */
 document.querySelectorAll("[data-k]").forEach(function(b){
   b.addEventListener("click",function(){
-    var k=b.dataset.k;S[k]=k==="who"?+b.dataset.v:b.dataset.v;
+    var k=b.dataset.k;if(k==="who")return;S[k]=b.dataset.v;
     syncButtons();save();
     if(k==="mode"||k==="art")say(hintFor(),false);
-    if(k==="who")say(PEOPLE[S.who].n+" ist ausgewählt.",true);
+
   });
 });
 
@@ -1064,8 +1081,7 @@ $("theme").addEventListener("contextmenu",function(e){e.preventDefault()});
 if(window.matchMedia){try{window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",themeIcon)}catch(e){}}
 
 /* ---------- Dropdown, Richtungsschalter, Vollbild ---------- */
-$("who-btn").addEventListener("click",function(e){e.stopPropagation();var o=$("people").classList.toggle("open");$("who-btn").setAttribute("aria-expanded",String(o))});
-document.addEventListener("click",function(){$("people").classList.remove("open");$("who-btn").setAttribute("aria-expanded","false")});
+
 $("dir-sw").addEventListener("click",function(){S.dir=S.dir==="down"?"right":"down";syncButtons();save();say(hintFor(),false)});
 $("view-sw").addEventListener("click",function(){S.view=S.view==="plan"?"color":"plan";syncButtons();save()});
 var FULL=false;
