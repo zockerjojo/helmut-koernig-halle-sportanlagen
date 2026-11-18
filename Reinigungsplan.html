@@ -21,7 +21,7 @@
   --line:#C3CCC6;
   --accent:#17694B;
   --on-accent:#FFFFFF;
-  --danger:#B3261E;
+  --danger:#B3261E; --ungewischt:#A8B2AC;
   --plan-track:#DCE3DE;
   --font-display:"Barlow Condensed","Arial Narrow",sans-serif;
   --font-body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -30,13 +30,13 @@
   :root:not([data-theme="light"]){
     color-scheme:dark;
     --bg:#0F1512;--panel:#18211C;--ink:#E7EEE9;--ink-2:#9BAAA1;--line:#33413A;
-    --accent:#4CC38A;--on-accent:#06150E;--danger:#F2766B;--plan-track:#212D27;
+    --accent:#4CC38A;--on-accent:#06150E;--danger:#F2766B;--plan-track:#212D27;--ungewischt:#C3CCC6;
   }
 }
 :root[data-theme="dark"]{
   color-scheme:dark;
   --bg:#0F1512;--panel:#18211C;--ink:#E7EEE9;--ink-2:#9BAAA1;--line:#33413A;
-  --accent:#4CC38A;--on-accent:#06150E;--danger:#F2766B;--plan-track:#212D27;
+  --accent:#4CC38A;--on-accent:#06150E;--danger:#F2766B;--plan-track:#212D27;--ungewischt:#C3CCC6;
 }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
@@ -128,10 +128,11 @@ textarea:focus-visible,.tf:focus-visible{outline:3px solid var(--accent);outline
 .color .zgate{stroke:#10201A}
 .tag{font-family:var(--font-body);font-size:8.5px;fill:var(--ink-2);text-anchor:middle}
 #paint path{stroke-opacity:.62}
-/* Noch nicht gewischte Bahnen: nur sichtbar, solange die Anzeige eingeschaltet ist */
-.nichtgereinigt{stroke:var(--danger);stroke-opacity:.85}
+/* Noch nicht gewischte Bahnen: nur sichtbar, solange die Anzeige eingeschaltet ist.
+   Hellgrau; auf hellem Untergrund etwas kraeftiger, damit es nicht verschwindet. */
+.nichtgereinigt{stroke:var(--ungewischt);stroke-opacity:.95}
 .map.nuroffen #free{display:none}
-.color .nichtgereinigt{stroke:#FF4136;stroke-opacity:.9}
+.color .nichtgereinigt{stroke:#D7DCD8}
 /* Farb-Ansicht */
 .color .hall{fill:#4E9977}
 .color .floor{fill:#57A683}
@@ -146,6 +147,9 @@ textarea:focus-visible,.tf:focus-visible{outline:3px solid var(--accent);outline
 #free path{stroke-opacity:.9}
 .color #free path{stroke-opacity:.9}
 .map:not(.color) #paint path,.map:not(.color) #free path{stroke-opacity:.82}
+/* Offene Bahnen moeglichst deckend, sonst mischt sich das Grau mit der Farbe darunter. */
+.map:not(.color) #paint path.nichtgereinigt,.map:not(.color) #free path.nichtgereinigt{stroke-opacity:.95}
+.color #paint path.nichtgereinigt,.color #free path.nichtgereinigt{stroke-opacity:1}
 .map:not(.color) #pins circle{fill:var(--panel) !important;stroke:var(--ink) !important}
 .map:not(.color) #pins text{fill:var(--ink) !important}
 .zb:disabled{opacity:.35}
@@ -415,7 +419,7 @@ function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
 
 /* ---------- Bahnen und Streifen ---------- */
 var lanes=[],hallEl=$("hallp"),gcount={};
-var ZEIGE_OFFEN=false; /* zeigt noch nicht gewischte Bahnen rot */
+var ZEIGE_OFFEN=false; /* zeigt noch nicht gewischte Bahnen hellgrau */
 function inHall(p){try{var pt=svg.createSVGPoint();pt.x=p.x;pt.y=p.y;return hallEl.isPointInFill(pt)}catch(e){return p.x>=6&&p.x<=697&&p.y>=6&&p.y<=315}}
 var ZAUN=[[661,202],[655,277],[640,296],[597,296],[597,276.65],[620,264],[645,238]];
 function inPoly(p,q){var c=false;for(var i=0,j=q.length-1;i<q.length;j=i++){var a=q[i],b=q[j];if((a[1]>p.y)!==(b[1]>p.y)&&p.x<(b[0]-a[0])*(p.y-a[1])/(b[1]-a[1])+a[0])c=!c}return c}
@@ -1080,14 +1084,14 @@ document.addEventListener("fullscreenchange",function(){if(!document.fullscreenE
 
 /* ---------- Nicht gereinigte Bereiche ---------- */
 /* Gezeichnet werden sonst nur gewischte Abschnitte. Eingeschaltet kommen die
-   Luecken dazu, in Rot: dann sieht man auf einen Blick, was noch offen ist. */
+   Luecken dazu, in Hellgrau: dann sieht man auf einen Blick, was noch offen ist. */
 function offenUmschalten(){
   ZEIGE_OFFEN=!ZEIGE_OFFEN;
   $("btn-offen").setAttribute("aria-pressed",String(ZEIGE_OFFEN));
   map.classList.toggle("nuroffen",ZEIGE_OFFEN);
   lanes.forEach(render);
   progress();
-  say(ZEIGE_OFFEN?"Rot ist, was noch nicht gewischt wurde. Das Gewischte ist ausgeblendet.":"Wieder alles zu sehen.",true);
+  say(ZEIGE_OFFEN?"Grau ist, was noch nicht gewischt wurde. Das Gewischte ist ausgeblendet.":"Wieder alles zu sehen.",true);
 }
 $("btn-offen").addEventListener("click",offenUmschalten);
 
@@ -1096,7 +1100,7 @@ $("btn-offen").addEventListener("click",offenUmschalten);
    fest eingetragen, sonst kaeme ein schwarz-weisser Umriss heraus. */
 function bildStil(farbig,v){
   var ink=v("--ink","#14201B"),ink2=v("--ink-2","#55635C"),panel=v("--panel","#F7F9F7");
-  var line=v("--line","#C3CCC6"),bahn=v("--plan-track","#DCE3DE"),rot=v("--danger","#B3261E");
+  var line=v("--line","#C3CCC6"),bahn=v("--plan-track","#DCE3DE"),grau=v("--ungewischt","#A8B2AC");
   var strich=farbig?"#10201A":ink;
   return ".hall{fill:"+(farbig?"#4E9977":panel)+"}"
     +".floor{fill:"+(farbig?"#57A683":"none")+"}"
@@ -1114,8 +1118,8 @@ function bildStil(farbig,v){
     +".pil{fill:"+(farbig?"#DAD7CC":panel)+";stroke:"+strich+";stroke-width:1.1}"
     +".gate{display:"+(farbig?"inline":"none")+";fill:#FFFFFF;stroke:#10201A;stroke-width:.5;stroke-linejoin:round}"
     +".tag{font-family:sans-serif;font-size:8.5px;fill:"+(farbig?"#FFFFFF":ink2)+";text-anchor:middle}"
-    +".nichtgereinigt{stroke:"+(farbig?"#FF4136":rot)+";stroke-opacity:.85}"
     +"#paint path,#free path{stroke-opacity:"+(farbig?".9":".82")+"}"
+    +"#paint path.nichtgereinigt,#free path.nichtgereinigt{stroke:"+(farbig?"#D7DCD8":grau)+";stroke-opacity:"+(farbig?"1":".95")+"}"
     +"#pins circle{fill:"+(farbig?"#F29F05":panel)+";stroke:"+(farbig?"#2B1B00":ink)+"}"
     +"#pins text{font-family:sans-serif;fill:"+(farbig?"#2B1B00":ink)+"}"
     +(ZEIGE_OFFEN?"#free{display:none}":"");

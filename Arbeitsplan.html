@@ -186,7 +186,7 @@ textarea{resize:vertical; line-height:1.35}
     <svg id="svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Plan der Halle, Ebene -4, mit Aufgaben und Pfeilen">
       <defs><filter id="etikett-schatten" x="-20%" y="-30%" width="140%" height="170%"><feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-opacity=".22"></feDropShadow></filter></defs>
       <g id="world">
-        <image id="plan" href="./bilder/hallenplan-ebene-4.svg" x="30.6" y="23" width="793" height="525.1" aria-hidden="true"></image>
+        <image id="gelaende" href="./bilder/gelaende-aussen.jpg" x="86.56" y="65.2" width="704.16" height="452.85" aria-hidden="true"></image><image id="plan" href="./bilder/hallenplan-ebene-4.svg" x="30.6" y="23" width="793" height="525.1" aria-hidden="true"></image>
         <g id="pfeile"></g>
         <g id="punkte"></g>
         <g id="etiketten"></g>
@@ -950,6 +950,18 @@ function zeilenZeichnen() {
     </li>`).join("");
   $("f-zeilen-leer").hidden = S.zeilen.length > 0;
 }
+/* Liest die Felder direkt aus der Anzeige. Noetig vor jedem Neuaufbau der Liste: ginge ein
+   Eingabe-Ereignis verloren, waere sonst das Getippte weg. */
+function zeilenLesen() {
+  $("f-zeilen").querySelectorAll("li[data-id]").forEach((li) => {
+    const z = S.zeilen.find((x) => x.id === li.dataset.id);
+    if (!z) return;
+    const t = li.querySelector('[data-feld="titel"]');
+    const x = li.querySelector('[data-feld="text"]');
+    if (t) z.titel = t.value;
+    if (x) z.text = x.value;
+  });
+}
 /* Eingaben werden sofort im Speicher der Seite festgehalten. Gespeichert wird erst beim Knopf „Speichern“. */
 $("f-zeilen").addEventListener("input", (e) => {
   const feld = e.target.dataset?.feld;
@@ -964,10 +976,12 @@ $("f-zeilen").addEventListener("keydown", (e) => {
 $("f-zeilen").addEventListener("click", (e) => {
   const weg = e.target.closest("[data-weg]");
   if (!weg) return;
+  zeilenLesen();
   S.zeilen = S.zeilen.filter((x) => x.id !== weg.dataset.weg);
   zeilenZeichnen();
 });
 $("f-zeile-neu").addEventListener("click", () => {
+  zeilenLesen();
   const z = { id: neueId(), titel: "", text: "" };
   S.zeilen.push(z);
   zeilenZeichnen();
@@ -975,6 +989,7 @@ $("f-zeile-neu").addEventListener("click", () => {
   if (feld) { feld.focus(); feld.scrollIntoView({ block: "center", behavior: "smooth" }); }
 });
 sortierbar($("f-zeilen"), ".griff", (von, nach) => {
+  zeilenLesen();
   if (von !== nach) {
     const [z] = S.zeilen.splice(von, 1);
     S.zeilen.splice(nach, 0, z);
@@ -983,6 +998,7 @@ sortierbar($("f-zeilen"), ".griff", (von, nach) => {
 });
 /* Leere Zeilen werden beim Speichern nicht übernommen. Nummern ergeben sich aus der Reihenfolge. */
 function zeilenFuerSpeichern() {
+  zeilenLesen();
   const ausgabe = {};
   S.zeilen.forEach((z) => {
     const titel = (z.titel || "").trim().slice(0, 80);
