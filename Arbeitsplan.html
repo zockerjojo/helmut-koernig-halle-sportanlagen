@@ -145,6 +145,7 @@ textarea{resize:vertical; line-height:1.35}
   </a>
   <div class="kopf-knoepfe">
     <button class="rund-knopf" id="verlauf-knopf" type="button" aria-pressed="false" aria-label="Verlauf anzeigen" title="Verlauf anzeigen" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button>
+    <button class="knopf klein" id="abmelden" type="button" hidden>Abmelden</button>
     <button class="rund-knopf" id="dunkel" type="button" aria-pressed="false" aria-label="Dunkelmodus" title="Dunkelmodus"><svg class="mond" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sonne" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></button>
   </div>
 </header>
@@ -172,8 +173,8 @@ textarea{resize:vertical; line-height:1.35}
   <p class="muted" id="live-text">Aufgaben und Pfeile für die ganze Halle. Alle sehen dasselbe.</p>
 
   <div class="feld">
-    <span id="ich-text">Wer bist du?</span>
-    <div class="personen" role="group" aria-labelledby="ich-text" id="ich-wahl"></div>
+    <span id="ich-text">Angemeldet als</span>
+    <div class="personen" id="ich-wahl"></div>
   </div>
 
   <div class="leiste" role="group" aria-label="Werkzeug">
@@ -279,17 +280,14 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, onAuthStateChanged, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getDatabase, ref, get, set, update, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { firebaseConfig } from "./js/config.js";
+import { sitzung, anmelden as zugangAnmelden, abmelden, darf, darfAufgabe, namen as namenLaden } from "./js/zugang.js";
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
-/* Dieselben Personen und Farben wie im Reinigungsplan. */
-const PERSONEN = [
-  { n: "Joel", c: "#2B7BFF" },
-  { n: "Arno", c: "#FFC914" },
-  { n: "Patrick", c: "#A259FF" },
-  { n: "Lukas", c: "#35E0F2" },
-];
+/* Die Personen stehen in der Datenbank und werden nach der Anmeldung geholt.
+   Bei einer Aufgabe steht weiterhin der Name, damit alte Einträge gültig bleiben. */
+let PERSONEN = [];
 /* Der Plan: Ebene -4 aus dem Fluchtwegeplan, ohne Fluchtzeichen, rote Linien und Feuermelder.
    Der Rand um das Gebäude gehört dazu, damit man auch draußen etwas eintragen kann. */
 const PLAN = { x: 30.6, y: 23, w: 793, h: 525.1 };
@@ -354,19 +352,40 @@ function zeigeBereich(angemeldet) {
   $("anmeldung").hidden = angemeldet;
   $("panel").hidden = !angemeldet;
   $("verlauf-knopf").hidden = !angemeldet;
+  $("abmelden").hidden = !angemeldet;
 }
-/* Der Arbeitsplan hat einen eigenen Code. Freigeschaltete Geräte stehen unter arbeitsplanzugang. */
-const ZUGANG = "arbeitsplanzugang";
-async function istFreigeschaltet(uid) {
-  const snap = await get(ref(db, `${ZUGANG}/${uid}`));
-  return snap.exists();
+/* Wer angemeldet ist, sieht diese Seite nur mit dem Recht für den Arbeitsplan. */
+let ICH = null;
+async function seiteStarten() {
+  let si = null;
+  try { si = await sitzung(); } catch (err) { console.error(err); }
+  if (!si) { zeigeBereich(false); return; }
+  if (!darf(si, "arbeitsplan")) {
+    zeigeBereich(false);
+    $("anmeldung-fehler").textContent = "Dieser Zugang darf den Arbeitsplan nicht sehen.";
+    return;
+  }
+  ICH = si;
+  S.ich = si.name;
+  const liste = await namenLaden();
+  PERSONEN = Object.entries(liste).map(([bid, n]) => ({ bid, n: n.name, c: n.farbe })).sort((x, y) => x.n.localeCompare(y.n, "de"));
+  if (!PERSONEN.some((x) => x.n === si.name)) PERSONEN.unshift({ bid: si.bid, n: si.name, c: si.farbe });
+  zeigeBereich(true);
+  rechteAnwenden();
+  starteSync();
 }
-onAuthStateChanged(auth, async (user) => {
-  if (anmeldungLaeuft) return;
-  let frei = false;
-  try { frei = !!user && (await istFreigeschaltet(user.uid)); } catch (err) { console.error(err); }
-  zeigeBereich(frei);
-  if (frei) starteSync();
+/* Blendet aus, was dieser Zugang nicht darf. Die Datenbank prüft es zusätzlich. */
+function rechteAnwenden() {
+  const darfNeu = darfAufgabe(ICH, "erstellen");
+  $("w-aufgabe").disabled = !darfNeu;
+  $("w-pfeil").disabled = !darfNeu;
+  $("w-aufgabe").title = darfNeu ? "" : "Dieser Zugang darf keine Aufgaben erstellen.";
+  $("w-pfeil").title = $("w-aufgabe").title;
+}
+const istMeine = (e) => !!e && !!ICH && (ICH.istAdmin || (!!e.ersteller && e.ersteller === ICH.bid));
+$("abmelden").addEventListener("click", async () => {
+  await abmelden().catch(() => {});
+  location.reload();
 });
 
 function augenTaste(knopfId, feldId) {
@@ -395,16 +414,14 @@ $("formular").addEventListener("submit", async (e) => {
   anmeldungLaeuft = true;
   knopf.disabled = true;
   try {
-    const { user } = await signInAnonymously(auth);
-    await set(ref(db, `${ZUGANG}/${user.uid}`), code);
+    await zugangAnmelden(code);
     feld.value = "";
     codeVerbergen();
-    zeigeBereich(true);
-    starteSync();
+    await seiteStarten();
   } catch (err) {
     console.error(err);
     fehler.textContent = anmeldeFehler(err);
-    await signOut(auth).catch(() => {});
+    await abmelden().catch(() => {});
   } finally {
     anmeldungLaeuft = false;
     knopf.disabled = false;
@@ -414,7 +431,7 @@ $("formular").addEventListener("submit", async (e) => {
 /* ---- Zustand ---- */
 const S = {
   modus: "ansehen",
-  ich: PERSONEN[0].n,
+  ich: "",   /* kommt aus der Anmeldung */
   eintraege: {},
   verlauf: {},
   gewaehlt: null,
@@ -429,7 +446,6 @@ const S = {
 };
 /* Während eine Zeile in der Liste gezogen wird, wird die Liste nicht neu aufgebaut. */
 let ziehtGerade = false;
-try { const g = localStorage.getItem("hkh-arbeitsplan-ich"); if (PERSONEN.some((p) => p.n === g)) S.ich = g; } catch (e) {}
 
 const NS = "http://www.w3.org/2000/svg";
 const svg = $("svg");
@@ -528,7 +544,7 @@ svg.addEventListener("pointerdown", (e) => {
   /* Aufnehmen geht nur beim Ansehen, nicht waehrend man etwas Neues setzt. */
   if (S.modus === "ansehen" && S.tafel !== "formular" && S.tafel !== "verlauf") {
     const griff = griffBei(welt);
-    if (griff) {
+    if (griff && darfAufgabe(ICH, "verschieben", istMeine(griff.e))) {
       geste.uhr = setTimeout(() => {
         if (!geste || geste.art !== "karte" || geste.bewegt) return;
         geste = { art: "eintrag", id: e.pointerId, welt0: welt, uhr: 0 };
@@ -885,6 +901,12 @@ function waehle(id) {
   const nr = nummerVon(id);
   $("d-wer").textContent = untertitelVon(e) + (nr ? ` · Prio ${nr}` : "");
   $("d-erledigt").textContent = istOffen(e) ? "Als erledigt markieren" : "Wieder öffnen";
+  const meine = istMeine(e);
+  $("d-bearbeiten").disabled = !darfAufgabe(ICH, "bearbeiten", meine);
+  $("d-erledigt").disabled = !darfAufgabe(ICH, "erledigen", meine);
+  $("d-loeschen").disabled = !darfAufgabe(ICH, "loeschen", meine);
+  $("d-bearbeiten").title = $("d-bearbeiten").disabled ? "Diese Aufgabe darfst du nicht bearbeiten." : "";
+  $("d-loeschen").title = $("d-loeschen").disabled ? "Diese Aufgabe darfst du nicht löschen." : "";
   zeilenAnsichtZeichnen(e);
   tafelZeigen("detail");
   hinweisZurueck();
@@ -1032,7 +1054,7 @@ $("t-formular").addEventListener("submit", async (e) => {
       waehle(id);
     } else {
       const id = neueId();
-      const basis = { text: titel, person: S.person ?? null, status: "offen", ts: Date.now(), reihe: neueReihe() };
+      const basis = { text: titel, person: S.person ?? null, status: "offen", ts: Date.now(), reihe: neueReihe(), ersteller: ICH?.bid || "" };
       if (zeilen) basis.zeilen = zeilen;
       const eintrag = S.entwurf.art === "pfeil"
         ? { art: "pfeil", ...basis, x1: r2(S.entwurf.x1), y1: r2(S.entwurf.y1), x2: r2(S.entwurf.x2), y2: r2(S.entwurf.y2) }
@@ -1084,6 +1106,12 @@ $("d-loeschen-ja").addEventListener("click", async () => {
    der neue Schlüssel des verschobenen Eintrags, außer die Zwischenräume sind aufgebraucht. */
 async function reihenfolgeAendern(von, nach) {
   const liste = offene();
+  const e0 = liste[von];
+  if (e0 && !darfAufgabe(ICH, "bearbeiten", istMeine(e0))) {
+    hinweisSetzen("Diese Aufgabe darfst du nicht umsortieren.");
+    alleZeichnen();
+    return;
+  }
   if (von < 0 || nach < 0 || von >= liste.length || nach >= liste.length || von === nach) { alleZeichnen(); return; }
   const [e] = liste.splice(von, 1);
   liste.splice(nach, 0, e);
@@ -1127,20 +1155,13 @@ async function schreiben(werte) {
 
 /* ---- Personen ---- */
 function personenZeichnen() {
-  $("ich-wahl").innerHTML = PERSONEN.map((p) =>
-    `<button class="person" type="button" data-ich="${esc(p.n)}" aria-pressed="${S.ich === p.n}"><span class="farbe" style="background:${p.c}"></span>${esc(p.n)}</button>`
-  ).join("");
+  $("ich-wahl").innerHTML = ICH
+    ? `<span class="person" aria-pressed="true"><span class="farbe" style="background:${esc(ICH.farbe)}"></span>${esc(ICH.name)}</span>`
+    : "";
   $("f-personen").innerHTML = PERSONEN.map((p) =>
     `<button class="person" type="button" data-person="${esc(p.n)}" aria-pressed="${S.person === p.n}"><span class="farbe" style="background:${p.c}"></span>${esc(p.n)}${S.person === p.n ? " ✓" : ""}</button>`
   ).join("");
 }
-$("ich-wahl").addEventListener("click", (e) => {
-  const knopf = e.target.closest("[data-ich]");
-  if (!knopf) return;
-  S.ich = knopf.dataset.ich;
-  try { localStorage.setItem("hkh-arbeitsplan-ich", S.ich); } catch (err) {}
-  personenZeichnen();
-});
 $("f-personen").addEventListener("click", (e) => {
   const knopf = e.target.closest("[data-person]");
   if (!knopf) return;
@@ -1356,7 +1377,8 @@ function sauber(roh) {
       .sort((a, b) => a.reihe - b.reihe);
     const gemeinsam = {
       text: e.text.slice(0, 200),
-      person: PERSONEN.some((p) => p.n === e.person) ? e.person : null,
+      person: typeof e.person === "string" && e.person ? e.person.slice(0, 40) : null,
+      ersteller: typeof e.ersteller === "string" ? e.ersteller : null,
       status: e.status === "erledigt" ? "erledigt" : "offen",
       ts: zahl(e.ts) ?? 0,
       reihe: zahl(e.reihe),
@@ -1413,6 +1435,7 @@ zeilenZeichnen();
 filterZeichnen();
 hinweisZurueck();
 tafelZeigen("aus");
+seiteStarten().catch((err) => { console.error(err); zeigeBereich(false); });
 </script>
 </body>
 </html>
