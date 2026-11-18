@@ -176,21 +176,10 @@ tbody th{font-weight:400}
       </div>
     </form>
     <div class="wahl" id="zugang-wahl" hidden>
-      <div class="bereiche">
-        <a class="bereich" href="./Reinigungsplan">
-          <span class="bereich-text"><span class="bereich-name">Hallenreinigung</span><span class="bereich-zusatz">Gereinigte Bereiche eintragen und einsehen</span></span>
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>
-        </a>
-        <a class="bereich" href="./Sportanlagen">
-          <span class="bereich-text"><span class="bereich-name">Sportanlagen</span><span class="bereich-zusatz">Status der Anlagen und der Tribüne einstellen</span></span>
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>
-        </a>
-        <a class="bereich" href="./Arbeitsplan">
-          <span class="bereich-text"><span class="bereich-name">Hallen Arbeitsplan</span><span class="bereich-zusatz">Aufgaben und Pfeile auf dem Hallenplan, eigener Code</span></span>
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>
-        </a>
-      </div>
+      <div class="bereiche" id="zugang-bereiche"></div>
+      <p class="hinweis" id="zugang-leer" hidden>Für diesen Zugang ist kein Bereich freigeschaltet. Wende dich an einen Admin.</p>
       <div class="reihe">
+        <button class="knopf" id="zugang-abmelden" type="button">Abmelden</button>
         <button class="knopf" id="zugang-schliessen" type="button">Schließen</button>
       </div>
     </div>
@@ -255,19 +244,33 @@ async function zugangOeffnen() {
   zeigeTeil("warten");
   fenster.hidden = false;
   $("zugang-titel").focus();
-  let frei = false;
+  let s = null;
   let stoerung = false;
   try {
-    frei = await (await ladeZugang()).istFreigeschaltet();
+    s = await (await ladeZugang()).sitzung();
   } catch (err) {
     console.error(err);
     stoerung = true;
   }
   if (fenster.hidden) return;
-  zeigeTeil(frei ? "wahl" : "formular");
+  if (s) bereicheZeichnen(s);
+  zeigeTeil(s ? "wahl" : "formular");
   if (stoerung) $("zugang-fehler").textContent = "Keine Verbindung zum Server.";
-  (frei ? fenster.querySelector(".bereich") : $("zugang-code")).focus();
+  (s ? (fenster.querySelector(".bereich") ?? $("zugang-schliessen")) : $("zugang-code")).focus();
 }
+/* Zeigt nur die Bereiche, die dieser Zugang sehen darf. */
+function bereicheZeichnen(s) {
+  const m = zugangModul;
+  const erlaubt = (m?.BEREICHE ?? []).filter((f) => s.istAdmin || s.rechte?.[f.id] === true);
+  $("zugang-bereiche").innerHTML = erlaubt.map((f) => `
+    <a class="bereich" href="${f.seite}">
+      <span class="bereich-text"><span class="bereich-name">${f.name}</span><span class="bereich-zusatz">${f.zusatz}</span></span>
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>
+    </a>`).join("");
+  $("zugang-leer").hidden = erlaubt.length > 0;
+  $("zugang-titel").textContent = "Bereich wählen";
+}
+
 function zugangSchliessen() {
   $("zugang").hidden = true;
   $("zugang-code").value = "";
@@ -310,8 +313,9 @@ $("zugang-formular").addEventListener("submit", async (e) => {
     await modul.anmelden(code);
     $("zugang-code").value = "";
     codeVerbergen();
+    bereicheZeichnen(await modul.sitzung());
     zeigeTeil("wahl");
-    $("zugang").querySelector(".bereich").focus();
+    ($("zugang").querySelector(".bereich") ?? $("zugang-schliessen")).focus();
   } catch (err) {
     console.error(err);
     fehler.textContent = modul ? modul.anmeldeFehler(err) : "Keine Verbindung zum Server.";
@@ -320,6 +324,11 @@ $("zugang-formular").addEventListener("submit", async (e) => {
   }
 });
 $("zugang-abbrechen").addEventListener("click", zugangSchliessen);
+$("zugang-abmelden").addEventListener("click", async () => {
+  try { await (await ladeZugang()).abmelden(); } catch (err) { console.error(err); }
+  zeigeTeil("formular");
+  $("zugang-code").focus();
+});
 $("zugang-schliessen").addEventListener("click", zugangSchliessen);
 document.addEventListener("keydown", (e) => {
   const fenster = $("zugang");
