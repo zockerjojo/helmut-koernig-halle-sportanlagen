@@ -84,17 +84,6 @@ textarea{resize:vertical; line-height:1.35}
 .zoom{position:absolute; right:8px; bottom:8px; display:flex; flex-direction:column; gap:6px}
 .zb{width:44px; height:44px; border-radius:10px; border:1px solid var(--line); background:var(--panel); color:var(--ink); font:inherit; font-size:22px; font-weight:600; line-height:1; display:flex; align-items:center; justify-content:center; cursor:pointer}
 .zb.klein{font-size:13px; font-weight:600}
-/* Etagenwahl: ein Schieber mit zwei Stellungen, oben Außen, unten Halle */
-.etagen{position:relative; width:44px; padding:3px; border:1px solid var(--line); border-radius:10px; background:var(--panel); display:flex; flex-direction:column; gap:0; margin-bottom:2px}
-.etagen-knauf{position:absolute; left:3px; right:3px; height:calc(50% - 3px); border-radius:8px; background:var(--accent); transition:transform .18s ease; transform:translateY(100%); pointer-events:none}
-.etagen[data-etage="aussen"] .etagen-knauf{transform:translateY(0)}
-.eb{position:relative; z-index:1; height:30px; border:0; background:none; font:inherit; font-size:12px; font-weight:600; color:var(--ink-2); cursor:pointer; border-radius:8px; padding:0; -webkit-tap-highlight-color:transparent}
-.eb[aria-pressed="true"]{color:var(--on-accent)}
-/* Filter nach Person */
-.filter-feld{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
-.filter-feld .person{flex:none}
-#svg[data-etage="halle"] #ebene-aussen{display:none}
-#svg[data-etage="aussen"] #ebene-halle{display:none}
 /* Aufgaben und Pfeile im Plan */
 #punkte circle.kugel{stroke:#14201B; stroke-width:1.2}
 #punkte circle.kugel.gewaehlt{stroke-width:2.4}
@@ -155,7 +144,6 @@ textarea{resize:vertical; line-height:1.35}
     <span class="marke">Helmut-Körnig-Halle · Personal</span>
   </a>
   <div class="kopf-knoepfe">
-    <button class="rund-knopf" id="filter-knopf" type="button" aria-pressed="false" aria-label="Nach Person filtern" title="Nach Person filtern" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 5h18l-7 8.2V21l-4-2.2v-5.6z"/></svg></button>
     <button class="rund-knopf" id="verlauf-knopf" type="button" aria-pressed="false" aria-label="Verlauf anzeigen" title="Verlauf anzeigen" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button>
     <button class="knopf klein" id="abmelden" type="button" hidden>Abmelden</button>
     <button class="rund-knopf" id="dunkel" type="button" aria-pressed="false" aria-label="Dunkelmodus" title="Dunkelmodus"><svg class="mond" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sonne" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></button>
@@ -195,36 +183,17 @@ textarea{resize:vertical; line-height:1.35}
     <button type="button" id="w-pfeil" aria-pressed="false">Pfeil</button>
   </div>
 
-  <div class="tafel" id="filter-tafel" style="margin-bottom:12px" hidden>
-    <div class="stapel">
-      <h2>Nur bestimmte Personen zeigen</h2>
-      <p class="muted">Tippe die Personen an, deren Aufgaben und Pfeile du sehen willst. Ist nichts ausgewählt, siehst du alles.</p>
-      <div class="filter-feld" id="filter-personen"></div>
-      <p class="muted" id="filter-stand">Es werden alle Einträge gezeigt.</p>
-      <div class="reihe">
-        <button class="knopf klein" id="filter-alle" type="button">Alle zeigen</button>
-        <button class="knopf klein" id="filter-zu" type="button">Schließen</button>
-      </div>
-    </div>
-  </div>
-
   <div class="map" id="map">
     <svg id="svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Plan der Halle, Ebene -4, mit Aufgaben und Pfeilen">
       <defs><filter id="etikett-schatten" x="-20%" y="-30%" width="140%" height="170%"><feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-opacity=".22"></feDropShadow></filter></defs>
       <g id="world">
-        <g id="ebene-halle"><image id="gelaende" href="./bilder/gelaende-aussen.jpg" x="86.56" y="65.2" width="704.16" height="452.85" aria-hidden="true"></image><image id="plan" href="./bilder/hallenplan-ebene-4.svg" x="30.6" y="23" width="793" height="525.1" aria-hidden="true"></image></g>
-        <g id="ebene-aussen"><image id="gelaende-voll" href="./bilder/gelaende-voll.jpg" x="86.56" y="65.2" width="704.16" height="452.85" aria-hidden="true"></image></g>
+        <image id="gelaende" href="./bilder/gelaende-aussen.jpg" x="86.56" y="65.2" width="704.16" height="452.85" aria-hidden="true"></image><image id="plan" href="./bilder/hallenplan-ebene-4.svg" x="30.6" y="23" width="793" height="525.1" aria-hidden="true"></image>
         <g id="pfeile"></g>
         <g id="punkte"></g>
         <g id="etiketten"></g>
       </g>
     </svg>
     <div class="zoom">
-      <div class="etagen" id="etagen" role="group" aria-label="Etage">
-        <span class="etagen-knauf" id="etagen-knauf" aria-hidden="true"></span>
-        <button class="eb" id="e-aussen" type="button" aria-pressed="false" title="Außenbereich">Außen</button>
-        <button class="eb" id="e-halle" type="button" aria-pressed="true" title="Halle">Halle</button>
-      </div>
       <button class="zb" id="z-rein" type="button" aria-label="Näher heranzoomen" title="Näher heran">+</button>
       <button class="zb" id="z-raus" type="button" aria-label="Weiter weg zoomen" title="Weiter weg">−</button>
       <button class="zb klein" id="z-ganz" type="button" aria-label="Ganzen Plan zeigen" title="Ganzer Plan">Alles</button>
@@ -298,7 +267,7 @@ textarea{resize:vertical; line-height:1.35}
 
   <section class="tafel" id="listen-tafel">
     <h2>Alle Aufgaben</h2>
-    <p class="muted" id="alle-hinweis">Oben steht die höchste Priorität (Prio 1). Neue Aufgaben kommen unten dazu. Die Aufgabe am Griff nach oben oder unten ziehen.</p>
+    <p class="muted">Oben steht die höchste Priorität (Prio 1). Neue Aufgaben kommen unten dazu. Die Aufgabe am Griff nach oben oder unten ziehen.</p>
     <ul class="verlauf" id="alle-liste" style="max-height:none"></ul>
     <p class="muted" id="alle-leer" hidden>Noch nichts eingetragen. Tippe oben auf „Aufgabe“ und dann auf den Plan.</p>
   </section>
@@ -311,7 +280,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, onAuthStateChanged, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getDatabase, ref, get, set, update, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { firebaseConfig } from "./js/config.js";
-import { sitzung, anmelden as zugangAnmelden, abmelden, darf, darfAufgabe, darfVertreten, namen as namenLaden } from "./js/zugang.js";
+import { sitzung, anmelden as zugangAnmelden, abmelden, darf, darfAufgabe, namen as namenLaden } from "./js/zugang.js";
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -383,16 +352,10 @@ function zeigeBereich(angemeldet) {
   $("anmeldung").hidden = angemeldet;
   $("panel").hidden = !angemeldet;
   $("verlauf-knopf").hidden = !angemeldet;
-  $("filter-knopf").hidden = !angemeldet;
   $("abmelden").hidden = !angemeldet;
-  if (!angemeldet) $("filter-tafel").hidden = true;
 }
 /* Wer angemeldet ist, sieht diese Seite nur mit dem Recht für den Arbeitsplan. */
 let ICH = null;
-/* Name der Person, für die gerade eingetragen wird. Ohne das Recht "Für andere
-   eintragen" immer die eigene. Wird bewusst nicht gemerkt: nach dem Neuladen
-   trägt wieder jeder für sich selbst ein. */
-let ALS = "";
 async function seiteStarten() {
   let si = null;
   try { si = await sitzung(); } catch (err) { console.error(err); }
@@ -404,7 +367,6 @@ async function seiteStarten() {
   }
   ICH = si;
   S.ich = si.name;
-  ALS = si.name;
   const liste = await namenLaden();
   PERSONEN = Object.entries(liste).map(([bid, n]) => ({ bid, n: n.name, c: n.farbe })).sort((x, y) => x.n.localeCompare(y.n, "de"));
   if (!PERSONEN.some((x) => x.n === si.name)) PERSONEN.unshift({ bid: si.bid, n: si.name, c: si.farbe });
@@ -481,18 +443,7 @@ const S = {
   zeilen: [],
   filter: "alle",
   tafel: "aus",
-  /* Welche Etage gerade zu sehen ist, und wessen Einträge. Leer heißt: alle. */
-  etage: "halle",
-  nurPersonen: [],
 };
-const ETAGEN = { halle: "Halle", aussen: "Außenbereich" };
-const OHNE = "\u0000ohne";   /* steht im Filter für Einträge ohne Person */
-/* Eine Aufgabe gehört zu einer Etage, ein Pfeil kann von einer in die andere gehen. */
-const etageVon = (e) => (e?.etage === "aussen" ? "aussen" : "halle");
-const etageBis = (e) => (istPfeil(e) ? (e?.etage2 === "aussen" ? "aussen" : e?.etage2 === "halle" ? "halle" : etageVon(e)) : etageVon(e));
-const aufEtage = (e) => etageVon(e) === S.etage || etageBis(e) === S.etage;
-const passtZurPerson = (e) => S.nurPersonen.length === 0 || S.nurPersonen.includes(e.person || OHNE);
-const sichtbar = (e) => aufEtage(e) && passtZurPerson(e);
 /* Während eine Zeile in der Liste gezogen wird, wird die Liste nicht neu aufgebaut. */
 let ziehtGerade = false;
 
@@ -555,26 +506,6 @@ function zoomKnopf(faktor) {
 $("z-rein").addEventListener("click", () => zoomKnopf(1.6));
 $("z-raus").addEventListener("click", () => zoomKnopf(1 / 1.6));
 $("z-ganz").addEventListener("click", () => { V.z = 1; V.cx = PLAN.x + PLAN.w / 2; V.cy = PLAN.y + PLAN.h / 2; ansichtSetzen(); zeichnePlan(); });
-
-/* ---- Etage ---- */
-/* Halle und Außenbereich liegen deckungsgleich übereinander. Beim Umschalten
-   bleiben darum Ausschnitt und Zoom stehen: Wer einen Pfeil in der Halle
-   anfängt, wechselt die Etage und tippt das Ziel draußen an, und der Pfeil
-   behält beide Enden genau dort, wo sie gesetzt wurden. */
-function etageSetzen(etage, sagen) {
-  S.etage = etage === "aussen" ? "aussen" : "halle";
-  svg.dataset.etage = S.etage;
-  $("etagen").dataset.etage = S.etage;
-  $("e-halle").setAttribute("aria-pressed", String(S.etage === "halle"));
-  $("e-aussen").setAttribute("aria-pressed", String(S.etage === "aussen"));
-  svg.setAttribute("aria-label", `Plan der Etage ${ETAGEN[S.etage]}, mit Aufgaben und Pfeilen`);
-  zeichnePlan();
-  if (!sagen) return;
-  if (S.start) hinweisSetzen(`Der Anfang liegt in der Etage ${ETAGEN[etageVon(S.start)]}. Tippe das Ziel an, der Pfeil geht dann über beide Etagen.`);
-  else hinweisSetzen(`Etage ${ETAGEN[S.etage]}.`);
-}
-$("e-halle").addEventListener("click", () => etageSetzen("halle", true));
-$("e-aussen").addEventListener("click", () => etageSetzen("aussen", true));
 /* Mausrad und Trackpad: kraeftiges Scrollen zoomt staerker. deltaMode rechnet Zeilen und Seiten um. */
 svg.addEventListener("wheel", (e) => {
   e.preventDefault();
@@ -796,8 +727,7 @@ function zeichnePlan() {
   const p = proPixel();
   const zeigeText = V.z >= 1.8;
   const nummern = new Map(offene().map((e, i) => [e.id, i + 1]));
-  /* Prio bleibt die Prio aller Aufgaben. Gefiltert wird nur, was gezeichnet wird. */
-  const alle = sortiert().filter(sichtbar).map(mitVersatz);
+  const alle = sortiert().map(mitVersatz);
   if (S.verschiebt) haloZeichnen(alle, p);
   alle.filter(istPfeil).forEach((e) => {
     pfeilZeichnen(ebenePfeile, e.x1, e.y1, e.x2, e.y2, kartenFarbe(e), p, false);
@@ -912,7 +842,7 @@ function griffBei(punkt) {
 function planGetippt(punkt) {
   if (S.tafel === "formular" && !S.bearbeiten && S.modus === "aufgabe") {
     /* Noch im Anlegen: ein weiterer Tipp verschiebt die Stelle. */
-    S.entwurf = { art: "aufgabe", x: punkt.x, y: punkt.y, etage: S.etage };
+    S.entwurf = { art: "aufgabe", x: punkt.x, y: punkt.y };
     zeichnePlan();
     return;
   }
@@ -923,20 +853,20 @@ function planGetippt(punkt) {
   if (S.modus === "ansehen") { abwaehlen(); return; }
   if (S.modus === "aufgabe") {
     S.gewaehlt = null;
-    S.entwurf = { art: "aufgabe", x: punkt.x, y: punkt.y, etage: S.etage };
+    S.entwurf = { art: "aufgabe", x: punkt.x, y: punkt.y };
     formularOeffnen(null);
     return;
   }
   if (!S.start) {
     S.gewaehlt = null;
-    S.start = { x: punkt.x, y: punkt.y, etage: S.etage };
+    S.start = { x: punkt.x, y: punkt.y };
     S.entwurf = null;
     hinweisSetzen("Start gesetzt. Jetzt das Ziel antippen.");
     zeichnePlan();
     return;
   }
   if (Math.hypot(punkt.x - S.start.x, punkt.y - S.start.y) < 12) return;
-  S.entwurf = { art: "pfeil", x1: S.start.x, y1: S.start.y, x2: punkt.x, y2: punkt.y, etage: S.start.etage ?? S.etage, etage2: S.etage };
+  S.entwurf = { art: "pfeil", x1: S.start.x, y1: S.start.y, x2: punkt.x, y2: punkt.y };
   S.start = null;
   formularOeffnen(null);
 }
@@ -1004,8 +934,7 @@ function formularOeffnen(id) {
   const e = id ? S.eintraege[id] : null;
   S.bearbeiten = id;
   const pfeil = e ? istPfeil(e) : S.entwurf?.art === "pfeil";
-  /* Neue Einträge gehen an die Person, für die gerade eingetragen wird. */
-  S.person = e ? (e.person ?? null) : (ALS && PERSONEN.some((p) => p.n === ALS) ? ALS : null);
+  S.person = e ? (e.person ?? null) : null;
   S.zeilen = e ? (e.zeilen ?? []).map((z) => ({ id: z.id, titel: z.titel ?? "", text: z.text ?? "" })) : [];
   $("f-titel").textContent = e
     ? (pfeil ? "Pfeil bearbeiten" : "Aufgabe bearbeiten")
@@ -1127,12 +1056,9 @@ $("t-formular").addEventListener("submit", async (e) => {
       const id = neueId();
       const basis = { text: titel, person: S.person ?? null, status: "offen", ts: Date.now(), reihe: neueReihe(), ersteller: ICH?.bid || "" };
       if (zeilen) basis.zeilen = zeilen;
-      /* Die Etage steht beim Entwurf fest: ein Pfeil merkt sich die Etage seines
-         Anfangs und die seines Endes, darum kann er von drinnen nach draußen gehen. */
       const eintrag = S.entwurf.art === "pfeil"
-        ? { art: "pfeil", ...basis, x1: r2(S.entwurf.x1), y1: r2(S.entwurf.y1), x2: r2(S.entwurf.x2), y2: r2(S.entwurf.y2),
-            etage: S.entwurf.etage ?? S.etage, etage2: S.entwurf.etage2 ?? S.etage }
-        : { art: "aufgabe", ...basis, x: r2(S.entwurf.x), y: r2(S.entwurf.y), etage: S.entwurf.etage ?? S.etage };
+        ? { art: "pfeil", ...basis, x1: r2(S.entwurf.x1), y1: r2(S.entwurf.y1), x2: r2(S.entwurf.x2), y2: r2(S.entwurf.y2) }
+        : { art: "aufgabe", ...basis, x: r2(S.entwurf.x), y: r2(S.entwurf.y) };
       const ok = await schreiben({
         [`${BASIS}/eintraege/${id}`]: eintrag,
         ...verlaufPaar("erstellt", titel, eintrag.person),
@@ -1229,29 +1155,13 @@ async function schreiben(werte) {
 
 /* ---- Personen ---- */
 function personenZeichnen() {
-  if (!ICH) { $("ich-wahl").innerHTML = ""; }
-  else if (!darfVertreten(ICH)) {
-    $("ich-wahl").innerHTML = `<span class="person" aria-pressed="true"><span class="farbe" style="background:${esc(ICH.farbe)}"></span>${esc(ICH.name)}</span>`;
-  } else {
-    /* Mit dem Recht "Für andere eintragen" lässt sich umstellen, in wessen Namen
-       eingetragen wird. An den eigenen Rechten ändert das nichts. */
-    $("ich-wahl").innerHTML = PERSONEN.map((p) =>
-      `<button class="person" type="button" data-als="${esc(p.n)}" aria-pressed="${ALS === p.n}"><span class="farbe" style="background:${p.c}"></span>${esc(p.n)}${ALS === p.n ? " ✓" : ""}</button>`
-    ).join("");
-  }
+  $("ich-wahl").innerHTML = ICH
+    ? `<span class="person" aria-pressed="true"><span class="farbe" style="background:${esc(ICH.farbe)}"></span>${esc(ICH.name)}</span>`
+    : "";
   $("f-personen").innerHTML = PERSONEN.map((p) =>
     `<button class="person" type="button" data-person="${esc(p.n)}" aria-pressed="${S.person === p.n}"><span class="farbe" style="background:${p.c}"></span>${esc(p.n)}${S.person === p.n ? " ✓" : ""}</button>`
   ).join("");
 }
-$("ich-wahl").addEventListener("click", (e) => {
-  const knopf = e.target.closest("[data-als]");
-  if (!knopf) return;
-  ALS = knopf.dataset.als;
-  S.ich = ALS;
-  $("ich-text").textContent = ICH && ALS === ICH.name ? "Angemeldet als" : "Eingetragen wird für";
-  personenZeichnen();
-  hinweisSetzen(`Neue Einträge gehen jetzt auf ${ALS}.`);
-});
 $("f-personen").addEventListener("click", (e) => {
   const knopf = e.target.closest("[data-person]");
   if (!knopf) return;
@@ -1304,46 +1214,6 @@ $("verlauf-knopf").addEventListener("click", () => {
 });
 $("v-zurueck").addEventListener("click", () => { S.gewaehlt ? waehle(S.gewaehlt) : abwaehlen(); });
 
-/* ---- Nach Person filtern ---- */
-/* Der Filter blendet nur aus. Er ändert nichts an den Einträgen und nichts an
-   der Prio-Reihenfolge; die bleibt die Reihenfolge aller Aufgaben. */
-function filterPersonenZeichnen() {
-  const ohneDa = Object.values(S.eintraege).some((e) => !e.person);
-  const knopf = (wert, name, farbe, extra) =>
-    `<button class="person" type="button" ${extra} aria-pressed="${S.nurPersonen.includes(wert)}"><span class="farbe" style="background:${farbe}"></span>${esc(name)}</button>`;
-  $("filter-personen").innerHTML =
-    PERSONEN.map((p) => knopf(p.n, p.n, p.c, `data-filter="${esc(p.n)}"`)).join("") +
-    (ohneDa ? knopf(OHNE, "Ohne Person", "#9AA6A0", 'data-filter-ohne="1"') : "");
-  const gewaehlt = S.nurPersonen.map((x) => (x === OHNE ? "ohne Person" : x));
-  $("filter-stand").textContent = gewaehlt.length === 0
-    ? "Es werden alle Einträge gezeigt."
-    : `Gezeigt werden nur: ${gewaehlt.join(", ")}.`;
-  $("filter-knopf").setAttribute("aria-pressed", String(S.nurPersonen.length > 0));
-}
-function filterAnwenden() {
-  filterPersonenZeichnen();
-  zeichnePlan();
-  alleZeichnen();
-}
-$("filter-knopf").addEventListener("click", () => {
-  const tafel = $("filter-tafel");
-  if (!tafel.hidden) { tafel.hidden = true; return; }
-  filterPersonenZeichnen();
-  tafel.hidden = false;
-  tafel.scrollIntoView({ behavior: "smooth", block: "nearest" });
-});
-$("filter-personen").addEventListener("click", (e) => {
-  const knopf = e.target.closest("[data-filter], [data-filter-ohne]");
-  if (!knopf) return;
-  const wert = knopf.hasAttribute("data-filter-ohne") ? OHNE : knopf.dataset.filter;
-  S.nurPersonen = S.nurPersonen.includes(wert)
-    ? S.nurPersonen.filter((x) => x !== wert)
-    : [...S.nurPersonen, wert];
-  filterAnwenden();
-});
-$("filter-alle").addEventListener("click", () => { S.nurPersonen = []; filterAnwenden(); });
-$("filter-zu").addEventListener("click", () => { $("filter-tafel").hidden = true; });
-
 /* ---- Liste aller Aufgaben: offene nach Prio, erledigte darunter ---- */
 function alleZeichnen() {
   if (ziehtGerade) return;
@@ -1351,21 +1221,15 @@ function alleZeichnen() {
   const offen = alle.filter(istOffen);
   const erledigt = alle.filter((e) => !istOffen(e));
   const nummern = new Map(offen.map((e, i) => [e.id, i + 1]));
-  /* Gefiltert wird nur die Anzeige. Solange gefiltert ist, bleibt der Griff weg:
-     Verschieben in einer Teilliste würde die Prio der versteckten Aufgaben verdrehen. */
-  const gefiltert = S.nurPersonen.length > 0;
-  $("alle-liste").innerHTML = [...offen, ...erledigt].filter(passtZurPerson).map((e) => {
+  $("alle-liste").innerHTML = [...offen, ...erledigt].map((e) => {
     const nr = nummern.get(e.id);
     const farbe = punktFarbe(e);
-    const griff = nr && !gefiltert
+    const griff = nr
       ? `<button class="griff" type="button" data-griff="${esc(e.id)}" aria-label="Priorität ändern: nach oben oder unten ziehen" title="Zum Ändern der Priorität ziehen">${GRIFF_SVG}</button>`
       : `<span class="griff-platz" aria-hidden="true"></span>`;
     return `<li class="${istOffen(e) ? "offen" : "erledigt"}" data-id="${esc(e.id)}">${griff}<span class="abzeichen" style="background:${farbe}; color:${kontrast(farbe)}">${nr ?? ""}</span><span class="zeile"><button class="textknopf" type="button" data-zeigen="${esc(e.id)}" style="text-align:left; color:var(--ink); min-height:auto">${esc(titelVon(e))}</button><span class="wann">${esc(untertitelVon(e))}</span></span></li>`;
   }).join("");
   $("alle-leer").hidden = alle.length > 0;
-  $("alle-hinweis").textContent = gefiltert
-    ? "Gefiltert: es stehen nur die ausgewählten Personen in der Liste. Die Prio-Reihenfolge lässt sich erst wieder ändern, wenn der Filter aus ist."
-    : "Oben steht die höchste Priorität (Prio 1). Neue Aufgaben kommen unten dazu. Die Aufgabe am Griff nach oben oder unten ziehen.";
 }
 $("alle-liste").addEventListener("click", (e) => {
   const knopf = e.target.closest("[data-zeigen]");
@@ -1520,16 +1384,14 @@ function sauber(roh) {
       reihe: zahl(e.reihe),
       zeilen,
     };
-    /* Einträge von früher haben keine Etage. Die gehören in die Halle. */
-    const et = (v) => (v === "aussen" ? "aussen" : "halle");
     if (e.art === "pfeil") {
       const x1 = zahl(e.x1), y1 = zahl(e.y1), x2 = zahl(e.x2), y2 = zahl(e.y2);
       if (x1 === null || y1 === null || x2 === null || y2 === null) return;
-      raus[id] = { art: "pfeil", ...gemeinsam, x1, y1, x2, y2, etage: et(e.etage), etage2: et(e.etage2 ?? e.etage) };
+      raus[id] = { art: "pfeil", ...gemeinsam, x1, y1, x2, y2 };
     } else {
       const x = zahl(e.x), y = zahl(e.y);
       if (x === null || y === null) return;
-      raus[id] = { art: "aufgabe", ...gemeinsam, x, y, etage: et(e.etage) };
+      raus[id] = { art: "aufgabe", ...gemeinsam, x, y };
     }
   });
   return raus;
@@ -1571,8 +1433,6 @@ requestAnimationFrame(() => { ansichtSetzen(); zeichnePlan(); });
 personenZeichnen();
 zeilenZeichnen();
 filterZeichnen();
-etageSetzen(S.etage);
-filterPersonenZeichnen();
 hinweisZurueck();
 tafelZeigen("aus");
 seiteStarten().catch((err) => { console.error(err); zeigeBereich(false); });
