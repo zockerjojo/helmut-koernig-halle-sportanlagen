@@ -56,6 +56,11 @@ tbody th{font-weight:400}
 .kasten.gruen{background:var(--gruen)}
 .kasten.rot{background:var(--rot)}
 .leer{color:var(--ink2); font-size:15px}
+/* Aushang am Sportlereingang: dasselbe Kästchen wie die Tabelle darüber. */
+.aushang{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:12px 14px; display:flex; flex-direction:column; gap:6px}
+.aushang-titel{margin:0; font-size:13px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--ink2)}
+.aushang-text{margin:0; font-size:16px; line-height:1.35; color:var(--ink); white-space:pre-wrap; overflow-wrap:anywhere}
+.aushang-text.ohne{color:var(--ink2)}
 .verbindung{margin:0; font-size:13px; font-weight:600; color:var(--ink)}
 .stand{margin:0; font-size:14px; font-weight:500; color:var(--ink2)}
 /* Auf schmalen Bildschirmen steht der Name über dem Status, damit er nicht mitten im Wort umbricht */
@@ -141,6 +146,11 @@ tbody th{font-weight:400}
 </table>
 
 <p class="verbindung" id="verbindung" hidden>Keine Verbindung. Die Angaben können veraltet sein.</p>
+
+<section class="aushang" aria-labelledby="aushang-titel">
+  <p class="aushang-titel" id="aushang-titel">Aushang am Sportlereingang:</p>
+  <p class="aushang-text ohne" id="aushang-text">Infos folgen.</p>
+</section>
 
 <section class="hinweis-block">
   <p class="hinweis-titel">Hinweis zur Aktualität:</p>
@@ -437,6 +447,12 @@ onValue(ref(db, "matten"), (snap) => {
     ? liste.map(zeile).join("")
     : `<tr><td colspan="2" class="leer">Noch keine Anlagen eingetragen.</td></tr>`;
 });
+/* Aushang am Sportlereingang. Steht nichts darin, bleibt der Platzhalter stehen. */
+onValue(ref(db, "aushang/text"), (snap) => {
+  const text = String(snap.val() ?? "").trim();
+  $("aushang-text").textContent = text || "Infos folgen.";
+  $("aushang-text").classList.toggle("ohne", !text);
+}, () => {});
 onValue(ref(db, ".info/connected"), (snap) => {
   $("verbindung").hidden = snap.val() === true;
 });

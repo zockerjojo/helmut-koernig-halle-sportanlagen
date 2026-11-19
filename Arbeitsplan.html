@@ -220,7 +220,7 @@ textarea{resize:vertical; line-height:1.35}
       </g>
     </svg>
     <div class="zoom">
-      <div class="etagen" role="group" aria-label="Etage">
+      <div class="etagen" id="etagen" role="group" aria-label="Etage">
         <span class="etagen-knauf" id="etagen-knauf" aria-hidden="true"></span>
         <button class="eb" id="e-aussen" type="button" aria-pressed="false" title="Außenbereich">Außen</button>
         <button class="eb" id="e-halle" type="button" aria-pressed="true" title="Halle">Halle</button>
@@ -383,7 +383,9 @@ function zeigeBereich(angemeldet) {
   $("anmeldung").hidden = angemeldet;
   $("panel").hidden = !angemeldet;
   $("verlauf-knopf").hidden = !angemeldet;
+  $("filter-knopf").hidden = !angemeldet;
   $("abmelden").hidden = !angemeldet;
+  if (!angemeldet) $("filter-tafel").hidden = true;
 }
 /* Wer angemeldet ist, sieht diese Seite nur mit dem Recht für den Arbeitsplan. */
 let ICH = null;
@@ -553,6 +555,26 @@ function zoomKnopf(faktor) {
 $("z-rein").addEventListener("click", () => zoomKnopf(1.6));
 $("z-raus").addEventListener("click", () => zoomKnopf(1 / 1.6));
 $("z-ganz").addEventListener("click", () => { V.z = 1; V.cx = PLAN.x + PLAN.w / 2; V.cy = PLAN.y + PLAN.h / 2; ansichtSetzen(); zeichnePlan(); });
+
+/* ---- Etage ---- */
+/* Halle und Außenbereich liegen deckungsgleich übereinander. Beim Umschalten
+   bleiben darum Ausschnitt und Zoom stehen: Wer einen Pfeil in der Halle
+   anfängt, wechselt die Etage und tippt das Ziel draußen an, und der Pfeil
+   behält beide Enden genau dort, wo sie gesetzt wurden. */
+function etageSetzen(etage, sagen) {
+  S.etage = etage === "aussen" ? "aussen" : "halle";
+  svg.dataset.etage = S.etage;
+  $("etagen").dataset.etage = S.etage;
+  $("e-halle").setAttribute("aria-pressed", String(S.etage === "halle"));
+  $("e-aussen").setAttribute("aria-pressed", String(S.etage === "aussen"));
+  svg.setAttribute("aria-label", `Plan der Etage ${ETAGEN[S.etage]}, mit Aufgaben und Pfeilen`);
+  zeichnePlan();
+  if (!sagen) return;
+  if (S.start) hinweisSetzen(`Der Anfang liegt in der Etage ${ETAGEN[etageVon(S.start)]}. Tippe das Ziel an, der Pfeil geht dann über beide Etagen.`);
+  else hinweisSetzen(`Etage ${ETAGEN[S.etage]}.`);
+}
+$("e-halle").addEventListener("click", () => etageSetzen("halle", true));
+$("e-aussen").addEventListener("click", () => etageSetzen("aussen", true));
 /* Mausrad und Trackpad: kraeftiges Scrollen zoomt staerker. deltaMode rechnet Zeilen und Seiten um. */
 svg.addEventListener("wheel", (e) => {
   e.preventDefault();
@@ -1282,6 +1304,46 @@ $("verlauf-knopf").addEventListener("click", () => {
 });
 $("v-zurueck").addEventListener("click", () => { S.gewaehlt ? waehle(S.gewaehlt) : abwaehlen(); });
 
+/* ---- Nach Person filtern ---- */
+/* Der Filter blendet nur aus. Er ändert nichts an den Einträgen und nichts an
+   der Prio-Reihenfolge; die bleibt die Reihenfolge aller Aufgaben. */
+function filterPersonenZeichnen() {
+  const ohneDa = Object.values(S.eintraege).some((e) => !e.person);
+  const knopf = (wert, name, farbe, extra) =>
+    `<button class="person" type="button" ${extra} aria-pressed="${S.nurPersonen.includes(wert)}"><span class="farbe" style="background:${farbe}"></span>${esc(name)}</button>`;
+  $("filter-personen").innerHTML =
+    PERSONEN.map((p) => knopf(p.n, p.n, p.c, `data-filter="${esc(p.n)}"`)).join("") +
+    (ohneDa ? knopf(OHNE, "Ohne Person", "#9AA6A0", 'data-filter-ohne="1"') : "");
+  const gewaehlt = S.nurPersonen.map((x) => (x === OHNE ? "ohne Person" : x));
+  $("filter-stand").textContent = gewaehlt.length === 0
+    ? "Es werden alle Einträge gezeigt."
+    : `Gezeigt werden nur: ${gewaehlt.join(", ")}.`;
+  $("filter-knopf").setAttribute("aria-pressed", String(S.nurPersonen.length > 0));
+}
+function filterAnwenden() {
+  filterPersonenZeichnen();
+  zeichnePlan();
+  alleZeichnen();
+}
+$("filter-knopf").addEventListener("click", () => {
+  const tafel = $("filter-tafel");
+  if (!tafel.hidden) { tafel.hidden = true; return; }
+  filterPersonenZeichnen();
+  tafel.hidden = false;
+  tafel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+});
+$("filter-personen").addEventListener("click", (e) => {
+  const knopf = e.target.closest("[data-filter], [data-filter-ohne]");
+  if (!knopf) return;
+  const wert = knopf.hasAttribute("data-filter-ohne") ? OHNE : knopf.dataset.filter;
+  S.nurPersonen = S.nurPersonen.includes(wert)
+    ? S.nurPersonen.filter((x) => x !== wert)
+    : [...S.nurPersonen, wert];
+  filterAnwenden();
+});
+$("filter-alle").addEventListener("click", () => { S.nurPersonen = []; filterAnwenden(); });
+$("filter-zu").addEventListener("click", () => { $("filter-tafel").hidden = true; });
+
 /* ---- Liste aller Aufgaben: offene nach Prio, erledigte darunter ---- */
 function alleZeichnen() {
   if (ziehtGerade) return;
@@ -1509,6 +1571,8 @@ requestAnimationFrame(() => { ansichtSetzen(); zeichnePlan(); });
 personenZeichnen();
 zeilenZeichnen();
 filterZeichnen();
+etageSetzen(S.etage);
+filterPersonenZeichnen();
 hinweisZurueck();
 tafelZeigen("aus");
 seiteStarten().catch((err) => { console.error(err); zeigeBereich(false); });
