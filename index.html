@@ -81,7 +81,7 @@ tbody th{font-weight:400}
 .fenster-kopf{display:flex; flex-direction:column; gap:6px}
 .fenster h2{margin:0; font-family:var(--display); font-weight:600; font-size:30px; line-height:1.05; text-transform:uppercase}
 .fenster h2:focus{outline:none}
-.fenster form, .fenster .wahl{display:flex; flex-direction:column; gap:16px}
+.fenster form{display:flex; flex-direction:column; gap:16px}
 .feld{display:flex; flex-direction:column; gap:6px; font-size:15px; color:var(--ink2)}
 .feld input{font:inherit; font-size:16px; color:var(--ink); background:var(--bg); min-height:48px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; width:100%}
 /* Augen-Taste: blendet den eingegebenen Code ein und aus */
@@ -100,13 +100,6 @@ tbody th{font-weight:400}
 .knopf{flex:1; font:inherit; font-size:15px; font-weight:600; min-height:44px; padding:8px 18px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer}
 .knopf.primaer{background:var(--akzent); border-color:var(--akzent); color:var(--auf-akzent)}
 .knopf:disabled{opacity:.6; cursor:default}
-.bereiche{display:flex; flex-direction:column; gap:10px}
-.bereich{display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:76px; padding:14px 14px 14px 16px; border:1px solid var(--line); border-radius:12px; background:var(--bg); color:var(--ink); text-decoration:none}
-.bereich:hover{border-color:var(--ink)}
-.bereich-text{display:flex; flex-direction:column; gap:3px; min-width:0}
-.bereich-name{font-family:var(--display); font-weight:600; font-size:24px; line-height:1.05; text-transform:uppercase}
-.bereich-zusatz{font-size:14px; line-height:1.3; color:var(--ink2)}
-.bereich svg{flex:none; width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
 .fenster a:focus-visible, .fenster input:focus-visible{outline:3px solid var(--ink); outline-offset:2px}
 /* Logo oben links: führt auf jeder Seite zurück zur Startseite */
 .logo-link{display:inline-flex; align-items:center; gap:10px; min-width:0; flex:none; text-decoration:none; color:inherit; border-radius:6px}
@@ -195,14 +188,6 @@ tbody th{font-weight:400}
         <button class="knopf primaer" id="zugang-anmelden" type="submit">Anmelden</button>
       </div>
     </form>
-    <div class="wahl" id="zugang-wahl" hidden>
-      <div class="bereiche" id="zugang-bereiche"></div>
-      <p class="hinweis" id="zugang-leer" hidden>Für diesen Zugang ist kein Bereich freigeschaltet. Wende dich an einen Admin.</p>
-      <div class="reihe">
-        <button class="knopf" id="zugang-abmelden" type="button">Abmelden</button>
-        <button class="knopf" id="zugang-schliessen" type="button">Schließen</button>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -243,8 +228,8 @@ knopf.addEventListener("pointerdown", (e) => {
 ["pointerup", "pointerleave", "pointercancel"].forEach((name) => knopf.addEventListener(name, () => clearTimeout(halteUhr)));
 knopf.addEventListener("contextmenu", (e) => e.preventDefault());
 
-/* Zugang für das Personal: Ist das Gerät schon angemeldet, kommt sofort die Auswahl, sonst erst der Zugangscode.
-   Die Anmeldung wird erst hier nachgeladen, damit die Anzeige für Sportler schlank bleibt. */
+/* Zugang für das Personal: Gedrückt halten öffnet immer nur die Eingabe des Zugangscodes.
+   Die Bereiche erreicht man danach über die Personal-Leiste unten rechts. Die Anmeldung wird erst hier nachgeladen, damit die Anzeige für Sportler schlank bleibt. */
 let zugangModul = null;
 let vorherFokus = null;
 const ladeZugang = async () => (zugangModul ??= await import("./js/zugang.js"));
@@ -260,47 +245,18 @@ async function leisteZeigen(s) {
   if (!merker) return;
   try { const s = await (await ladeZugang()).sitzung(); if (s) leisteZeigen(s); } catch (err) { console.error(err); }
 })();
-function zeigeTeil(teil) {
-  $("zugang-warten").hidden = teil !== "warten";
-  $("zugang-formular").hidden = teil !== "formular";
-  $("zugang-wahl").hidden = teil !== "wahl";
-  $("zugang-titel").textContent = teil === "wahl" ? "Bereich wählen" : "Anmelden";
-}
-async function zugangOeffnen() {
+function zugangOeffnen() {
   const fenster = $("zugang");
   if (!fenster.hidden) return;
   vorherFokus = document.activeElement;
   $("zugang-fehler").textContent = "";
   $("zugang-code").value = "";
   codeVerbergen();
-  zeigeTeil("warten");
+  $("zugang-warten").hidden = true;
+  $("zugang-formular").hidden = false;
   fenster.hidden = false;
-  $("zugang-titel").focus();
-  let s = null;
-  let stoerung = false;
-  try {
-    s = await (await ladeZugang()).sitzung();
-  } catch (err) {
-    console.error(err);
-    stoerung = true;
-  }
-  if (fenster.hidden) return;
-  if (s) bereicheZeichnen(s);
-  zeigeTeil(s ? "wahl" : "formular");
-  if (stoerung) $("zugang-fehler").textContent = "Keine Verbindung zum Server.";
-  (s ? (fenster.querySelector(".bereich") ?? $("zugang-schliessen")) : $("zugang-code")).focus();
-}
-/* Zeigt nur die Bereiche, die dieser Zugang sehen darf. */
-function bereicheZeichnen(s) {
-  const m = zugangModul;
-  const erlaubt = (m?.BEREICHE ?? []).filter((f) => s.istAdmin || s.rechte?.[f.id] === true);
-  $("zugang-bereiche").innerHTML = erlaubt.map((f) => `
-    <a class="bereich" href="${f.seite}">
-      <span class="bereich-text"><span class="bereich-name">${f.name}</span><span class="bereich-zusatz">${f.zusatz}</span></span>
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>
-    </a>`).join("");
-  $("zugang-leer").hidden = erlaubt.length > 0;
-  $("zugang-titel").textContent = "Bereich wählen";
+  $("zugang-code").focus();
+  ladeZugang().catch((err) => console.error(err));
 }
 
 function zugangSchliessen() {
@@ -347,10 +303,9 @@ $("zugang-formular").addEventListener("submit", async (e) => {
     codeVerbergen();
     const s = await modul.sitzung();
     if (!s) throw Object.assign(new Error("PERMISSION_DENIED"), { code: "PERMISSION_DENIED" });
-    bereicheZeichnen(s);
+    document.querySelectorAll(".hkh-schalter, .hkh-band, .hkh-einst, .hkh-leiste").forEach((el) => el.remove());
     leisteZeigen(s);
-    zeigeTeil("wahl");
-    ($("zugang").querySelector(".bereich") ?? $("zugang-schliessen")).focus();
+    zugangSchliessen();
   } catch (err) {
     console.error(err);
     fehler.textContent = modul ? modul.anmeldeFehler(err) : "Keine Verbindung zum Server.";
@@ -359,14 +314,6 @@ $("zugang-formular").addEventListener("submit", async (e) => {
   }
 });
 $("zugang-abbrechen").addEventListener("click", zugangSchliessen);
-$("zugang-abmelden").addEventListener("click", async () => {
-  try { await (await ladeZugang()).abmelden(); } catch (err) { console.error(err); }
-  document.querySelector(".hkh-leiste")?.remove();
-  document.body.classList.remove("hkh-mit-leiste");
-  zeigeTeil("formular");
-  $("zugang-code").focus();
-});
-$("zugang-schliessen").addEventListener("click", zugangSchliessen);
 document.addEventListener("keydown", (e) => {
   const fenster = $("zugang");
   if (fenster.hidden) return;
@@ -380,11 +327,6 @@ document.addEventListener("keydown", (e) => {
   if (e.shiftKey && (document.activeElement === erstes || !fenster.contains(document.activeElement))) { e.preventDefault(); letztes.focus(); }
   else if (!e.shiftKey && (document.activeElement === letztes || !fenster.contains(document.activeElement))) { e.preventDefault(); erstes.focus(); }
 });
-/* Die Personal-Seiten führen mit "#auswahl" hierher zurück: dann geht die Auswahl sofort auf */
-if (location.hash === "#auswahl") {
-  history.replaceState(null, "", location.pathname + location.search);
-  zugangOeffnen();
-}
 
 /* Zustände: grün = frei, rot = nicht frei. Ohne Status gilt rot. */
 const ZUSTAENDE = {
