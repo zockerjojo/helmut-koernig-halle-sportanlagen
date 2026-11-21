@@ -161,6 +161,7 @@ textarea:focus-visible,.tf:focus-visible{outline:3px solid var(--accent);outline
   .b{font-size:14px;padding:4px 6px}
   .seg{flex-wrap:wrap}
   .seg .b{flex:1 1 40%}
+  .seg .b.sym,.seg .breite{flex:1 1 15%}
   .two{grid-template-columns:1fr}
   .two .seg .b{flex:1 1 28%}
   .map{margin:10px 16px 10px 0}
@@ -180,7 +181,23 @@ textarea:focus-visible,.tf:focus-visible{outline:3px solid var(--accent);outline
 .b{min-height:34px;padding:4px 6px;font-size:14px}
 .ghost{min-height:36px;font-size:14px}
 .r1{display:flex;gap:6px;align-items:center}
-.r3{display:grid;grid-template-columns:1fr 1fr;gap:6px;align-items:center}
+.r3{display:flex;gap:6px;align-items:center;justify-content:space-between}
+.switch .opt svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.mehr{position:relative;flex:none}
+.mehr > .b{width:56px;min-height:36px;position:relative}
+.mehr-zahl{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--accent);color:var(--on-accent);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.mehr-zahl[hidden]{display:none}
+.mmenu{position:absolute;top:calc(100% + 4px);right:0;z-index:20;display:none;flex-direction:column;gap:4px;padding:6px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.18);width:min(300px,86vw)}
+.mmenu.open{display:flex}
+.mmenu .ghost{flex:none;width:100%;min-width:0;text-align:left;padding:0 12px}
+/* Werkzeuge als Symbole; das Wort steht am PC beim Drüberfahren (title) */
+.b.sym svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.breite{position:relative;flex:1;display:flex;min-width:0}
+.breite > .b{flex:1}
+.bmenu{position:absolute;top:calc(100% + 4px);left:50%;transform:translateX(-50%);z-index:20;display:none;flex-direction:column;gap:4px;padding:6px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.18);min-width:120px}
+.bmenu.open{display:flex}
+.bmenu .b{flex:none;min-height:40px}
+.bmenu .linie{width:72px;height:20px;fill:none;stroke:currentColor;stroke-linecap:round}
 .r3 .seg .b{font-size:13px}
 .seg.sm .b{padding:4px 4px}
 .who{position:relative;flex:none}
@@ -234,15 +251,13 @@ a.ghost{display:flex;align-items:center;justify-content:center;gap:2px;color:var
   <header class="top">
     <div class="brand"><a class="logo-link" href="./" aria-label="Zur Startseite"><img class="logo" src="./bilder/logo.png" alt="Dortmunder Sportstätten" width="480" height="241"></a><h1>Reinigungsplan HKH</h1></div>
     <div class="hr"><span id="prog" aria-live="polite"></span><button class="live s-none" id="live" type="button" aria-label="Live-Abgleich und Zugangscode"><span class="ld"></span><span id="live-t">Nur dieses Gerät</span></button></div>
-    <button class="thb weit" id="logout" type="button" aria-label="Abmelden" title="Abmelden">Abmelden</button>
-    <button class="thb" id="theme" type="button" aria-label="Hell oder dunkel umschalten" title="Hell / Dunkel">&#9790;</button>
   </header>
 
   <section class="ctl" aria-label="Bedienung">
     <div class="r1">
       <div class="who">
-        <span class="b wbtn" id="who-btn" title="Angemeldet"><span class="dot" id="who-dot"></span><span id="who-name">…</span></span>
-        <div class="wmenu" id="people" role="menu" aria-label="Wer putzt" hidden></div>
+        <button class="b wbtn" id="who-btn" type="button" title="Für wen wird eingetragen?"><span class="dot" id="who-dot"></span><span id="who-name">…</span><span class="car" id="who-car" aria-hidden="true" hidden>&#9662;</span></button>
+        <div class="wmenu" id="people" role="menu" aria-label="Für wen wird eingetragen?"></div>
       </div>
       <div class="sl3 two" id="art-sl" data-pos="0" role="group" aria-label="Art: Bahnen oder Frei">
         <span class="knob3" aria-hidden="true"></span>
@@ -254,21 +269,32 @@ a.ghost{display:flex;align-items:center;justify-content:center;gap:2px;color:var
       </button>
     </div>
     <div class="seg" role="group" aria-label="Werkzeug">
-      <button class="b" id="m-paint" data-k="mode" data-v="paint">Malen</button>
-      <button class="b" id="m-erase" data-k="mode" data-v="erase">Radieren</button>
-      <button class="b" id="m-note" data-k="mode" data-v="note">Notiz</button>
-      <button class="b" id="m-move" data-k="mode" data-v="move">Schieben</button>
+      <button class="b sym" id="m-paint" data-k="mode" data-v="paint" title="Malen" aria-label="Malen"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 21v-4a4 4 0 1 1 4 4h-4" /> <path d="M21 3a16 16 0 0 0 -12.8 10.2" /> <path d="M21 3a16 16 0 0 1 -10.2 12.8" /> <path d="M10.6 9a9 9 0 0 1 4.4 4.4" /></svg></button>
+      <button class="b sym" id="m-erase" data-k="mode" data-v="erase" title="Radieren" aria-label="Radieren"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 20h-10.5l-4.21 -4.3a1 1 0 0 1 0 -1.41l10 -10a1 1 0 0 1 1.41 0l5 5a1 1 0 0 1 0 1.41l-9.2 9.3" /> <path d="M18 13.3l-6.3 -6.3" /></svg></button>
+      <div class="breite">
+        <button class="b sym" id="b-knopf" type="button" title="Strichbreite" aria-label="Strichbreite: Breit" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g transform="translate(3.2 0) scale(.78)"><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /> <path d="M13.5 6.5l4 4" /></g><line id="b-strich" x1="3" y1="21.6" x2="21" y2="21.6" stroke-width="3.2"/></svg></button>
+        <div class="bmenu" id="b-menu" role="menu" aria-label="Strichbreite">
+          <button type="button" class="b" id="b-all" data-k="brush" data-v="all" role="menuitemradio" title="Breit" aria-label="Breit"><svg class="linie" viewBox="0 0 72 20" aria-hidden="true" focusable="false"><line x1="6" y1="10" x2="66" y2="10" stroke-width="9"/></svg></button>
+          <button type="button" class="b" id="b-mid" data-k="brush" data-v="mid" role="menuitemradio" title="Mittel" aria-label="Mittel"><svg class="linie" viewBox="0 0 72 20" aria-hidden="true" focusable="false"><line x1="6" y1="10" x2="66" y2="10" stroke-width="5"/></svg></button>
+          <button type="button" class="b" id="b-one" data-k="brush" data-v="one" role="menuitemradio" title="Schmal" aria-label="Schmal"><svg class="linie" viewBox="0 0 72 20" aria-hidden="true" focusable="false"><line x1="6" y1="10" x2="66" y2="10" stroke-width="2"/></svg></button>
+        </div>
+      </div>
+      <button class="b sym" id="m-note" data-k="mode" data-v="note" title="Notiz" aria-label="Notiz"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 9h8" /> <path d="M8 13h6" /> <path d="M9 18h-3a3 3 0 0 1 -3 -3v-8a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v8a3 3 0 0 1 -3 3h-3l-3 3l-3 -3" /></svg></button>
+      <button class="b sym" id="m-move" data-k="mode" data-v="move" title="Schieben" aria-label="Schieben"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 11v-3.5a1.5 1.5 0 0 1 3 0v2.5" /> <path d="M11 9.5v-3a1.5 1.5 0 0 1 3 0v3.5" /> <path d="M14 7.5a1.5 1.5 0 0 1 3 0v2.5" /> <path d="M17 9.5a1.5 1.5 0 0 1 3 0v4.5a6 6 0 0 1 -6 6h-2h.208a6 6 0 0 1 -5.012 -2.7l-.196 -.3c-.312 -.479 -1.407 -2.388 -3.286 -5.728a1.5 1.5 0 0 1 .536 -2.022a1.867 1.867 0 0 1 2.28 .28l1.47 1.47" /></svg></button>
     </div>
     <div class="r3">
-      <div class="sl3" id="brush-sl" data-pos="0" role="group" aria-label="Breite der Malerei">
-        <span class="knob3" aria-hidden="true"></span>
-        <button type="button" class="sl-opt" id="b-all" data-k="brush" data-v="all">Breit</button>
-        <button type="button" class="sl-opt" id="b-mid" data-k="brush" data-v="mid">Mittel</button>
-        <button type="button" class="sl-opt" id="b-one" data-k="brush" data-v="one">Schmal</button>
-      </div>
-      <button class="switch full" id="view-sw" type="button" data-d="plan" aria-label="Ansicht: Plan oder Farbe" title="Ansicht">
-        <span class="knob" aria-hidden="true"></span><span class="opt o1" aria-hidden="true">Plan</span><span class="opt o2" aria-hidden="true">Farbe</span>
+      <button class="switch" id="view-sw" type="button" data-d="plan" aria-label="Ansicht: Plan oder Farbe" title="Ansicht: Plan oder Farbe">
+        <span class="knob" aria-hidden="true"></span><span class="opt o1" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 7l6 -3l6 3l6 -3v13l-6 3l-6 -3l-6 3v-13" /> <path d="M9 4v13" /> <path d="M15 7v13" /></svg></span><span class="opt o2" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21a9 9 0 0 1 0 -18c4.97 0 9 3.582 9 8c0 1.06 -.474 2.078 -1.318 2.828c-.844 .75 -1.989 1.172 -3.182 1.172h-2.5a2 2 0 0 0 -1 3.75a1.3 1.3 0 0 1 -1 2.25" /> <path d="M7.5 10.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /> <path d="M11.5 7.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /> <path d="M15.5 10.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /></svg></span>
       </button>
+      <div class="mehr">
+        <button class="b sym" id="mehr-knopf" type="button" title="Mehr: Notizen, Umschalten, Herunterladen, Zurücksetzen" aria-label="Mehr: Notizen, Umschalten, Herunterladen, Zurücksetzen" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 6l16 0" /> <path d="M4 12l16 0" /> <path d="M4 18l16 0" /></svg><span class="mehr-zahl" id="mehr-zahl" hidden></span></button>
+        <div class="mmenu" id="mehr-menu" role="menu" aria-label="Mehr">
+          <button class="ghost" id="open-notes" role="menuitem">Notizen (0)</button>
+          <button class="ghost" id="btn-offen" type="button" role="menuitemcheckbox" aria-pressed="false">Umschalten nicht gereinigte Bereiche</button>
+          <button class="ghost" id="btn-bild" type="button" role="menuitem">Plan herunterladen</button>
+          <button class="ghost danger" id="open-reset" role="menuitem">Zurücksetzen</button>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -341,12 +367,6 @@ a.ghost{display:flex;align-items:center;justify-content:center;gap:2px;color:var
 
   <footer class="bot">
     <p id="info" aria-live="polite"></p>
-    <div class="acts">
-      <button class="ghost" id="open-notes">Notizen (0)</button>
-      <button class="ghost" id="btn-offen" type="button" aria-pressed="false">Umschalten nicht gereinigte Bereiche</button>
-      <button class="ghost" id="btn-bild" type="button">Plan herunterladen</button>
-      <button class="ghost danger" id="open-reset">Zurücksetzen</button>
-    </div>
   </footer>
 
   <div class="shade" id="sh-edit">
@@ -393,7 +413,7 @@ a.ghost{display:flex;align-items:center;justify-content:center;gap:2px;color:var
   <div class="shade" id="sh-reset">
     <div class="sheet" role="dialog" aria-labelledby="h-reset">
       <h2 id="h-reset">Alle Flächen auf offen setzen?</h2>
-      <p>Alle eingemalten Flächen verschwinden, bei allen Personen. Das lässt sich nicht rückgängig machen. Die Notizen bleiben erhalten.</p>
+      <p id="reset-text">Alle eingemalten Flächen verschwinden, bei allen Personen. Das lässt sich nicht rückgängig machen. Die Notizen bleiben erhalten.</p>
       <p id="reset-warn" class="err" aria-live="polite"></p>
       <div class="acts">
         <button class="ghost" id="reset-cancel">Abbrechen</button>
@@ -509,10 +529,16 @@ function render(l){
     while(k+c<n&&key(l.st[(start+k+c)%n])===key(v))c++;
     if(v){if(!ZEIGE_OFFEN)seg(l,idx*l.ps,c*l.ps,v)}else if(ZEIGE_OFFEN)seg(l,idx*l.ps,c*l.ps,null);k+=c}
 }
+/* Fremde Farben bleiben stehen, außer mit dem Recht "Fremde Farben übermalen".
+   Eigene heißt: von der Person, für die gerade eingetragen wird. */
+var FREMD_GESCHUETZT=0;
+function darfZelle(alt){return !alt||DARF_UEBERMALEN||String(alt.p)===String(S.who)}
+function darfStrich(s){return !!s&&(DARF_UEBERMALEN||String(s.p)===String(S.who))}
 function fill(l,a,b,v,undo){
   var i0=Math.floor(Math.min(a,b)/l.ps),i1=Math.min(Math.floor(Math.max(a,b)/l.ps),i0+l.n-1);
   for(var i=i0;i<=i1;i++){var x=l.closed?((i%l.n)+l.n)%l.n:i;if(x<0||x>=l.n||(l.valid&&!l.valid[x]))continue;
     if(key(l.st[x])===key(v))continue;
+    if(!darfZelle(l.st[x])){FREMD_GESCHUETZT++;continue}
     if(undo&&!(x in undo))undo[x]=l.st[x];
     l.st[x]=v;mark(l,x,v)}
 }
@@ -641,8 +667,12 @@ function startSync(){
       }
       S.who=ich.bid||"admin";
       NAMEN[S.who]={name:ich.name,farbe:ich.farbe};
-      syncButtons();
-      Z.namen().then(function(n){Object.keys(n||{}).forEach(function(k){NAMEN[k]=n[k]});NAMEN[S.who]={name:ich.name,farbe:ich.farbe};syncButtons();lanes.forEach(render);});
+      import("./js/leiste.js").then(function(L){L.leisteStarten(ich,"reinigung")}).catch(function(e){try{console.error(e)}catch(x){}});
+      DARF_VERTRETEN=Z.darfVertreten(ich,"reinigung");DARF_UEBERMALEN=Z.darfZusatz(ich,"reinigung","uebermalen");
+      $("who-car").hidden=!DARF_VERTRETEN;
+      $("who-btn").setAttribute("aria-haspopup",String(DARF_VERTRETEN));
+      syncButtons();peopleZeichnen();
+      Z.namen().then(function(n){Object.keys(n||{}).forEach(function(k){NAMEN[k]=n[k]});NAMEN[S.who]={name:ich.name,farbe:ich.farbe};syncButtons();peopleZeichnen();lanes.forEach(render);});
       var db=Z.db,base=sync.base;
       sync.fn=Z;sync.db=db;
       Z.onValue(Z.ref(db,".info/connected"),function(s){sync.conn=s.val()===true;checkLive()});
@@ -678,10 +708,6 @@ function openCode(msg){
   if(gate)setTimeout(function(){try{$("code-in").focus()}catch(e){}},50);
 }
 $("live").addEventListener("click",function(){openCode("")});
-$("logout").addEventListener("click",function(){
-  if(!sync.Z){location.reload();return}
-  sync.Z.abmelden().then(function(){location.reload()},function(){location.reload()});
-});
 $("code-cancel").addEventListener("click",function(){show("sh-code",false)});
 function codeGo(){
   var c=String($("code-in").value||"").trim(),btn=$("code-go");
@@ -752,7 +778,7 @@ function freeMove(e){
   fr.s.pts.push([Math.round(p.x*10)/10,Math.round(p.y*10)/10]);fr.last=p;renderFree();
 }
 function freeEraseAt(p){
-  for(var i=free.length-1;i>=0;i--){if(nearFree(free[i],p)){fr.removed.push(free[i]);free.splice(i,1)}}
+  for(var i=free.length-1;i>=0;i--){if(nearFree(free[i],p)){if(!darfStrich(free[i])){FREMD_GESCHUETZT++;continue}fr.removed.push(free[i]);free.splice(i,1)}}
 }
 function freeEnd(){
   var f=fr;fr=null;if(!f)return;
@@ -877,6 +903,7 @@ function strokeMove(e){
     fill(l,it.prev,it.prev+d,v,it.undo);it.prev=s;render(l);
   });
   act.changed=true;
+  if(FREMD_GESCHUETZT){say("Flächen anderer bleiben stehen. Übermalen darf nur, wer das Recht dafür hat.",false);FREMD_GESCHUETZT=0;return}
   say(S.mode==="paint"?person(S.who).n+" trägt geputzt ein.":"Wird wieder auf offen gesetzt.",false);
 }
 function cancelStroke(){
@@ -980,6 +1007,7 @@ function drawPins(){
     t.textContent=String(i+1);pinG.appendChild(t);
   });
   $("open-notes").textContent="Notizen ("+notes.length+")";
+  $("mehr-zahl").textContent=String(notes.length);$("mehr-zahl").hidden=!notes.length;
 }
 function show(id,on){$(id).classList.toggle("open",on)}
 var pend=null;
@@ -1019,21 +1047,38 @@ $("notes-close").addEventListener("click",function(){show("sh-notes",false)});
 /* ---------- Zurücksetzen ---------- */
 var armed=false;
 function disarm(){armed=false;$("reset-go").textContent="Zurücksetzen";$("reset-warn").textContent=""}
-$("open-reset").addEventListener("click",function(){disarm();show("sh-reset",true)});
+$("open-reset").addEventListener("click",function(){
+  disarm();
+  $("h-reset").textContent=DARF_UEBERMALEN?"Alle Flächen auf offen setzen?":"Deine Flächen auf offen setzen?";
+  $("reset-text").textContent=DARF_UEBERMALEN
+    ?"Alle eingemalten Flächen verschwinden, bei allen Personen. Das lässt sich nicht rückgängig machen. Die Notizen bleiben erhalten."
+    :"Deine eingemalten Flächen und Striche verschwinden. Flächen anderer bleiben stehen, dafür fehlt dir das Recht zum Übermalen. Die Notizen bleiben erhalten.";
+  show("sh-reset",true);
+});
 $("reset-cancel").addEventListener("click",function(){disarm();show("sh-reset",false)});
 $("reset-go").addEventListener("click",function(){
   if(!armed){armed=true;$("reset-go").textContent="Wirklich zurücksetzen";$("reset-warn").textContent="Zur Sicherheit: Drück den roten Knopf ein zweites Mal.";return}
   if(sync.on&&!sync.db){armed=false;$("reset-go").textContent="Zurücksetzen";$("reset-warn").textContent="Noch keine Verbindung. Zurücksetzen geht erst, wenn oben „Live“ steht.";return}
   disarm();
-  sync.pending={};
-  var rops=[];lanes.forEach(function(l){var it=[];for(var q=0;q<l.n;q++){if(l.st[q])it.push({l:l.id,i:q,a:l.st[q],b:null})}if(it.length)rops.push({k:"lanes",items:it})});
-  if(free.length)rops.push({k:"free-del",items:free.slice()});
+  var nurEigene=!DARF_UEBERMALEN;
+  if(!nurEigene)sync.pending={};
+  var rops=[];lanes.forEach(function(l){var it=[];for(var q=0;q<l.n;q++){if(l.st[q]&&darfZelle(l.st[q]))it.push({l:l.id,i:q,a:l.st[q],b:null})}if(it.length)rops.push({k:"lanes",items:it})});
+  var weg=free.filter(darfStrich);
+  if(weg.length)rops.push({k:"free-del",items:weg.slice()});
   if(rops.length)pushOp({k:"batch",ops:rops});
-  free=[];renderFree();
-  lanes.forEach(function(l){l.st.fill(null);render(l)});
-  if(sync.on)sync.fn.set(sync.fn.ref(sync.db,sync.base+"/lanes"),null).catch(onErr);
-  if(sync.on)put({"free":null});
-  progress();save();show("sh-reset",false);say("Alle Flächen stehen wieder auf offen. Die Notizen sind noch da.",false);
+  if(nurEigene){
+    /* Jede eigene Fläche und jeder eigene Strich einzeln; fremde bleiben stehen. */
+    rops.forEach(function(op){if(op.k==="lanes")op.items.forEach(function(it){setCell(it.l,it.i,null)})});
+    weg.forEach(function(s){freeDel(s)});
+    renderFree();
+  }else{
+    free=[];renderFree();
+    lanes.forEach(function(l){l.st.fill(null);render(l)});
+    if(sync.on)sync.fn.set(sync.fn.ref(sync.db,sync.base+"/lanes"),null).catch(onErr);
+    if(sync.on)put({"free":null});
+  }
+  progress();save();show("sh-reset",false);
+  say(nurEigene?"Deine Flächen stehen wieder auf offen. Flächen anderer und die Notizen sind noch da.":"Alle Flächen stehen wieder auf offen. Die Notizen sind noch da.",false);
 });
 ["sh-edit","sh-notes","sh-reset","sh-code"].forEach(function(id){
   $(id).addEventListener("click",function(e){if(e.target===$(id)&&!(id==="sh-code"&&$(id).classList.contains("gate"))){show(id,false);if(id==="sh-edit")pend=null;if(id==="sh-reset")disarm()}});
@@ -1051,10 +1096,50 @@ function syncButtons(){
   $("dir-sw").setAttribute("data-d",S.dir);
   $("view-sw").setAttribute("data-d",S.view);
   $("art-sl").setAttribute("data-pos",S.art==="free"?"1":"0");
-  $("brush-sl").setAttribute("data-pos",{all:"0",mid:"1",one:"2"}[S.brush]);
+  $("b-strich").setAttribute("stroke-width",{all:"3.2",mid:"2",one:"1"}[S.brush]);
+  $("b-knopf").setAttribute("aria-label","Strichbreite: "+{all:"Breit",mid:"Mittel",one:"Schmal"}[S.brush]);
+  $("b-knopf").title="Strichbreite: "+{all:"Breit",mid:"Mittel",one:"Schmal"}[S.brush];
   svg.style.cursor=S.mode==="move"||S.mode==="note"?"grab":"crosshair";
 }
-/* Wer man ist, kommt aus der Anmeldung und wird nicht mehr ausgewaehlt. */
+/* Wer man ist, kommt aus der Anmeldung. Mit dem Recht "Fuer andere eintragen" laesst
+   sich umstellen, in wessen Namen gewischt wird. Die eigenen Rechte bleiben davon unberuehrt. */
+var DARF_VERTRETEN=false,DARF_UEBERMALEN=false;
+function peopleZeichnen(){
+  var ziel=$("people");ziel.innerHTML="";
+  Object.keys(NAMEN).sort(function(a,b){return String(NAMEN[a].name||"").localeCompare(String(NAMEN[b].name||""),"de")}).forEach(function(bid){
+    var p=NAMEN[bid],b=document.createElement("button");
+    b.className="b";b.type="button";b.dataset.who=bid;b.setAttribute("aria-pressed",String(S.who===bid));
+    var d=document.createElement("span");d.className="dot";d.style.background=p.farbe||"#6B7770";
+    b.appendChild(d);b.appendChild(document.createTextNode(p.name||"?"));
+    ziel.appendChild(b);
+  });
+}
+function menuZu(){$("people").classList.remove("open");$("who-btn").setAttribute("aria-expanded","false")}
+$("who-btn").addEventListener("click",function(e){
+  if(!DARF_VERTRETEN)return;
+  e.stopPropagation();
+  var offen=$("people").classList.toggle("open");
+  $("who-btn").setAttribute("aria-expanded",String(offen));
+});
+$("people").addEventListener("click",function(e){
+  var b=e.target.closest("[data-who]");if(!b)return;
+  e.stopPropagation();
+  S.who=b.dataset.who;syncButtons();peopleZeichnen();menuZu();
+  say("Eingetragen wird jetzt für "+person(S.who).n+".",true);
+});
+document.addEventListener("click",menuZu);
+/* Menü mit den selteneren Knöpfen: Notizen, Umschalten, Herunterladen, Zurücksetzen */
+function mehrZu(){$("mehr-menu").classList.remove("open");$("mehr-knopf").setAttribute("aria-expanded","false")}
+$("mehr-knopf").addEventListener("click",function(e){e.stopPropagation();var auf=!$("mehr-menu").classList.contains("open");$("mehr-menu").classList.toggle("open",auf);$("mehr-knopf").setAttribute("aria-expanded",String(auf));if(auf)$("open-notes").focus()});
+$("mehr-menu").addEventListener("click",function(e){if(e.target.closest("button"))setTimeout(mehrZu,0)});
+document.addEventListener("click",function(e){if(!e.target.closest(".mehr"))mehrZu()});
+document.addEventListener("keydown",function(e){if(e.key==="Escape")mehrZu()});
+/* Strichbreite: ein Stift-Knopf, darunter die Auswahl wie ein Menü */
+function breiteZu(){$("b-menu").classList.remove("open");$("b-knopf").setAttribute("aria-expanded","false")}
+$("b-knopf").addEventListener("click",function(e){e.stopPropagation();var auf=!$("b-menu").classList.contains("open");$("b-menu").classList.toggle("open",auf);$("b-knopf").setAttribute("aria-expanded",String(auf));if(auf)$("b-"+S.brush).focus()});
+$("b-menu").addEventListener("click",function(e){if(e.target.closest("[data-k]"))setTimeout(breiteZu,0)});
+document.addEventListener("click",function(e){if(!e.target.closest(".breite"))breiteZu()});
+document.addEventListener("keydown",function(e){if(e.key==="Escape")breiteZu()});
 document.querySelectorAll("[data-k]").forEach(function(b){
   b.addEventListener("click",function(){
     var k=b.dataset.k;if(k==="who")return;S[k]=b.dataset.v;
@@ -1066,25 +1151,8 @@ document.querySelectorAll("[data-k]").forEach(function(b){
 
 /* ---------- Hell / Dunkel ---------- */
 function isDark(){var t=document.documentElement.getAttribute("data-theme");if(t)return t==="dark";return !!(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches)}
-function themeIcon(){$("theme").innerHTML=isDark()?"&#9728;&#65038;":"&#9790;&#65038;"}
-/* Dieselbe Einstellung wie auf der Startseite und bei den Sportanlagen */
+/* Dieselbe Einstellung wie auf allen Seiten. Umgeschaltet wird in der Personal-Leiste. */
 try{var th0=localStorage.getItem("hkh-thema");if(th0==="dark"||th0==="light")document.documentElement.setAttribute("data-theme",th0)}catch(e){}
-themeIcon();
-/* Kurz tippen schaltet hell und dunkel um. Gedrückt halten führt zur Auswahl der Bereiche. */
-var HALTEN_MS=2000;
-var halteUhr=0,gehalten=false;
-$("theme").addEventListener("click",function(){
-  if(gehalten){gehalten=false;return}
-  var n=isDark()?"light":"dark";document.documentElement.setAttribute("data-theme",n);try{localStorage.setItem("hkh-thema",n)}catch(e){}themeIcon();
-});
-$("theme").addEventListener("pointerdown",function(e){
-  if(e.pointerType==="mouse"&&e.button!==0)return;
-  gehalten=false;clearTimeout(halteUhr);
-  halteUhr=setTimeout(function(){gehalten=true;location.href="./#auswahl"},HALTEN_MS);
-});
-["pointerup","pointerleave","pointercancel"].forEach(function(n){$("theme").addEventListener(n,function(){clearTimeout(halteUhr)})});
-$("theme").addEventListener("contextmenu",function(e){e.preventDefault()});
-if(window.matchMedia){try{window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",themeIcon)}catch(e){}}
 
 /* ---------- Dropdown, Richtungsschalter, Vollbild ---------- */
 
