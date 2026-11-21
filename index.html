@@ -58,7 +58,8 @@ tbody th{font-weight:400}
 .leer{color:var(--ink2); font-size:15px}
 /* Aushang am Sportlereingang: dasselbe Kästchen wie die Tabelle darüber. */
 .aushang{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:12px 14px; display:flex; flex-direction:column; gap:6px}
-.aushang-titel{margin:0; font-size:13px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--ink2)}
+/* Überschrift exakt wie die Anlagennamen in der Tabelle (z. B. „Tribüne Nord“) */
+.aushang-titel{margin:0; font-family:var(--display); font-weight:600; font-size:19px; line-height:1.05; color:var(--ink); overflow-wrap:anywhere}
 .aushang-text{margin:0; font-size:16px; line-height:1.35; color:var(--ink); white-space:pre-wrap; overflow-wrap:anywhere}
 .aushang-text.ohne{color:var(--ink2)}
 .verbindung{margin:0; font-size:13px; font-weight:600; color:var(--ink)}
@@ -116,6 +117,15 @@ tbody th{font-weight:400}
 .hinweis-block p{margin:0}
 .hinweis-titel{font-weight:600; color:var(--ink)}
 .abspann{margin-top:4px; padding-top:10px; border-top:1px solid var(--line)}
+/* Am PC: Anzeige links, Aushang und Hinweise rechts daneben */
+@media (min-width:1000px){
+  .seite{max-width:1120px; display:grid; grid-template-columns:minmax(0,1.7fr) minmax(300px,1fr); column-gap:28px; row-gap:14px; align-content:start}
+  .seite > .kopf{grid-column:1 / -1}
+  .seite > table{grid-column:1; grid-row:2 / span 3; align-self:start}
+  .seite > .verbindung{grid-column:1; grid-row:5}
+  .seite > .aushang{grid-column:2; grid-row:2; align-self:start}
+  .seite > .hinweis-block{grid-column:2; grid-row:3; align-self:start}
+}
 </style>
 </head>
 <body>
@@ -238,6 +248,18 @@ knopf.addEventListener("contextmenu", (e) => e.preventDefault());
 let zugangModul = null;
 let vorherFokus = null;
 const ladeZugang = async () => (zugangModul ??= await import("./js/zugang.js"));
+/* Personal-Leiste unten rechts. Für Sportler bleibt davon nichts sichtbar. */
+async function leisteZeigen(s) {
+  try { (await import("./js/leiste.js")).leisteStarten(s, ""); } catch (err) { console.error(err); }
+}
+/* War auf diesem Gerät schon jemand angemeldet, erscheint das Symbol gleich beim Öffnen,
+   ohne den Hell/Dunkel-Knopf gedrückt zu halten. Das Merkzeichen setzt die Anmeldung. */
+(async () => {
+  let merker = false;
+  try { merker = localStorage.getItem("hkh-personal") === "1"; } catch (e) {}
+  if (!merker) return;
+  try { const s = await (await ladeZugang()).sitzung(); if (s) leisteZeigen(s); } catch (err) { console.error(err); }
+})();
 function zeigeTeil(teil) {
   $("zugang-warten").hidden = teil !== "warten";
   $("zugang-formular").hidden = teil !== "formular";
@@ -323,7 +345,10 @@ $("zugang-formular").addEventListener("submit", async (e) => {
     await modul.anmelden(code);
     $("zugang-code").value = "";
     codeVerbergen();
-    bereicheZeichnen(await modul.sitzung());
+    const s = await modul.sitzung();
+    if (!s) throw Object.assign(new Error("PERMISSION_DENIED"), { code: "PERMISSION_DENIED" });
+    bereicheZeichnen(s);
+    leisteZeigen(s);
     zeigeTeil("wahl");
     ($("zugang").querySelector(".bereich") ?? $("zugang-schliessen")).focus();
   } catch (err) {
@@ -336,6 +361,8 @@ $("zugang-formular").addEventListener("submit", async (e) => {
 $("zugang-abbrechen").addEventListener("click", zugangSchliessen);
 $("zugang-abmelden").addEventListener("click", async () => {
   try { await (await ladeZugang()).abmelden(); } catch (err) { console.error(err); }
+  document.querySelector(".hkh-leiste")?.remove();
+  document.body.classList.remove("hkh-mit-leiste");
   zeigeTeil("formular");
   $("zugang-code").focus();
 });
