@@ -44,7 +44,7 @@ body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); 
 .knopf.klein{min-height:36px; padding:6px 14px; font-size:14px}
 .knopf:disabled{opacity:.5; cursor:not-allowed}
 button:focus-visible, input:focus-visible, a:focus-visible, textarea:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
-h1{margin:0; font-family:var(--display); font-weight:600; font-size:clamp(32px, 6vw, 48px); line-height:1; text-transform:uppercase; text-wrap:balance}
+h1{margin:0; font-family:var(--display); font-weight:600; font-size:clamp(32px, 8vw, 44px); line-height:1; text-transform:uppercase; text-wrap:balance}
 h2{margin:0; font-family:var(--display); font-weight:600; font-size:26px; line-height:1.05; text-transform:uppercase; text-wrap:balance; overflow-wrap:anywhere}
 .muted{margin:0; font-size:15px; color:var(--ink-2)}
 .meldung{margin:0; min-height:20px; font-size:14px; color:var(--ink-2)}
@@ -163,15 +163,20 @@ textarea{resize:vertical; line-height:1.35}
   #panel > #tafel{grid-column:2; grid-row:6}
   #panel > #listen-tafel{grid-column:2; grid-row:7; max-height:calc(100vh - 96px); overflow:auto}
 }
+/* Einheitlicher Kopf auf allen Personalseiten: Logo, darunter-/daneben "Helmut-Körnig-Halle" und "Personal" wie auf der Startseite */
+.hkh-kopf{display:inline-flex !important; align-items:center; gap:10px; min-width:0; flex:none; text-decoration:none; color:inherit; border-radius:6px}
+.hkh-kopf img{flex:none; display:block; height:34px !important; width:auto}
+.hkh-marke{display:flex; flex-direction:column; gap:2px; margin:0; font-family:Barlow, system-ui, -apple-system, "Segoe UI", sans-serif; font-size:13px; font-weight:500; line-height:1.15; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2)}
+.kopf{flex-wrap:nowrap}
 </style>
 </head>
 <body>
 <div class="wrap">
 
 <header class="kopf">
-  <a class="logo-link" href="./" aria-label="Zur Startseite">
+  <a class="logo-link hkh-kopf" href="./" aria-label="Zur Startseite">
     <img src="./bilder/logo.png" alt="Dortmunder Sportstätten" width="480" height="241">
-    <span class="marke">Helmut-Körnig-Halle · Personal</span>
+    <span class="hkh-marke"><span>Helmut-Körnig-Halle</span><span>Personal</span></span>
   </a>
   <div class="kopf-knoepfe">
     <button class="rund-knopf" id="filter-knopf" type="button" aria-pressed="false" aria-label="Nach Person filtern" title="Nach Person filtern" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 5h18l-7 8.2V21l-4-2.2v-5.6z"/></svg></button>
@@ -182,7 +187,7 @@ textarea{resize:vertical; line-height:1.35}
 <p class="muted" id="pruefung" style="margin-top:48px">Einen Moment …</p>
 
 <section id="anmeldung" class="anmeldung" hidden>
-  <h1>Hallen Arbeitsplan</h1>
+  <h1>Aufgaben und Arbeitsplan</h1>
   <p class="muted">Für diesen Bereich gibt es einen eigenen Code. Der Code für Hallenreinigung und Sportanlagen passt hier nicht.</p>
   <form id="formular" class="stapel" novalidate>
     <div class="feld">
@@ -198,7 +203,7 @@ textarea{resize:vertical; line-height:1.35}
 </section>
 
 <section id="panel" class="stapel" hidden style="padding-top:16px">
-  <h1>Hallen Arbeitsplan</h1>
+  <h1>Aufgaben und Arbeitsplan</h1>
   <p class="muted" id="live-text">Aufgaben und Pfeile für die ganze Halle. Alle sehen dasselbe.</p>
 
   <div class="feld">
@@ -214,7 +219,7 @@ textarea{resize:vertical; line-height:1.35}
 
   <div class="tafel" id="filter-tafel" style="margin-bottom:12px" hidden>
     <div class="stapel">
-      <h2>Nur bestimmte Personen zeigen</h2>
+      <h2>Nur Aufgaben von bestimmten Personen zeigen</h2>
       <p class="muted">Tippe die Personen an, deren Aufgaben und Pfeile du sehen willst. Ist nichts ausgewählt, siehst du alles.</p>
       <div class="filter-feld" id="filter-personen"></div>
       <p class="muted" id="filter-stand">Es werden alle Einträge gezeigt.</p>
@@ -230,17 +235,17 @@ textarea{resize:vertical; line-height:1.35}
       <defs><filter id="etikett-schatten" x="-20%" y="-30%" width="140%" height="170%"><feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-opacity=".22"></feDropShadow></filter></defs>
       <g id="world">
         <g id="ebene-halle"><image id="gelaende" href="./bilder/gelaende-aussen.jpg" x="86.56" y="65.2" width="704.16" height="452.85" aria-hidden="true"></image><image id="plan" href="./bilder/hallenplan-ebene-4.svg" x="30.6" y="23" width="793" height="525.1" aria-hidden="true"></image></g>
-        <g id="ebene-aussen"><image id="gelaende-voll" href="./bilder/gelaende-voll.jpg" x="86.56" y="65.2" width="704.16" height="452.85" aria-hidden="true"></image></g>
+        <g id="ebene-aussen"><image id="gelaende-voll" href="./bilder/gelaende-voll.jpg" x="86.56" y="65.2" width="704.16" height="452.85" transform="rotate(180 438.64 291.625)" aria-hidden="true"></image></g>
         <g id="pfeile"></g>
         <g id="punkte"></g>
         <g id="etiketten"></g>
       </g>
     </svg>
     <div class="zoom">
-      <div class="etagen" id="etagen" role="group" aria-label="Etage">
+      <div class="etagen" id="etagen" role="group" aria-label="Ebene">
         <span class="etagen-knauf" id="etagen-knauf" aria-hidden="true"></span>
-        <button class="eb" id="e-aussen" type="button" aria-pressed="false" title="Außenbereich">Außen</button>
-        <button class="eb" id="e-halle" type="button" aria-pressed="true" title="Halle">Halle</button>
+        <button class="eb" id="e-aussen" type="button" aria-pressed="false" title="Ebene EG">EG</button>
+        <button class="eb" id="e-halle" type="button" aria-pressed="true" title="Ebene UG">UG</button>
       </div>
       <button class="zb" id="z-rein" type="button" aria-label="Näher heranzoomen" title="Näher heran">+</button>
       <button class="zb" id="z-raus" type="button" aria-label="Weiter weg zoomen" title="Weiter weg">−</button>
@@ -477,7 +482,7 @@ const S = {
   etage: "halle",
   nurPersonen: [],
 };
-const ETAGEN = { halle: "Halle", aussen: "Außenbereich" };
+const ETAGEN = { halle: "UG", aussen: "EG" };
 const OHNE = "\u0000ohne";   /* steht im Filter für Einträge ohne Person */
 /* Eine Aufgabe gehört zu einer Etage, ein Pfeil kann von einer in die andere gehen. */
 const etageVon = (e) => (e?.etage === "aussen" ? "aussen" : "halle");
@@ -560,11 +565,11 @@ function etageSetzen(etage, sagen) {
   $("etagen").dataset.etage = S.etage;
   $("e-halle").setAttribute("aria-pressed", String(S.etage === "halle"));
   $("e-aussen").setAttribute("aria-pressed", String(S.etage === "aussen"));
-  svg.setAttribute("aria-label", `Plan der Etage ${ETAGEN[S.etage]}, mit Aufgaben und Pfeilen`);
+  svg.setAttribute("aria-label", `Plan der Ebene ${ETAGEN[S.etage]}, mit Aufgaben und Pfeilen`);
   zeichnePlan();
   if (!sagen) return;
-  if (S.start) hinweisSetzen(`Der Anfang liegt in der Etage ${ETAGEN[etageVon(S.start)]}. Tippe das Ziel an, der Pfeil geht dann über beide Etagen.`);
-  else hinweisSetzen(`Etage ${ETAGEN[S.etage]}.`);
+  if (S.start) hinweisSetzen(`Der Anfang liegt auf Ebene ${ETAGEN[etageVon(S.start)]}. Tippe das Ziel an, der Pfeil geht dann über beide Ebenen.`);
+  else hinweisSetzen(`Ebene ${ETAGEN[S.etage]}`);
 }
 $("e-halle").addEventListener("click", () => etageSetzen("halle", true));
 $("e-aussen").addEventListener("click", () => etageSetzen("aussen", true));
