@@ -114,9 +114,9 @@ tbody th{font-weight:400}
 @media (min-width:1000px){
   .seite{max-width:1120px; display:grid; grid-template-columns:minmax(0,1.7fr) minmax(300px,1fr); column-gap:28px; row-gap:14px; align-content:start}
   .seite > .kopf{grid-column:1 / -1}
-  .seite > table{grid-column:1; grid-row:2 / span 3; align-self:start}
+  .seite > .aushang{grid-column:1 / -1; grid-row:2}
+  .seite > table{grid-column:1; grid-row:3 / span 2; align-self:start}
   .seite > .verbindung{grid-column:1; grid-row:5}
-  .seite > .aushang{grid-column:2; grid-row:2; align-self:start}
   .seite > .hinweis-block{grid-column:2; grid-row:3; align-self:start}
 }
 </style>
@@ -136,6 +136,11 @@ tbody th{font-weight:400}
   <p class="stand" id="stand">Stand: –</p>
 </header>
 
+<section class="aushang" aria-labelledby="aushang-titel">
+  <p class="aushang-titel" id="aushang-titel">Aushang am Sportlereingang:</p>
+  <p class="aushang-text ohne" id="aushang-text">Infos folgen.</p>
+</section>
+
 <table>
   <caption class="nur-leser">Status der Sportanlagen</caption>
   <colgroup><col style="width:38%"><col style="width:62%"></colgroup>
@@ -149,11 +154,6 @@ tbody th{font-weight:400}
 </table>
 
 <p class="verbindung" id="verbindung" hidden>Keine Verbindung. Die Angaben können veraltet sein.</p>
-
-<section class="aushang" aria-labelledby="aushang-titel">
-  <p class="aushang-titel" id="aushang-titel">Aushang am Sportlereingang:</p>
-  <p class="aushang-text ohne" id="aushang-text">Infos folgen.</p>
-</section>
 
 <section class="hinweis-block">
   <p class="hinweis-titel">Hinweis zur Aktualität:</p>
@@ -407,18 +407,28 @@ function standZeit(ms) {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+/* Stand = jüngste Änderung an den Anlagen oder am Aushang */
+let standAnlagen = 0;
+let standAushang = 0;
+function standZeigen() {
+  const neuste = Math.max(standAnlagen, standAushang);
+  $("stand").textContent = neuste ? `Stand: ${standZeit(neuste)}` : "Stand: –";
+}
 onValue(ref(db, "matten"), (snap) => {
   const v = snap.val() ?? {};
   const liste = sortiert(Object.entries(v).map(([key, m]) => ({ key, ...m })));
-  const neuste = Object.values(v).reduce((max, m) => Math.max(max, typeof m?.geaendert === "number" ? m.geaendert : 0), 0);
-  $("stand").textContent = neuste ? `Stand: ${standZeit(neuste)}` : "Stand: –";
+  standAnlagen = Object.values(v).reduce((max, m) => Math.max(max, typeof m?.geaendert === "number" ? m.geaendert : 0), 0);
+  standZeigen();
   $("zeilen").innerHTML = liste.length
     ? liste.map(zeile).join("")
     : `<tr><td colspan="2" class="leer">Noch keine Anlagen eingetragen.</td></tr>`;
 });
 /* Aushang am Sportlereingang. Steht nichts darin, bleibt der Platzhalter stehen. */
-onValue(ref(db, "aushang/text"), (snap) => {
-  const text = String(snap.val() ?? "").trim();
+onValue(ref(db, "aushang"), (snap) => {
+  const a = snap.val() ?? {};
+  const text = String(a.text ?? "").trim();
+  standAushang = typeof a.ts === "number" ? a.ts : 0;
+  standZeigen();
   $("aushang-text").textContent = text || "Infos folgen.";
   $("aushang-text").classList.toggle("ohne", !text);
 }, () => {});
