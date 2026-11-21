@@ -38,8 +38,6 @@ body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); 
 .rund-knopf svg{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
 #verlauf-knopf[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
 .rund-knopf .sonne{display:none}
-:root[data-theme="dark"] #dunkel .sonne{display:block}
-:root[data-theme="dark"] #dunkel .mond{display:none}
 .knopf{font:inherit; font-size:15px; font-weight:600; min-height:44px; padding:8px 18px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer}
 .knopf.primaer{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
 .knopf.gefahr{border-color:var(--fehler); color:var(--fehler); background:var(--panel)}
@@ -72,6 +70,9 @@ textarea{resize:vertical; line-height:1.35}
 .leiste{display:flex; gap:4px; padding:4px; border-radius:999px; background:var(--panel); border:1px solid var(--line)}
 .leiste button{flex:1; min-height:40px; padding:0 6px; border:0; border-radius:999px; background:transparent; color:var(--ink); font:inherit; font-size:15px; font-weight:600; cursor:pointer}
 .leiste button[aria-pressed="true"]{background:var(--accent); color:var(--on-accent)}
+.leiste button svg, .sym-knopf svg{width:24px; height:24px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; vertical-align:middle}
+.leiste button{display:inline-flex; align-items:center; justify-content:center}
+.sym-knopf{width:48px; padding:0 !important; display:inline-flex; align-items:center; justify-content:center}
 /* Personen */
 .personen{display:flex; flex-wrap:wrap; gap:8px}
 .person{display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:0 14px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); font:inherit; font-size:15px; font-weight:600; cursor:pointer}
@@ -84,6 +85,17 @@ textarea{resize:vertical; line-height:1.35}
 .zoom{position:absolute; right:8px; bottom:8px; display:flex; flex-direction:column; gap:6px}
 .zb{width:44px; height:44px; border-radius:10px; border:1px solid var(--line); background:var(--panel); color:var(--ink); font:inherit; font-size:22px; font-weight:600; line-height:1; display:flex; align-items:center; justify-content:center; cursor:pointer}
 .zb.klein{font-size:13px; font-weight:600}
+/* Etagenwahl: ein Schieber mit zwei Stellungen, oben Außen, unten Halle */
+.etagen{position:relative; width:44px; padding:3px; border:1px solid var(--line); border-radius:10px; background:var(--panel); display:flex; flex-direction:column; gap:0; margin-bottom:2px}
+.etagen-knauf{position:absolute; left:3px; right:3px; height:calc(50% - 3px); border-radius:8px; background:var(--accent); transition:transform .18s ease; transform:translateY(100%); pointer-events:none}
+.etagen[data-etage="aussen"] .etagen-knauf{transform:translateY(0)}
+.eb{position:relative; z-index:1; height:30px; border:0; background:none; font:inherit; font-size:12px; font-weight:600; color:var(--ink-2); cursor:pointer; border-radius:8px; padding:0; -webkit-tap-highlight-color:transparent}
+.eb[aria-pressed="true"]{color:var(--on-accent)}
+/* Filter nach Person */
+.filter-feld{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+.filter-feld .person{flex:none}
+#svg[data-etage="halle"] #ebene-aussen{display:none}
+#svg[data-etage="aussen"] #ebene-halle{display:none}
 /* Aufgaben und Pfeile im Plan */
 #punkte circle.kugel{stroke:#14201B; stroke-width:1.2}
 #punkte circle.kugel.gewaehlt{stroke-width:2.4}
@@ -132,7 +144,25 @@ textarea{resize:vertical; line-height:1.35}
 .verlauf .wann{font-size:13px; color:var(--ink-2)}
 #alle-liste li{align-items:center}
 #alle-liste .zeile{flex:1 1 auto}
+.hin-knopf{flex:none; width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center; padding:0; border:1px solid var(--line); border-radius:10px; background:var(--panel); color:var(--ink); cursor:pointer}
+.hin-knopf:hover{border-color:var(--ink)}
+.hin-knopf svg{width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+.format-leiste{display:flex; gap:6px}
+.format-leiste button{width:36px; height:32px; display:inline-flex; align-items:center; justify-content:center; padding:0; border:1px solid var(--line); border-radius:8px; background:var(--panel); color:var(--ink); cursor:pointer}
+.format-leiste svg{width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+.zeile-text ul{margin:4px 0; padding-left:20px}
 .abzeichen{flex:none; width:28px; height:28px; border-radius:50%; border:1px solid var(--ink); display:inline-flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; line-height:1}
+/* Am PC: Karte links groß und beim Scrollen stehend, rechts Details, Filter und Liste */
+@media (min-width:1100px){
+  .wrap{max-width:1560px}
+  #panel{display:grid; grid-template-columns:minmax(0,1fr) minmax(360px,420px); column-gap:24px; row-gap:12px; align-items:start}
+  #panel > *{grid-column:1 / -1}
+  #panel > #map{grid-column:1; grid-row:5 / span 3; position:sticky; top:12px; max-height:calc(100vh - 96px)}
+  #panel > #karten-hinweis{grid-column:1; grid-row:8}
+  #panel > #filter-tafel{grid-column:2; grid-row:5; margin-bottom:0 !important}
+  #panel > #tafel{grid-column:2; grid-row:6}
+  #panel > #listen-tafel{grid-column:2; grid-row:7; max-height:calc(100vh - 96px); overflow:auto}
+}
 </style>
 </head>
 <body>
@@ -144,9 +174,8 @@ textarea{resize:vertical; line-height:1.35}
     <span class="marke">Helmut-Körnig-Halle · Personal</span>
   </a>
   <div class="kopf-knoepfe">
+    <button class="rund-knopf" id="filter-knopf" type="button" aria-pressed="false" aria-label="Nach Person filtern" title="Nach Person filtern" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 5h18l-7 8.2V21l-4-2.2v-5.6z"/></svg></button>
     <button class="rund-knopf" id="verlauf-knopf" type="button" aria-pressed="false" aria-label="Verlauf anzeigen" title="Verlauf anzeigen" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button>
-    <button class="knopf klein" id="abmelden" type="button" hidden>Abmelden</button>
-    <button class="rund-knopf" id="dunkel" type="button" aria-pressed="false" aria-label="Dunkelmodus" title="Dunkelmodus"><svg class="mond" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sonne" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></button>
   </div>
 </header>
 
@@ -178,22 +207,41 @@ textarea{resize:vertical; line-height:1.35}
   </div>
 
   <div class="leiste" role="group" aria-label="Werkzeug">
-    <button type="button" id="w-ansehen" aria-pressed="true">Ansehen</button>
-    <button type="button" id="w-aufgabe" aria-pressed="false">Aufgabe</button>
-    <button type="button" id="w-pfeil" aria-pressed="false">Pfeil</button>
+    <button type="button" id="w-ansehen" aria-pressed="true" title="Ansehen" aria-label="Ansehen"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.904 17.563a1.2 1.2 0 0 0 2.228 .308l2.09 -3.093l4.907 4.907a1.067 1.067 0 0 0 1.509 0l1.047 -1.047a1.067 1.067 0 0 0 0 -1.509l-4.907 -4.907l3.113 -2.09a1.2 1.2 0 0 0 -.309 -2.228l-13.582 -3.904l3.904 13.563" /></svg></button>
+    <button type="button" id="w-aufgabe" aria-pressed="false" title="Aufgabe setzen" aria-label="Aufgabe setzen"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /> <path d="M9 12h6" /> <path d="M12 9v6" /></svg></button>
+    <button type="button" id="w-pfeil" aria-pressed="false" title="Pfeil setzen" aria-label="Pfeil setzen"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 19a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /> <path d="M19 7a2 2 0 1 0 0 -4a2 2 0 0 0 0 4" /> <path d="M11 19h5.5a3.5 3.5 0 0 0 0 -7h-8a3.5 3.5 0 0 1 0 -7h4.5" /></svg></button>
+  </div>
+
+  <div class="tafel" id="filter-tafel" style="margin-bottom:12px" hidden>
+    <div class="stapel">
+      <h2>Nur bestimmte Personen zeigen</h2>
+      <p class="muted">Tippe die Personen an, deren Aufgaben und Pfeile du sehen willst. Ist nichts ausgewählt, siehst du alles.</p>
+      <div class="filter-feld" id="filter-personen"></div>
+      <p class="muted" id="filter-stand">Es werden alle Einträge gezeigt.</p>
+      <div class="reihe">
+        <button class="knopf klein" id="filter-alle" type="button">Alle zeigen</button>
+        <button class="knopf klein" id="filter-zu" type="button">Schließen</button>
+      </div>
+    </div>
   </div>
 
   <div class="map" id="map">
     <svg id="svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Plan der Halle, Ebene -4, mit Aufgaben und Pfeilen">
       <defs><filter id="etikett-schatten" x="-20%" y="-30%" width="140%" height="170%"><feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-opacity=".22"></feDropShadow></filter></defs>
       <g id="world">
-        <image id="gelaende" href="./bilder/gelaende-aussen.jpg" x="86.56" y="65.2" width="704.16" height="452.85" aria-hidden="true"></image><image id="plan" href="./bilder/hallenplan-ebene-4.svg" x="30.6" y="23" width="793" height="525.1" aria-hidden="true"></image>
+        <g id="ebene-halle"><image id="gelaende" href="./bilder/gelaende-aussen.jpg" x="86.56" y="65.2" width="704.16" height="452.85" aria-hidden="true"></image><image id="plan" href="./bilder/hallenplan-ebene-4.svg" x="30.6" y="23" width="793" height="525.1" aria-hidden="true"></image></g>
+        <g id="ebene-aussen"><image id="gelaende-voll" href="./bilder/gelaende-voll.jpg" x="86.56" y="65.2" width="704.16" height="452.85" aria-hidden="true"></image></g>
         <g id="pfeile"></g>
         <g id="punkte"></g>
         <g id="etiketten"></g>
       </g>
     </svg>
     <div class="zoom">
+      <div class="etagen" id="etagen" role="group" aria-label="Etage">
+        <span class="etagen-knauf" id="etagen-knauf" aria-hidden="true"></span>
+        <button class="eb" id="e-aussen" type="button" aria-pressed="false" title="Außenbereich">Außen</button>
+        <button class="eb" id="e-halle" type="button" aria-pressed="true" title="Halle">Halle</button>
+      </div>
       <button class="zb" id="z-rein" type="button" aria-label="Näher heranzoomen" title="Näher heran">+</button>
       <button class="zb" id="z-raus" type="button" aria-label="Weiter weg zoomen" title="Weiter weg">−</button>
       <button class="zb klein" id="z-ganz" type="button" aria-label="Ganzen Plan zeigen" title="Ganzer Plan">Alles</button>
@@ -211,9 +259,9 @@ textarea{resize:vertical; line-height:1.35}
       </div>
       <div class="zeilen-ansicht" id="d-zeilen" hidden></div>
       <div class="aktionen" style="margin-top:4px">
-        <button class="knopf klein" id="d-bearbeiten" type="button">Bearbeiten</button>
-        <button class="knopf klein" id="d-erledigt" type="button">Als erledigt markieren</button>
-        <button class="knopf klein gefahr" id="d-loeschen" type="button">Löschen</button>
+        <button class="knopf klein sym-knopf" id="d-bearbeiten" type="button" title="Bearbeiten" aria-label="Bearbeiten"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /> <path d="M13.5 6.5l4 4" /></svg></button>
+        <button class="knopf klein sym-knopf" id="d-erledigt" type="button" title="Als erledigt markieren" aria-label="Als erledigt markieren"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12l5 5l10 -10" /></svg></button>
+        <button class="knopf klein gefahr sym-knopf" id="d-loeschen" type="button" title="Löschen" aria-label="Löschen"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7l16 0" /> <path d="M10 11l0 6" /> <path d="M14 11l0 6" /> <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /> <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg></button>
       </div>
       <div class="rueckfrage" id="d-rueckfrage" hidden>
         <p class="muted" style="color:var(--ink)">Wirklich löschen? Das lässt sich nicht rückgängig machen.</p>
@@ -234,7 +282,7 @@ textarea{resize:vertical; line-height:1.35}
           <input type="text" id="f-text" maxlength="200" autocomplete="off" placeholder="Zum Beispiel: Netz am Ballfang prüfen">
         </div>
         <div class="feld">
-          <span id="f-wer-text">Wer macht das? Darf frei bleiben.</span>
+          <span id="f-wer-text">Wer macht das? Mehrere möglich, oder niemand.</span>
           <div class="personen" role="group" aria-labelledby="f-wer-text" id="f-personen"></div>
         </div>
         <div class="feld" style="gap:8px">
@@ -267,7 +315,7 @@ textarea{resize:vertical; line-height:1.35}
 
   <section class="tafel" id="listen-tafel">
     <h2>Alle Aufgaben</h2>
-    <p class="muted">Oben steht die höchste Priorität (Prio 1). Neue Aufgaben kommen unten dazu. Die Aufgabe am Griff nach oben oder unten ziehen.</p>
+    <p class="muted" id="alle-hinweis">Oben steht die höchste Priorität (Prio 1). Neue Aufgaben kommen unten dazu. Die Aufgabe am Griff nach oben oder unten ziehen.</p>
     <ul class="verlauf" id="alle-liste" style="max-height:none"></ul>
     <p class="muted" id="alle-leer" hidden>Noch nichts eingetragen. Tippe oben auf „Aufgabe“ und dann auf den Plan.</p>
   </section>
@@ -280,7 +328,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, onAuthStateChanged, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getDatabase, ref, get, set, update, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { firebaseConfig } from "./js/config.js";
-import { sitzung, anmelden as zugangAnmelden, abmelden, darf, darfAufgabe, namen as namenLaden } from "./js/zugang.js";
+import { sitzung, anmelden as zugangAnmelden, abmelden, darf, darfAufgabe, darfVertreten, namen as namenLaden } from "./js/zugang.js";
+import { leisteStarten } from "./js/leiste.js";
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -299,34 +348,12 @@ const wurzel = document.documentElement;
 const stilWert = (name, ersatz) => getComputedStyle(wurzel).getPropertyValue(name).trim() || ersatz;
 const farbeVon = (name) => PERSONEN.find((p) => p.n === name)?.c ?? stilWert("--ink", "#14201B");
 
-/* Farbschema: dieselbe Einstellung wie auf den anderen Seiten. */
-function thema(dunkel) {
-  wurzel.dataset.theme = dunkel ? "dark" : "light";
-  $("dunkel").setAttribute("aria-pressed", String(dunkel));
-  try { localStorage.setItem("hkh-thema", dunkel ? "dark" : "light"); } catch (e) {}
-}
+/* Farbschema: dieselbe Einstellung wie auf den anderen Seiten. Umgeschaltet wird
+   über die Einstellungen in der Personal-Leiste; danach zeichnet die Karte neu. */
 let gemerkt = null;
 try { gemerkt = localStorage.getItem("hkh-thema"); } catch (e) {}
-thema(gemerkt ? gemerkt === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches);
-
-/* Kurz tippen schaltet hell und dunkel um. Gedrückt halten führt zur Auswahl der Bereiche. */
-const HALTEN_MS = 2000;
-const themaKnopf = $("dunkel");
-let halteUhr = 0;
-let gehalten = false;
-themaKnopf.addEventListener("click", () => {
-  if (gehalten) { gehalten = false; return; }
-  thema(wurzel.dataset.theme !== "dark");
-  try { zeichnePlan(); alleZeichnen(); verlaufZeichnen(); } catch (err) {}
-});
-themaKnopf.addEventListener("pointerdown", (e) => {
-  if (e.pointerType === "mouse" && e.button !== 0) return;
-  gehalten = false;
-  clearTimeout(halteUhr);
-  halteUhr = setTimeout(() => { gehalten = true; location.href = "./#auswahl"; }, HALTEN_MS);
-});
-["pointerup", "pointerleave", "pointercancel"].forEach((name) => themaKnopf.addEventListener(name, () => clearTimeout(halteUhr)));
-themaKnopf.addEventListener("contextmenu", (e) => e.preventDefault());
+wurzel.dataset.theme = (gemerkt ? gemerkt === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+window.addEventListener("hkh-thema", () => { try { zeichnePlan(); alleZeichnen(); verlaufZeichnen(); } catch (err) {} });
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -352,10 +379,15 @@ function zeigeBereich(angemeldet) {
   $("anmeldung").hidden = angemeldet;
   $("panel").hidden = !angemeldet;
   $("verlauf-knopf").hidden = !angemeldet;
-  $("abmelden").hidden = !angemeldet;
+  $("filter-knopf").hidden = !angemeldet;
+  if (!angemeldet) $("filter-tafel").hidden = true;
 }
 /* Wer angemeldet ist, sieht diese Seite nur mit dem Recht für den Arbeitsplan. */
 let ICH = null;
+/* Name der Person, für die gerade eingetragen wird. Ohne das Recht "Für andere
+   eintragen" immer die eigene. Wird bewusst nicht gemerkt: nach dem Neuladen
+   trägt wieder jeder für sich selbst ein. */
+let ALS = "";
 async function seiteStarten() {
   let si = null;
   try { si = await sitzung(); } catch (err) { console.error(err); }
@@ -367,6 +399,8 @@ async function seiteStarten() {
   }
   ICH = si;
   S.ich = si.name;
+  leisteStarten(si, "arbeitsplan");
+  ALS = si.name;
   const liste = await namenLaden();
   PERSONEN = Object.entries(liste).map(([bid, n]) => ({ bid, n: n.name, c: n.farbe })).sort((x, y) => x.n.localeCompare(y.n, "de"));
   if (!PERSONEN.some((x) => x.n === si.name)) PERSONEN.unshift({ bid: si.bid, n: si.name, c: si.farbe });
@@ -379,14 +413,10 @@ function rechteAnwenden() {
   const darfNeu = darfAufgabe(ICH, "erstellen");
   $("w-aufgabe").disabled = !darfNeu;
   $("w-pfeil").disabled = !darfNeu;
-  $("w-aufgabe").title = darfNeu ? "" : "Dieser Zugang darf keine Aufgaben erstellen.";
-  $("w-pfeil").title = $("w-aufgabe").title;
+  $("w-aufgabe").title = darfNeu ? "Aufgabe setzen" : "Dieser Zugang darf keine Aufgaben erstellen.";
+  $("w-pfeil").title = darfNeu ? "Pfeil setzen" : $("w-aufgabe").title;
 }
 const istMeine = (e) => !!e && !!ICH && (ICH.istAdmin || (!!e.ersteller && e.ersteller === ICH.bid));
-$("abmelden").addEventListener("click", async () => {
-  await abmelden().catch(() => {});
-  location.reload();
-});
 
 function augenTaste(knopfId, feldId) {
   const knopf = $(knopfId);
@@ -439,11 +469,23 @@ const S = {
   start: null,
   verschiebt: null,
   bearbeiten: null,
-  person: null,
+  personen: [],
   zeilen: [],
   filter: "alle",
   tafel: "aus",
+  /* Welche Etage gerade zu sehen ist, und wessen Einträge. Leer heißt: alle. */
+  etage: "halle",
+  nurPersonen: [],
 };
+const ETAGEN = { halle: "Halle", aussen: "Außenbereich" };
+const OHNE = "\u0000ohne";   /* steht im Filter für Einträge ohne Person */
+/* Eine Aufgabe gehört zu einer Etage, ein Pfeil kann von einer in die andere gehen. */
+const etageVon = (e) => (e?.etage === "aussen" ? "aussen" : "halle");
+const etageBis = (e) => (istPfeil(e) ? (e?.etage2 === "aussen" ? "aussen" : e?.etage2 === "halle" ? "halle" : etageVon(e)) : etageVon(e));
+const aufEtage = (e) => etageVon(e) === S.etage || etageBis(e) === S.etage;
+const passtZurPerson = (e) => S.nurPersonen.length === 0 ||
+  (e.personen?.length ? e.personen.some((n) => S.nurPersonen.includes(n)) : S.nurPersonen.includes(OHNE));
+const sichtbar = (e) => aufEtage(e) && passtZurPerson(e);
 /* Während eine Zeile in der Liste gezogen wird, wird die Liste nicht neu aufgebaut. */
 let ziehtGerade = false;
 
@@ -506,6 +548,26 @@ function zoomKnopf(faktor) {
 $("z-rein").addEventListener("click", () => zoomKnopf(1.6));
 $("z-raus").addEventListener("click", () => zoomKnopf(1 / 1.6));
 $("z-ganz").addEventListener("click", () => { V.z = 1; V.cx = PLAN.x + PLAN.w / 2; V.cy = PLAN.y + PLAN.h / 2; ansichtSetzen(); zeichnePlan(); });
+
+/* ---- Etage ---- */
+/* Halle und Außenbereich liegen deckungsgleich übereinander. Beim Umschalten
+   bleiben darum Ausschnitt und Zoom stehen: Wer einen Pfeil in der Halle
+   anfängt, wechselt die Etage und tippt das Ziel draußen an, und der Pfeil
+   behält beide Enden genau dort, wo sie gesetzt wurden. */
+function etageSetzen(etage, sagen) {
+  S.etage = etage === "aussen" ? "aussen" : "halle";
+  svg.dataset.etage = S.etage;
+  $("etagen").dataset.etage = S.etage;
+  $("e-halle").setAttribute("aria-pressed", String(S.etage === "halle"));
+  $("e-aussen").setAttribute("aria-pressed", String(S.etage === "aussen"));
+  svg.setAttribute("aria-label", `Plan der Etage ${ETAGEN[S.etage]}, mit Aufgaben und Pfeilen`);
+  zeichnePlan();
+  if (!sagen) return;
+  if (S.start) hinweisSetzen(`Der Anfang liegt in der Etage ${ETAGEN[etageVon(S.start)]}. Tippe das Ziel an, der Pfeil geht dann über beide Etagen.`);
+  else hinweisSetzen(`Etage ${ETAGEN[S.etage]}.`);
+}
+$("e-halle").addEventListener("click", () => etageSetzen("halle", true));
+$("e-aussen").addEventListener("click", () => etageSetzen("aussen", true));
 /* Mausrad und Trackpad: kraeftiges Scrollen zoomt staerker. deltaMode rechnet Zeilen und Seiten um. */
 svg.addEventListener("wheel", (e) => {
   e.preventDefault();
@@ -648,8 +710,9 @@ const istOffen = (e) => e.status !== "erledigt";
 /* Der Titel ist die Aufgabe selbst. Die Textzeilen stehen nur in der Ansicht und im Formular. */
 const titelVon = (e) => e.text;
 const untertitelVon = (e) => {
-  if (!istOffen(e)) return e.person ? `✓ ${e.person} · erledigt` : "✓ erledigt";
-  return e.person ? `${e.person} · offen` : "Für alle · offen";
+  const wer = e.personen.join(", ");
+  if (!istOffen(e)) return wer ? `✓ ${wer} · erledigt` : "✓ erledigt";
+  return wer ? `${wer} · offen` : "Für alle · offen";
 };
 const punktFarbe = (e) => (istOffen(e) ? farbeVon(e.person) : stilWert("--erledigt", "#6B7770"));
 /* Die Karte bleibt immer weiß, auch im Dunkelmodus. Ihre Farben sind darum fest. Die Liste nimmt die Themenfarben. */
@@ -692,8 +755,20 @@ function pfeilZeichnen(ziel, x1, y1, x2, y2, farbe, p, gestrichelt) {
 /* Kreis mit Prio-Zahl: bei einer Aufgabe der Punkt, bei einem Pfeil der Anfang. */
 function kreisZeichnen(ziel, x, y, e, nummer, p, gewaehlt) {
   const farbe = kartenFarbe(e);
+  const mehrere = istOffen(e) && e.personen?.length > 1;
+  if (mehrere) {
+    const r = 8 * p, n = e.personen.length;
+    e.personen.forEach((name, i) => {
+      const a0 = -Math.PI / 2 + (i / n) * 2 * Math.PI, a1 = -Math.PI / 2 + ((i + 1) / n) * 2 * Math.PI;
+      const gross = a1 - a0 > Math.PI ? 1 : 0;
+      ziel.appendChild(neu("path", {
+        d: `M${x},${y} L${x + r * Math.cos(a0)},${y + r * Math.sin(a0)} A${r},${r} 0 ${gross} 1 ${x + r * Math.cos(a1)},${y + r * Math.sin(a1)} Z`,
+        fill: farbeVon(name),
+      }));
+    });
+  }
   ziel.appendChild(neu("circle", {
-    cx: x, cy: y, r: 8 * p, fill: farbe,
+    cx: x, cy: y, r: 8 * p, fill: mehrere ? "none" : farbe,
     class: "kugel" + (gewaehlt ? " gewaehlt" : ""),
     "stroke-width": (gewaehlt ? 2.4 : 1.2) * p,
   }));
@@ -727,7 +802,8 @@ function zeichnePlan() {
   const p = proPixel();
   const zeigeText = V.z >= 1.8;
   const nummern = new Map(offene().map((e, i) => [e.id, i + 1]));
-  const alle = sortiert().map(mitVersatz);
+  /* Prio bleibt die Prio aller Aufgaben. Gefiltert wird nur, was gezeichnet wird. */
+  const alle = sortiert().filter(sichtbar).map(mitVersatz);
   if (S.verschiebt) haloZeichnen(alle, p);
   alle.filter(istPfeil).forEach((e) => {
     pfeilZeichnen(ebenePfeile, e.x1, e.y1, e.x2, e.y2, kartenFarbe(e), p, false);
@@ -748,10 +824,10 @@ function zeichnePlan() {
     });
   }
   if (S.start) {
-    ebenePunkte.appendChild(neu("circle", { cx: S.start.x, cy: S.start.y, r: 8 * p, fill: "none", stroke: S.person ? farbeVon(S.person) : KARTE_DUNKEL, "stroke-width": 2.5 * p, "stroke-dasharray": `${4 * p} ${3 * p}` }));
+    ebenePunkte.appendChild(neu("circle", { cx: S.start.x, cy: S.start.y, r: 8 * p, fill: "none", stroke: S.personen.length ? farbeVon(S.personen[0]) : KARTE_DUNKEL, "stroke-width": 2.5 * p, "stroke-dasharray": `${4 * p} ${3 * p}` }));
   }
   if (S.entwurf) {
-    const f = S.person ? farbeVon(S.person) : KARTE_DUNKEL;
+    const f = S.personen.length ? farbeVon(S.personen[0]) : KARTE_DUNKEL;
     if (S.entwurf.art === "pfeil") pfeilZeichnen(ebenePfeile, S.entwurf.x1, S.entwurf.y1, S.entwurf.x2, S.entwurf.y2, f, p, true);
     else ebenePunkte.appendChild(neu("circle", { cx: S.entwurf.x, cy: S.entwurf.y, r: 8 * p, fill: f, stroke: "#FFFFFF", "stroke-width": 2 * p, "fill-opacity": ".85" }));
   }
@@ -842,7 +918,7 @@ function griffBei(punkt) {
 function planGetippt(punkt) {
   if (S.tafel === "formular" && !S.bearbeiten && S.modus === "aufgabe") {
     /* Noch im Anlegen: ein weiterer Tipp verschiebt die Stelle. */
-    S.entwurf = { art: "aufgabe", x: punkt.x, y: punkt.y };
+    S.entwurf = { art: "aufgabe", x: punkt.x, y: punkt.y, etage: S.etage };
     zeichnePlan();
     return;
   }
@@ -853,20 +929,20 @@ function planGetippt(punkt) {
   if (S.modus === "ansehen") { abwaehlen(); return; }
   if (S.modus === "aufgabe") {
     S.gewaehlt = null;
-    S.entwurf = { art: "aufgabe", x: punkt.x, y: punkt.y };
+    S.entwurf = { art: "aufgabe", x: punkt.x, y: punkt.y, etage: S.etage };
     formularOeffnen(null);
     return;
   }
   if (!S.start) {
     S.gewaehlt = null;
-    S.start = { x: punkt.x, y: punkt.y };
+    S.start = { x: punkt.x, y: punkt.y, etage: S.etage };
     S.entwurf = null;
     hinweisSetzen("Start gesetzt. Jetzt das Ziel antippen.");
     zeichnePlan();
     return;
   }
   if (Math.hypot(punkt.x - S.start.x, punkt.y - S.start.y) < 12) return;
-  S.entwurf = { art: "pfeil", x1: S.start.x, y1: S.start.y, x2: punkt.x, y2: punkt.y };
+  S.entwurf = { art: "pfeil", x1: S.start.x, y1: S.start.y, x2: punkt.x, y2: punkt.y, etage: S.start.etage ?? S.etage, etage2: S.etage };
   S.start = null;
   formularOeffnen(null);
 }
@@ -900,13 +976,15 @@ function waehle(id) {
   $("d-titel").textContent = titelVon(e);
   const nr = nummerVon(id);
   $("d-wer").textContent = untertitelVon(e) + (nr ? ` · Prio ${nr}` : "");
-  $("d-erledigt").textContent = istOffen(e) ? "Als erledigt markieren" : "Wieder öffnen";
+  const erlText = istOffen(e) ? "Als erledigt markieren" : "Wieder öffnen";
+  $("d-erledigt").innerHTML = istOffen(e) ? '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12l5 5l10 -10" /></svg>' : '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19.95 11a8 8 0 1 0 -.5 4m.5 5v-5h-5" /></svg>';
+  $("d-erledigt").title = erlText; $("d-erledigt").setAttribute("aria-label", erlText);
   const meine = istMeine(e);
   $("d-bearbeiten").disabled = !darfAufgabe(ICH, "bearbeiten", meine);
   $("d-erledigt").disabled = !darfAufgabe(ICH, "erledigen", meine);
   $("d-loeschen").disabled = !darfAufgabe(ICH, "loeschen", meine);
-  $("d-bearbeiten").title = $("d-bearbeiten").disabled ? "Diese Aufgabe darfst du nicht bearbeiten." : "";
-  $("d-loeschen").title = $("d-loeschen").disabled ? "Diese Aufgabe darfst du nicht löschen." : "";
+  $("d-bearbeiten").title = $("d-bearbeiten").disabled ? "Diese Aufgabe darfst du nicht bearbeiten." : "Bearbeiten";
+  $("d-loeschen").title = $("d-loeschen").disabled ? "Diese Aufgabe darfst du nicht löschen." : "Löschen";
   zeilenAnsichtZeichnen(e);
   tafelZeigen("detail");
   hinweisZurueck();
@@ -924,17 +1002,59 @@ $("d-schliessen").addEventListener("click", abwaehlen);
 function zeilenAnsichtZeichnen(e) {
   const zeilen = e.zeilen ?? [];
   $("d-zeilen").innerHTML = zeilen.map((z) =>
-    `<div class="zeile-block">${z.titel ? `<p class="zeile-titel">${esc(z.titel)}</p>` : ""}<p class="zeile-text">${esc(z.text)}</p></div>`
+    `<div class="zeile-block">${z.titel ? `<p class="zeile-titel">${esc(z.titel)}</p>` : ""}<div class="zeile-text">${formatiert(z.text)}</div></div>`
   ).join("");
   $("d-zeilen").hidden = zeilen.length === 0;
 }
+
+/* Einfache Auszeichnung in Textzeilen: **fett**, __unterstrichen__, Zeilen mit "- " sind Stichpunkte.
+   Erst wird alles maskiert, dann werden nur diese Zeichen in HTML umgesetzt. */
+function formatiert(text) {
+  const inline = (s) => esc(s)
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/__(.+?)__/g, "<u>$1</u>");
+  const raus = [];
+  let liste = null;
+  String(text || "").split("\n").forEach((zeile) => {
+    const m = zeile.match(/^\s*[-•]\s+(.*)$/);
+    if (m) { (liste ??= []).push(`<li>${inline(m[1])}</li>`); return; }
+    if (liste) { raus.push(`<ul>${liste.join("")}</ul>`); liste = null; }
+    raus.push(zeile.trim() ? `<p>${inline(zeile)}</p>` : "");
+  });
+  if (liste) raus.push(`<ul>${liste.join("")}</ul>`);
+  return raus.join("");
+}
+$("f-zeilen").addEventListener("click", (e) => {
+  const k = e.target.closest("[data-format]");
+  if (!k) return;
+  const feld = k.closest("li")?.querySelector('[data-feld="text"]');
+  if (!feld) return;
+  const a = feld.selectionStart, b = feld.selectionEnd, v = feld.value;
+  if (k.dataset.format === "punkt") {
+    /* Jede markierte Zeile (oder die aktuelle) wird zum Stichpunkt, ein zweiter Druck nimmt ihn weg. */
+    const anf = v.lastIndexOf("\n", a - 1) + 1, endeRoh = v.indexOf("\n", b), ende = endeRoh < 0 ? v.length : endeRoh;
+    const block = v.slice(anf, ende).split("\n");
+    const alle = block.every((z) => /^\s*-\s/.test(z));
+    const neu = block.map((z) => (alle ? z.replace(/^\s*-\s/, "") : (/^\s*-\s/.test(z) ? z : "- " + z))).join("\n");
+    feld.value = v.slice(0, anf) + neu + v.slice(ende);
+    feld.setSelectionRange(anf, anf + neu.length);
+  } else {
+    const zeichen = k.dataset.format === "fett" ? "**" : "__";
+    const wort = v.slice(a, b) || (k.dataset.format === "fett" ? "fett" : "unterstrichen");
+    feld.value = v.slice(0, a) + zeichen + wort + zeichen + v.slice(b);
+    feld.setSelectionRange(a + 2, a + 2 + wort.length);
+  }
+  feld.focus();
+  feld.dispatchEvent(new Event("input", { bubbles: true }));
+});
 
 /* ---- Formular: ein Titel, dazu Textzeilen mit Überschrift und Text ---- */
 function formularOeffnen(id) {
   const e = id ? S.eintraege[id] : null;
   S.bearbeiten = id;
   const pfeil = e ? istPfeil(e) : S.entwurf?.art === "pfeil";
-  S.person = e ? (e.person ?? null) : null;
+  /* Neue Einträge gehen an die Person, für die gerade eingetragen wird. */
+  S.personen = e ? [...e.personen] : (ALS && PERSONEN.some((p) => p.n === ALS) ? [ALS] : []);
   S.zeilen = e ? (e.zeilen ?? []).map((z) => ({ id: z.id, titel: z.titel ?? "", text: z.text ?? "" })) : [];
   $("f-titel").textContent = e
     ? (pfeil ? "Pfeil bearbeiten" : "Aufgabe bearbeiten")
@@ -955,7 +1075,7 @@ function formularOeffnen(id) {
 }
 function formularSchliessen() {
   const war = S.bearbeiten;
-  S.entwurf = null; S.start = null; S.bearbeiten = null; S.person = null; S.zeilen = [];
+  S.entwurf = null; S.start = null; S.bearbeiten = null; S.personen = []; S.zeilen = [];
   if (war) waehle(war); else abwaehlen();
 }
 $("f-abbrechen").addEventListener("click", formularSchliessen);
@@ -967,6 +1087,11 @@ function zeilenZeichnen() {
         <button class="griff" type="button" aria-label="Textzeile verschieben: nach oben oder unten ziehen" title="Zum Verschieben ziehen">${GRIFF_SVG}</button>
         <input type="text" data-feld="titel" maxlength="80" placeholder="Überschrift, zum Beispiel: Material" value="${esc(z.titel)}" aria-label="Überschrift der Textzeile">
         <button class="zeile-weg" type="button" data-weg="${esc(z.id)}">Entfernen</button>
+      </div>
+      <div class="format-leiste" role="toolbar" aria-label="Text formatieren">
+        <button type="button" data-format="fett" title="Fett" aria-label="Fett"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h6a3.5 3.5 0 0 1 0 7h-6l0 -7" /> <path d="M13 12h1a3.5 3.5 0 0 1 0 7h-7v-7" /></svg></button>
+        <button type="button" data-format="unter" title="Unterstrichen" aria-label="Unterstrichen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v5a5 5 0 0 0 10 0v-5" /> <path d="M5 19h14" /></svg></button>
+        <button type="button" data-format="punkt" title="Stichpunkte" aria-label="Stichpunkte"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l11 0" /> <path d="M9 12l11 0" /> <path d="M9 18l11 0" /> <path d="M5 6l0 .01" /> <path d="M5 12l0 .01" /> <path d="M5 18l0 .01" /></svg></button>
       </div>
       <textarea data-feld="text" rows="2" maxlength="1000" placeholder="Was soll in dieser Zeile stehen?" aria-label="Text der Textzeile">${esc(z.text)}</textarea>
     </li>`).join("");
@@ -1021,14 +1146,14 @@ sortierbar($("f-zeilen"), ".griff", (von, nach) => {
 /* Leere Zeilen werden beim Speichern nicht übernommen. Nummern ergeben sich aus der Reihenfolge. */
 function zeilenFuerSpeichern() {
   zeilenLesen();
-  const ausgabe = {};
+  const ausgabe = [];
   S.zeilen.forEach((z) => {
     const titel = (z.titel || "").trim().slice(0, 80);
-    const text = (z.text || "").trim().slice(0, 1000);
-    if (!titel && !text) return;
-    ausgabe[z.id] = { titel, text, reihe: (Object.keys(ausgabe).length + 1) * 1000 };
+    const text = (z.text || "").trimEnd().replace(/^\s*\n/, "").slice(0, 1000);
+    if (!titel && !text.trim()) return;
+    ausgabe.push({ titel, text });
   });
-  return Object.keys(ausgabe).length ? ausgabe : null;
+  return ausgabe.length ? JSON.stringify(ausgabe) : null;
 }
 
 $("t-formular").addEventListener("submit", async (e) => {
@@ -1045,26 +1170,35 @@ $("t-formular").addEventListener("submit", async (e) => {
       /* Nur die geänderten Felder schreiben, damit nichts anderes überschrieben wird. */
       const ok = await schreiben({
         [`${BASIS}/eintraege/${id}/text`]: titel,
-        [`${BASIS}/eintraege/${id}/person`]: S.person ?? null,
+        [`${BASIS}/eintraege/${id}/person`]: S.personen[0] ?? null,
+        [`${BASIS}/eintraege/${id}/personen`]: S.personen.length ? S.personen.join("|") : null,
         [`${BASIS}/eintraege/${id}/zeilen`]: zeilen,
-        ...verlaufPaar("bearbeitet", titel, S.person ?? null),
+        ...verlaufPaar("bearbeitet", titel, S.personen[0] ?? null),
       });
       if (!ok) return;
-      S.bearbeiten = null; S.person = null; S.zeilen = [];
+      S.bearbeiten = null; S.personen = []; S.zeilen = [];
       waehle(id);
     } else {
       const id = neueId();
-      const basis = { text: titel, person: S.person ?? null, status: "offen", ts: Date.now(), reihe: neueReihe(), ersteller: ICH?.bid || "" };
+      /* Wer für jemand anderen einträgt, legt die Aufgabe in dessen Namen an:
+         sie gehört dann dieser Person, als hätte sie sie selbst erstellt. */
+      const vertreten = ALS && ICH && ALS !== ICH.name && darfVertreten(ICH, "arbeitsplan");
+      const ersteller = vertreten ? (PERSONEN.find((x) => x.n === ALS)?.bid || ICH?.bid || "") : (ICH?.bid || "");
+      const basis = { text: titel, status: "offen", ts: Date.now(), reihe: neueReihe(), ersteller };
+      if (S.personen.length) { basis.person = S.personen[0]; basis.personen = S.personen.join("|"); }
       if (zeilen) basis.zeilen = zeilen;
+      /* Die Etage steht beim Entwurf fest: ein Pfeil merkt sich die Etage seines
+         Anfangs und die seines Endes, darum kann er von drinnen nach draußen gehen. */
       const eintrag = S.entwurf.art === "pfeil"
-        ? { art: "pfeil", ...basis, x1: r2(S.entwurf.x1), y1: r2(S.entwurf.y1), x2: r2(S.entwurf.x2), y2: r2(S.entwurf.y2) }
-        : { art: "aufgabe", ...basis, x: r2(S.entwurf.x), y: r2(S.entwurf.y) };
+        ? { art: "pfeil", ...basis, x1: r2(S.entwurf.x1), y1: r2(S.entwurf.y1), x2: r2(S.entwurf.x2), y2: r2(S.entwurf.y2),
+            etage: S.entwurf.etage ?? S.etage, etage2: S.entwurf.etage2 ?? S.etage }
+        : { art: "aufgabe", ...basis, x: r2(S.entwurf.x), y: r2(S.entwurf.y), etage: S.entwurf.etage ?? S.etage };
       const ok = await schreiben({
         [`${BASIS}/eintraege/${id}`]: eintrag,
         ...verlaufPaar("erstellt", titel, eintrag.person),
       });
       if (!ok) return;
-      S.entwurf = null; S.person = null; S.zeilen = [];
+      S.entwurf = null; S.personen = []; S.zeilen = [];
       abwaehlen();
       hinweisSetzen("Gespeichert. Die Karte zeigt es jetzt.");
     }
@@ -1107,8 +1241,8 @@ $("d-loeschen-ja").addEventListener("click", async () => {
 async function reihenfolgeAendern(von, nach) {
   const liste = offene();
   const e0 = liste[von];
-  if (e0 && !darfAufgabe(ICH, "bearbeiten", istMeine(e0))) {
-    hinweisSetzen("Diese Aufgabe darfst du nicht umsortieren.");
+  if (e0 && !darfAufgabe(ICH, "prio")) {
+    hinweisSetzen("Die Priorität darfst du nicht ändern.");
     alleZeichnen();
     return;
   }
@@ -1155,17 +1289,34 @@ async function schreiben(werte) {
 
 /* ---- Personen ---- */
 function personenZeichnen() {
-  $("ich-wahl").innerHTML = ICH
-    ? `<span class="person" aria-pressed="true"><span class="farbe" style="background:${esc(ICH.farbe)}"></span>${esc(ICH.name)}</span>`
-    : "";
+  if (!ICH) { $("ich-wahl").innerHTML = ""; }
+  else if (!darfVertreten(ICH, "arbeitsplan")) {
+    $("ich-wahl").innerHTML = `<span class="person" aria-pressed="true"><span class="farbe" style="background:${esc(ICH.farbe)}"></span>${esc(ICH.name)}</span>`;
+  } else {
+    /* Mit dem Recht "Für andere eintragen" lässt sich umstellen, in wessen Namen
+       eingetragen wird. An den eigenen Rechten ändert das nichts. */
+    $("ich-wahl").innerHTML = PERSONEN.map((p) =>
+      `<button class="person" type="button" data-als="${esc(p.n)}" aria-pressed="${ALS === p.n}"><span class="farbe" style="background:${p.c}"></span>${esc(p.n)}${ALS === p.n ? " ✓" : ""}</button>`
+    ).join("");
+  }
   $("f-personen").innerHTML = PERSONEN.map((p) =>
-    `<button class="person" type="button" data-person="${esc(p.n)}" aria-pressed="${S.person === p.n}"><span class="farbe" style="background:${p.c}"></span>${esc(p.n)}${S.person === p.n ? " ✓" : ""}</button>`
+    `<button class="person" type="button" data-person="${esc(p.n)}" aria-pressed="${S.personen.includes(p.n)}"><span class="farbe" style="background:${p.c}"></span>${esc(p.n)}${S.personen.includes(p.n) ? " ✓" : ""}</button>`
   ).join("");
 }
+$("ich-wahl").addEventListener("click", (e) => {
+  const knopf = e.target.closest("[data-als]");
+  if (!knopf) return;
+  ALS = knopf.dataset.als;
+  S.ich = ALS;
+  $("ich-text").textContent = ICH && ALS === ICH.name ? "Angemeldet als" : "Eingetragen wird für";
+  personenZeichnen();
+  hinweisSetzen(`Neue Einträge gehen jetzt auf ${ALS}.`);
+});
 $("f-personen").addEventListener("click", (e) => {
   const knopf = e.target.closest("[data-person]");
   if (!knopf) return;
-  S.person = S.person === knopf.dataset.person ? null : knopf.dataset.person;
+  const n = knopf.dataset.person;
+  S.personen = S.personen.includes(n) ? S.personen.filter((x) => x !== n) : [...S.personen, n];
   personenZeichnen();
   zeichnePlan();
 });
@@ -1214,6 +1365,58 @@ $("verlauf-knopf").addEventListener("click", () => {
 });
 $("v-zurueck").addEventListener("click", () => { S.gewaehlt ? waehle(S.gewaehlt) : abwaehlen(); });
 
+/* Zur Aufgabe springen: Etage wechseln, heranzoomen, auswählen. */
+function zuEintragSpringen(id) {
+  const e = S.eintraege[id];
+  if (!e) return;
+  if (!aufEtage(e)) etageSetzen(etageVon(e));
+  const x = istPfeil(e) ? (e.x1 + e.x2) / 2 : e.x, y = istPfeil(e) ? (e.y1 + e.y2) / 2 : e.y;
+  V.z = Math.max(V.z, 2.4); V.cx = x; V.cy = y;
+  ansichtSetzen();
+  waehle(id);
+  map.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+/* ---- Nach Person filtern ---- */
+/* Der Filter blendet nur aus. Er ändert nichts an den Einträgen und nichts an
+   der Prio-Reihenfolge; die bleibt die Reihenfolge aller Aufgaben. */
+function filterPersonenZeichnen() {
+  const ohneDa = Object.values(S.eintraege).some((e) => !e.personen?.length);
+  const knopf = (wert, name, farbe, extra) =>
+    `<button class="person" type="button" ${extra} aria-pressed="${S.nurPersonen.includes(wert)}"><span class="farbe" style="background:${farbe}"></span>${esc(name)}</button>`;
+  $("filter-personen").innerHTML =
+    PERSONEN.map((p) => knopf(p.n, p.n, p.c, `data-filter="${esc(p.n)}"`)).join("") +
+    (ohneDa ? knopf(OHNE, "Ohne Person", "#9AA6A0", 'data-filter-ohne="1"') : "");
+  const gewaehlt = S.nurPersonen.map((x) => (x === OHNE ? "ohne Person" : x));
+  $("filter-stand").textContent = gewaehlt.length === 0
+    ? "Es werden alle Einträge gezeigt."
+    : `Gezeigt werden nur: ${gewaehlt.join(", ")}.`;
+  $("filter-knopf").setAttribute("aria-pressed", String(S.nurPersonen.length > 0));
+}
+function filterAnwenden() {
+  filterPersonenZeichnen();
+  zeichnePlan();
+  alleZeichnen();
+}
+$("filter-knopf").addEventListener("click", () => {
+  const tafel = $("filter-tafel");
+  if (!tafel.hidden) { tafel.hidden = true; return; }
+  filterPersonenZeichnen();
+  tafel.hidden = false;
+  tafel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+});
+$("filter-personen").addEventListener("click", (e) => {
+  const knopf = e.target.closest("[data-filter], [data-filter-ohne]");
+  if (!knopf) return;
+  const wert = knopf.hasAttribute("data-filter-ohne") ? OHNE : knopf.dataset.filter;
+  S.nurPersonen = S.nurPersonen.includes(wert)
+    ? S.nurPersonen.filter((x) => x !== wert)
+    : [...S.nurPersonen, wert];
+  filterAnwenden();
+});
+$("filter-alle").addEventListener("click", () => { S.nurPersonen = []; filterAnwenden(); });
+$("filter-zu").addEventListener("click", () => { $("filter-tafel").hidden = true; });
+
 /* ---- Liste aller Aufgaben: offene nach Prio, erledigte darunter ---- */
 function alleZeichnen() {
   if (ziehtGerade) return;
@@ -1221,21 +1424,26 @@ function alleZeichnen() {
   const offen = alle.filter(istOffen);
   const erledigt = alle.filter((e) => !istOffen(e));
   const nummern = new Map(offen.map((e, i) => [e.id, i + 1]));
-  $("alle-liste").innerHTML = [...offen, ...erledigt].map((e) => {
+  /* Gefiltert wird nur die Anzeige. Solange gefiltert ist, bleibt der Griff weg:
+     Verschieben in einer Teilliste würde die Prio der versteckten Aufgaben verdrehen. */
+  const gefiltert = S.nurPersonen.length > 0;
+  $("alle-liste").innerHTML = [...offen, ...erledigt].filter(passtZurPerson).map((e) => {
     const nr = nummern.get(e.id);
     const farbe = punktFarbe(e);
-    const griff = nr
+    const griff = nr && !gefiltert && darfAufgabe(ICH, "prio")
       ? `<button class="griff" type="button" data-griff="${esc(e.id)}" aria-label="Priorität ändern: nach oben oder unten ziehen" title="Zum Ändern der Priorität ziehen">${GRIFF_SVG}</button>`
       : `<span class="griff-platz" aria-hidden="true"></span>`;
-    return `<li class="${istOffen(e) ? "offen" : "erledigt"}" data-id="${esc(e.id)}">${griff}<span class="abzeichen" style="background:${farbe}; color:${kontrast(farbe)}">${nr ?? ""}</span><span class="zeile"><button class="textknopf" type="button" data-zeigen="${esc(e.id)}" style="text-align:left; color:var(--ink); min-height:auto">${esc(titelVon(e))}</button><span class="wann">${esc(untertitelVon(e))}</span></span></li>`;
+    return `<li class="${istOffen(e) ? "offen" : "erledigt"}" data-id="${esc(e.id)}">${griff}<span class="abzeichen" style="background:${farbe}; color:${kontrast(farbe)}">${nr ?? ""}</span><span class="zeile"><button class="textknopf" type="button" data-zeigen="${esc(e.id)}" style="text-align:left; color:var(--ink); min-height:auto">${esc(titelVon(e))}</button><span class="wann">${esc(untertitelVon(e))}</span></span><button class="hin-knopf" type="button" data-hin="${esc(e.id)}" aria-label="Auf der Karte zeigen" title="Auf der Karte zeigen"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 12a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /> <path d="M4 12a8 8 0 1 0 16 0a8 8 0 1 0 -16 0" /> <path d="M12 2l0 2" /> <path d="M12 20l0 2" /> <path d="M20 12l2 0" /> <path d="M2 12l2 0" /></svg></button></li>`;
   }).join("");
   $("alle-leer").hidden = alle.length > 0;
+  $("alle-hinweis").textContent = gefiltert
+    ? "Gefiltert: es stehen nur die ausgewählten Personen in der Liste. Die Prio-Reihenfolge lässt sich erst wieder ändern, wenn der Filter aus ist."
+    : "Oben steht die höchste Priorität (Prio 1). Neue Aufgaben kommen unten dazu. Die Aufgabe am Griff nach oben oder unten ziehen.";
 }
 $("alle-liste").addEventListener("click", (e) => {
-  const knopf = e.target.closest("[data-zeigen]");
+  const knopf = e.target.closest("[data-zeigen], [data-hin]");
   if (!knopf) return;
-  waehle(knopf.dataset.zeigen);
-  map.scrollIntoView({ behavior: "smooth", block: "center" });
+  zuEintragSpringen(knopf.dataset.zeigen || knopf.dataset.hin);
 });
 sortierbar($("alle-liste"), "[data-griff]", (von, nach) => {
   if (von === nach) { alleZeichnen(); return; }
@@ -1351,7 +1559,7 @@ function sortierbar(liste, griffWahl, onEnde, listenWahl = ":scope > li") {
 function modusSetzen(m) {
   S.modus = m;
   ["ansehen", "aufgabe", "pfeil"].forEach((name) => $("w-" + name).setAttribute("aria-pressed", String(name === m)));
-  S.entwurf = null; S.start = null; S.person = null; S.bearbeiten = null; S.verschiebt = null;
+  S.entwurf = null; S.start = null; S.personen = []; S.bearbeiten = null; S.verschiebt = null;
   if (S.tafel === "formular") tafelZeigen("aus");
   hinweisZurueck();
   map.classList.toggle("setzen", m !== "ansehen" && S.tafel !== "verlauf");
@@ -1366,35 +1574,65 @@ function sauber(roh) {
   const raus = {};
   Object.entries(roh || {}).forEach(([id, e]) => {
     if (!e || typeof e.text !== "string") return;
-    const zeilen = Object.entries(e.zeilen || {})
-      .map(([zid, z]) => ({
+    /* Textzeilen stehen neu als Text (JSON) in der Datenbank, damit die Regeln
+       sie vergleichen können. Ältere Einträge haben noch ein Objekt. */
+    let zRoh = e.zeilen, zeilenAlt = false;
+    if (typeof zRoh === "string") { try { zRoh = JSON.parse(zRoh); } catch (err) { zRoh = []; } }
+    else if (zRoh && typeof zRoh === "object") zeilenAlt = true;
+    const zListe = Array.isArray(zRoh)
+      ? zRoh.map((z, i) => ({ id: "z" + i, z, reihe: i }))
+      : Object.entries(zRoh || {}).map(([zid, z]) => ({ id: zid, z, reihe: zahl(z?.reihe) ?? 0 }));
+    const zeilen = zListe
+      .map(({ id: zid, z, reihe }) => ({
         id: zid,
         titel: typeof z?.titel === "string" ? z.titel.slice(0, 80) : "",
         text: typeof z?.text === "string" ? z.text.slice(0, 1000) : "",
-        reihe: zahl(z?.reihe) ?? 0,
+        reihe,
       }))
       .filter((z) => z.titel || z.text)
       .sort((a, b) => a.reihe - b.reihe);
+    /* Mehrere Mitarbeiter stehen als "Arno|Joel" in personen; alte Einträge haben person. */
+    const personen = typeof e.personen === "string"
+      ? e.personen.split("|").map((s) => s.trim().slice(0, 40)).filter(Boolean).slice(0, 12)
+      : (typeof e.person === "string" && e.person ? [e.person.slice(0, 40)] : []);
     const gemeinsam = {
       text: e.text.slice(0, 200),
-      person: typeof e.person === "string" && e.person ? e.person.slice(0, 40) : null,
+      person: personen[0] ?? null,
+      personen,
+      zeilenAlt,
       ersteller: typeof e.ersteller === "string" ? e.ersteller : null,
       status: e.status === "erledigt" ? "erledigt" : "offen",
       ts: zahl(e.ts) ?? 0,
       reihe: zahl(e.reihe),
       zeilen,
     };
+    /* Einträge von früher haben keine Etage. Die gehören in die Halle. */
+    const et = (v) => (v === "aussen" ? "aussen" : "halle");
     if (e.art === "pfeil") {
       const x1 = zahl(e.x1), y1 = zahl(e.y1), x2 = zahl(e.x2), y2 = zahl(e.y2);
       if (x1 === null || y1 === null || x2 === null || y2 === null) return;
-      raus[id] = { art: "pfeil", ...gemeinsam, x1, y1, x2, y2 };
+      raus[id] = { art: "pfeil", ...gemeinsam, x1, y1, x2, y2, etage: et(e.etage), etage2: et(e.etage2 ?? e.etage) };
     } else {
       const x = zahl(e.x), y = zahl(e.y);
       if (x === null || y === null) return;
-      raus[id] = { art: "aufgabe", ...gemeinsam, x, y };
+      raus[id] = { art: "aufgabe", ...gemeinsam, x, y, etage: et(e.etage) };
     }
   });
   return raus;
+}
+/* Ältere Einträge haben ihre Textzeilen noch als Objekt. Damit auch Mitarbeiter
+   ohne Bearbeiten-Recht sie abhaken oder versetzen können, stellt sie jeder, der
+   sie bearbeiten darf, still auf Text um. Am Inhalt ändert sich nichts. */
+const umgestellt = new Set();
+function zeilenUmstellen() {
+  if (!ICH) return;
+  const werte = {};
+  Object.entries(S.eintraege).forEach(([id, e]) => {
+    if (!e.zeilenAlt || umgestellt.has(id) || !darfAufgabe(ICH, "bearbeiten", istMeine(e))) return;
+    umgestellt.add(id);
+    werte[`${BASIS}/eintraege/${id}/zeilen`] = e.zeilen.length ? JSON.stringify(e.zeilen.map((z) => ({ titel: z.titel, text: z.text }))) : null;
+  });
+  if (Object.keys(werte).length) update(ref(db), werte).catch((err) => console.error(err));
 }
 function datenFehler(err) {
   console.error(err);
@@ -1411,6 +1649,7 @@ function starteSync() {
   syncLaeuft = true;
   onValue(ref(db, `${BASIS}/eintraege`), (snap) => {
     S.eintraege = sauber(snap.val());
+    zeilenUmstellen();
     $("live-text").textContent = "Aufgaben und Pfeile für die ganze Halle. Alle sehen dasselbe.";
     if (S.gewaehlt && !S.eintraege[S.gewaehlt]) {
       S.gewaehlt = null;
@@ -1433,6 +1672,8 @@ requestAnimationFrame(() => { ansichtSetzen(); zeichnePlan(); });
 personenZeichnen();
 zeilenZeichnen();
 filterZeichnen();
+etageSetzen(S.etage);
+filterPersonenZeichnen();
 hinweisZurueck();
 tafelZeigen("aus");
 seiteStarten().catch((err) => { console.error(err); zeigeBereich(false); });
