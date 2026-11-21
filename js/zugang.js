@@ -25,8 +25,8 @@ export const istRechteFehler = (err) => /permission[_ ]denied/i.test(`${err?.cod
 /* Die Bereiche, für die es ein Recht gibt. Der Schlüssel steht so auch in der Datenbank. */
 export const BEREICHE = [
   { id: "reinigung", name: "Hallenreinigung", seite: "./Reinigungsplan", zusatz: "Gereinigte Bereiche eintragen und einsehen" },
-  { id: "sportanlagen", name: "Sportanlagen", seite: "./Sportanlagen", zusatz: "Status der Anlagen und der Tribüne einstellen" },
-  { id: "arbeitsplan", name: "Hallen Arbeitsplan", seite: "./Arbeitsplan", zusatz: "Aufgaben und Pfeile auf dem Hallenplan" },
+  { id: "sportanlagen", name: "Einstellungen Sportanlagen", seite: "./Sportanlagen", zusatz: "Status der Anlagen und der Tribüne einstellen" },
+  { id: "arbeitsplan", name: "Aufgaben und Arbeitsplan", seite: "./Arbeitsplan", zusatz: "Aufgaben und Pfeile auf dem Hallenplan" },
   { id: "admin", name: "Admin Panel", seite: "./Adminpanel", zusatz: "Benutzer, Codes, Rechte und Sicherungen" },
 ];
 
