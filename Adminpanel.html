@@ -48,7 +48,7 @@ body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); 
 .knopf:disabled{opacity:.5; cursor:not-allowed}
 .logo-link{display:inline-flex; align-items:center; gap:10px; min-width:0; text-decoration:none; color:inherit; border-radius:6px}
 button:focus-visible, input:focus-visible, a:focus-visible, summary:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
-h1{margin:0; font-family:var(--display); font-weight:600; font-size:clamp(32px,6vw,48px); line-height:1; text-transform:uppercase}
+h1{margin:0; font-family:var(--display); font-weight:600; font-size:clamp(32px, 8vw, 44px); line-height:1; text-transform:uppercase; text-wrap:balance}
 h2{margin:0; font-family:var(--display); font-weight:600; font-size:26px; line-height:1.05; text-transform:uppercase}
 h3{margin:0; font-size:15px; font-weight:600}
 .muted{margin:0; font-size:15px; color:var(--ink-2)}
@@ -120,7 +120,7 @@ details.sicher > summary::-webkit-details-marker{display:none}
 .balken-strich{display:block; height:100%; min-width:3px; border-radius:999px; background:var(--accent)}
 .balken-zahl{text-align:right; font-variant-numeric:tabular-nums}
 .rueckfrage{border:1px solid var(--fehler); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; font-size:14px}
-/* Am PC: Benutzer links, Formular, Sicherungen und Besucher rechts daneben */
+/* Am PC: Benutzer links, Formular, Besucher und Sicherungen rechts daneben */
 @media (min-width:1100px){
   .wrap{max-width:1280px}
   #panel{display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr); column-gap:24px; row-gap:20px; align-items:start}
@@ -131,12 +131,19 @@ details.sicher > summary::-webkit-details-marker{display:none}
   #panel > :nth-child(n+3){grid-column:2}
   #panel > #formular{position:sticky; top:12px; max-height:calc(100vh - 96px); overflow:auto}
 }
+/* Einheitlicher Kopf auf allen Personalseiten: Logo, darunter-/daneben "Helmut-Körnig-Halle" und "Personal" wie auf der Startseite */
+.hkh-kopf{display:inline-flex !important; align-items:center; gap:10px; min-width:0; flex:none; text-decoration:none; color:inherit; border-radius:6px}
+.hkh-kopf img{flex:none; display:block; height:34px !important; width:auto}
+.hkh-marke{display:flex; flex-direction:column; gap:2px; margin:0; font-family:Barlow, system-ui, -apple-system, "Segoe UI", sans-serif; font-size:13px; font-weight:500; line-height:1.15; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2)}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="kopf">
-    <a class="logo-link marke" href="./">Helmut-Körnig-Halle · Personal</a>
+    <a class="logo-link hkh-kopf" href="./" aria-label="Zur Startseite">
+    <img src="./bilder/logo.png" alt="Dortmunder Sportstätten" width="480" height="241">
+    <span class="hkh-marke"><span>Helmut-Körnig-Halle</span><span>Personal</span></span>
+  </a>
     <div class="kopf-knoepfe">
     </div>
   </div>
@@ -208,6 +215,13 @@ details.sicher > summary::-webkit-details-marker{display:none}
     </form>
 
     <section class="karte">
+      <h2>Besucher</h2>
+      <p class="muted">Gezählt wird die öffentliche Anzeige, jedes Gerät einmal pro Tag. Die Personal-Seiten zählen nicht mit.</p>
+      <div class="zahlen" id="besucher-zahlen"></div>
+      <div class="balken" id="besucher-tage"></div>
+    </section>
+
+    <section class="karte">
       <div class="kopfzeile">
         <div>
           <h2>Sicherungen</h2>
@@ -225,13 +239,6 @@ details.sicher > summary::-webkit-details-marker{display:none}
           </div>
         </details>
       </div>
-    </section>
-
-    <section class="karte">
-      <h2>Besucher</h2>
-      <p class="muted">Gezählt wird die öffentliche Anzeige, jedes Gerät einmal pro Tag. Die Personal-Seiten zählen nicht mit.</p>
-      <div class="zahlen" id="besucher-zahlen"></div>
-      <div class="balken" id="besucher-tage"></div>
     </section>
   </section>
 </div>
