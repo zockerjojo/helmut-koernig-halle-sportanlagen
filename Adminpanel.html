@@ -33,13 +33,17 @@ body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); 
 .kopf-knoepfe{display:flex; gap:10px; flex:none; align-items:center}
 .rund-knopf{display:inline-flex; align-items:center; justify-content:center; flex:none; width:44px; height:44px; padding:0; border-radius:50%; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; touch-action:manipulation}
 .rund-knopf:hover{border-color:var(--ink)}
-.rund-knopf svg{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+.rund-knopf svg{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; pointer-events:none}
+.rund-knopf{-webkit-tap-highlight-color:transparent}
 .rund-knopf .sonne{display:none}
 :root[data-theme="dark"] #dunkel .sonne{display:block}
 :root[data-theme="dark"] #dunkel .mond{display:none}
 .knopf{font:inherit; font-size:15px; font-weight:600; min-height:44px; padding:8px 18px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer}
 .knopf.primaer{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
 .knopf.gefahr{border-color:var(--fehler); color:var(--fehler); background:var(--panel)}
+.sym-knopf{min-width:48px; padding:0 10px !important; display:inline-flex; align-items:center; justify-content:center; gap:3px}
+.sym-knopf svg{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round}
+.sym-zahl{font-size:12px; font-weight:700}
 .knopf.klein{min-height:36px; padding:6px 14px; font-size:14px}
 .knopf:disabled{opacity:.5; cursor:not-allowed}
 .logo-link{display:inline-flex; align-items:center; gap:10px; min-width:0; text-decoration:none; color:inherit; border-radius:6px}
@@ -92,6 +96,10 @@ details[open] > summary .pfeil{transform:rotate(90deg)}
 .kreuz .txt{display:flex; flex-direction:column}
 .kreuz .zusatz{font-size:13px; color:var(--ink-2)}
 .unter{margin-left:32px; display:flex; flex-direction:column; gap:10px; padding-left:12px; border-left:2px solid var(--line)}
+.unter[hidden]{display:none}
+.bereich-block{display:flex; flex-direction:column; gap:10px}
+.bereich-block + .bereich-block{border-top:1px solid var(--line); padding-top:12px}
+.kreuz input:disabled + .txt{opacity:.55}
 .hinweis{border:1px dashed var(--line); border-radius:12px; padding:12px; font-size:14px; color:var(--ink-2); background:var(--bg)}
 .notfall{font-size:13px; color:var(--ink-2); margin:0}
 details.sicher > summary{list-style:none; cursor:pointer; display:inline-flex}
@@ -100,11 +108,29 @@ details.sicher > summary::-webkit-details-marker{display:none}
 .sz{display:flex; align-items:center; gap:10px; justify-content:space-between; border-bottom:1px solid var(--line); padding:8px 0; flex-wrap:wrap}
 .sz:last-child{border-bottom:0}
 .sz .wann{font-size:14px; color:var(--ink-2)}
-.zahlen{display:flex; gap:18px; flex-wrap:wrap}
-.zahl{display:flex; flex-direction:column}
-.zahl b{font-family:var(--display); font-size:30px; line-height:1}
-.zahl span{font-size:13px; color:var(--ink-2)}
+/* Besucherzahlen: wie früher auf der Sportanlagen-Seite, drei Zahlen und 14 Tage als Balken */
+.zahlen{display:flex; flex-wrap:wrap; gap:14px 28px}
+.zahl{display:flex; flex-direction:column; gap:2px}
+.zahl b{font-family:var(--display); font-weight:600; font-size:30px; line-height:1}
+.zahl span{font-size:14px; color:var(--ink-2)}
+.balken{display:flex; flex-direction:column; gap:5px}
+.balken-zeile{display:grid; grid-template-columns:72px minmax(0,1fr) 36px; align-items:center; gap:10px; font-size:14px}
+.balken-tag{color:var(--ink-2); font-variant-numeric:tabular-nums}
+.balken-feld{display:block; width:100%; height:10px; border-radius:999px; background:var(--line)}
+.balken-strich{display:block; height:100%; min-width:3px; border-radius:999px; background:var(--accent)}
+.balken-zahl{text-align:right; font-variant-numeric:tabular-nums}
 .rueckfrage{border:1px solid var(--fehler); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; font-size:14px}
+/* Am PC: Benutzer links, Formular, Sicherungen und Besucher rechts daneben */
+@media (min-width:1100px){
+  .wrap{max-width:1280px}
+  #panel{display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr); column-gap:24px; row-gap:20px; align-items:start}
+  #panel > :nth-child(1){grid-column:1 / -1}
+  #panel > :nth-child(2){grid-column:1; grid-row:2 / span 3}
+  #panel{grid-auto-flow:row dense}
+  /* rechts der Reihe nach; ein zugeklapptes Formular nimmt keinen Platz weg */
+  #panel > :nth-child(n+3){grid-column:2}
+  #panel > #formular{position:sticky; top:12px; max-height:calc(100vh - 96px); overflow:auto}
+}
 </style>
 </head>
 <body>
@@ -112,11 +138,6 @@ details.sicher > summary::-webkit-details-marker{display:none}
   <div class="kopf">
     <a class="logo-link marke" href="./">Helmut-Körnig-Halle · Personal</a>
     <div class="kopf-knoepfe">
-      <button class="knopf klein" id="abmelden" type="button" hidden>Abmelden</button>
-      <button class="rund-knopf" id="dunkel" type="button" aria-pressed="false" aria-label="Dunkelmodus" title="Dunkelmodus">
-        <svg class="mond" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        <svg class="sonne" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-      </button>
     </div>
   </div>
 
@@ -175,27 +196,10 @@ details.sicher > summary::-webkit-details-marker{display:none}
       </label>
       <p class="muted" style="font-size:14px">Mindestens 6 Zeichen. Der Code wird nur hier gezeigt, gib ihn der Person persönlich weiter.</p>
 
-      <div class="feld">Was darf die Person sehen?
-        <div class="kreuze" id="f-bereiche"></div>
+      <div class="feld">Was darf die Person?
+        <p class="hinweis" id="f-selbst" hidden>Das sind deine eigenen Rechte. Die kann nur ein anderer Admin ändern. Name, Farbe und Code kannst du hier anpassen.</p>
+        <div class="kreuze" id="f-rechte"></div>
       </div>
-
-      <div class="feld">Was darf sie im Arbeitsplan tun?
-        <div class="kreuze">
-          <label class="kreuz"><input type="checkbox" id="r-erstellen"><span class="txt"><span>Aufgaben erstellen</span></span></label>
-          <div class="unter">
-            <h3>Eigene Aufgaben</h3>
-            <label class="kreuz"><input type="checkbox" id="r-bearbeitenEigene"><span class="txt"><span>bearbeiten</span></span></label>
-            <label class="kreuz"><input type="checkbox" id="r-verschiebenEigene"><span class="txt"><span>verschieben</span></span></label>
-            <label class="kreuz"><input type="checkbox" id="r-loeschenEigene"><span class="txt"><span>löschen</span></span></label>
-            <h3 style="margin-top:4px">Aufgaben von anderen</h3>
-            <label class="kreuz"><input type="checkbox" id="r-bearbeitenFremde"><span class="txt"><span>bearbeiten</span></span></label>
-            <label class="kreuz"><input type="checkbox" id="r-verschiebenFremde"><span class="txt"><span>verschieben</span></span></label>
-            <label class="kreuz"><input type="checkbox" id="r-loeschenFremde"><span class="txt"><span>löschen</span></span></label>
-            <label class="kreuz"><input type="checkbox" id="r-erledigenFremde"><span class="txt"><span>als erledigt abhaken</span><span class="zusatz">Die eigenen darf ohnehin jeder abhaken</span></span></label>
-          </div>
-        </div>
-      </div>
-      <p class="hinweis">Ohne Haken bei „Aufgaben von anderen“ sieht die Person fremde Aufgaben, kann sie aber nicht anfassen. Ihre eigenen Aufgaben darf sie immer abhaken.</p>
       <p class="meldung fehler" id="f-fehler" role="alert"></p>
       <div class="aktionen">
         <button class="knopf" id="f-abbrechen" type="button">Abbrechen</button>
@@ -227,6 +231,7 @@ details.sicher > summary::-webkit-details-marker{display:none}
       <h2>Besucher</h2>
       <p class="muted">Gezählt wird die öffentliche Anzeige, jedes Gerät einmal pro Tag. Die Personal-Seiten zählen nicht mit.</p>
       <div class="zahlen" id="besucher-zahlen"></div>
+      <div class="balken" id="besucher-tage"></div>
     </section>
   </section>
 </div>
@@ -234,23 +239,18 @@ details.sicher > summary::-webkit-details-marker{display:none}
 <script type="module">
 import {
   db, ref, get, set, update, onValue, remove,
-  sitzung, anmelden, abmelden, anmeldeFehler, istRechteFehler, BEREICHE, AP_RECHTE,
+  sitzung, anmelden, abmelden, anmeldeFehler, istRechteFehler, BEREICHE, AP_RECHTE, ZUSATZRECHTE,
 } from "./js/zugang.js";
+import { leisteStarten } from "./js/leiste.js";
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
-/* Farbschema wie auf den anderen Seiten */
+/* Farbschema wie auf den anderen Seiten. Umgeschaltet wird in der Personal-Leiste. */
 const wurzel = document.documentElement;
-function thema(dunkel) {
-  wurzel.dataset.theme = dunkel ? "dark" : "light";
-  $("dunkel").setAttribute("aria-pressed", String(dunkel));
-  try { localStorage.setItem("hkh-thema", dunkel ? "dark" : "light"); } catch (e) {}
-}
 let gemerkt = null;
 try { gemerkt = localStorage.getItem("hkh-thema"); } catch (e) {}
-thema(gemerkt ? gemerkt === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches);
-$("dunkel").addEventListener("click", () => thema(wurzel.dataset.theme !== "dark"));
+wurzel.dataset.theme = (gemerkt ? gemerkt === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
 
 /* Auswahl an Farben. Bewusst viele und gut unterscheidbar, dazu eine freie Wahl. */
 const FARBEN = [
@@ -272,7 +272,6 @@ function zeige(welcher) {
   $("anmeldung").hidden = welcher !== "anmeldung";
   $("kein-zugriff").hidden = welcher !== "kein-zugriff";
   $("panel").hidden = welcher !== "panel";
-  $("abmelden").hidden = welcher === "pruefung" || welcher === "anmeldung";
 }
 $("augen").addEventListener("click", () => {
   const feld = $("code");
@@ -300,15 +299,12 @@ $("anmeldung").addEventListener("submit", async (e) => {
     $("anmelden-knopf").disabled = false;
   }
 });
-$("abmelden").addEventListener("click", async () => {
-  await abmelden().catch(() => {});
-  location.reload();
-});
 
 /* ---- Laden ---- */
 async function starten() {
   ich = await sitzung();
   if (!ich) { zeige("anmeldung"); return; }
+  leisteStarten(ich, "admin");
   if (!ich.istAdmin) { zeige("kein-zugriff"); return; }
   $("wer").innerHTML = `Benutzer, Codes und Rechte. Angemeldet als <strong>${esc(ich.name)}</strong>${ich.bid ? "" : " · über den Admin-Code"}`;
   zeige("panel");
@@ -337,10 +333,11 @@ const sortiert = () => Object.entries(benutzer).map(([bid, b]) => ({ bid, ...b }
 /* Kurze Namen für die Marken in der zugeklappten Zeile */
 const KURZ = { reinigung: "Reinigung", sportanlagen: "Sportanlagen", arbeitsplan: "Arbeitsplan", admin: "Admin" };
 function marken(b) {
-  return BEREICHE.map((f) => {
+  const bereiche = BEREICHE.map((f) => {
     const an = b.rechte?.[f.id] === true;
     return `<span class="marke-klein ${an ? "an" : "aus"}">${esc(KURZ[f.id] ?? f.name)}</span>`;
   }).join("");
+  return bereiche;
 }
 function beschreibung(b) {
   if (b.rechte?.arbeitsplan !== true) return "Kein Zugriff auf den Arbeitsplan.";
@@ -352,6 +349,8 @@ function beschreibung(b) {
   teile.push(eigen === 3 ? "eigene Aufgaben voll ändern" : eigen === 0 ? "eigene Aufgaben nicht ändern" : "eigene Aufgaben teilweise ändern");
   teile.push(fremd === 3 ? "fremde Aufgaben voll ändern" : fremd === 0 ? "fremde nur ansehen" : "fremde teilweise ändern");
   if (t.erledigenFremde) teile.push("fremde abhaken");
+  if (t.prio) teile.push("Prio ändern");
+  if (t.vertreten) teile.push("für andere eintragen");
   return "Arbeitsplan: " + teile.join(", ") + ".";
 }
 function zeichneListe() {
@@ -375,10 +374,10 @@ function zeichneListe() {
         </div>
         <p class="muted" style="font-size:14px">${esc(beschreibung(b))} · ${n === 1 ? "1 Gerät angemeldet" : n + " Geräte angemeldet"}${selbst ? " · Das bist du." : ""}</p>
         <div class="aktionen">
-          <button class="knopf klein" type="button" data-bearbeiten="${esc(b.bid)}">Bearbeiten</button>
-          <button class="knopf klein" type="button" data-abmelden="${esc(b.bid)}"${selbst || n === 0 ? " disabled" : ""}>Geräte abmelden${n ? ` (${n})` : ""}</button>
-          <button class="knopf klein ${b.gesperrt ? "primaer" : "gefahr"}" type="button" data-sperre="${esc(b.bid)}"${selbst ? " disabled" : ""}>${b.gesperrt ? "Code wieder freigeben" : "Code sperren"}</button>
-          <button class="knopf klein gefahr" type="button" data-loeschen="${esc(b.bid)}"${selbst ? " disabled" : ""}>Löschen</button>
+          <button class="knopf klein sym-knopf" type="button" data-bearbeiten="${esc(b.bid)}" title="Bearbeiten" aria-label="Bearbeiten"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /> <path d="M13.5 6.5l4 4" /></svg></button>
+          <button class="knopf klein sym-knopf" type="button" data-abmelden="${esc(b.bid)}"${selbst || n === 0 ? " disabled" : ""} title="Alle Geräte abmelden${n ? ` (${n} angemeldet)` : ""}" aria-label="Alle Geräte abmelden${n ? `, ${n} angemeldet` : ""}"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" /> <path d="M9 12h12l-3 -3" /> <path d="M18 15l3 -3" /></svg>${n ? `<span class="sym-zahl">${n}</span>` : ""}</button>
+          <button class="knopf klein sym-knopf ${b.gesperrt ? "primaer" : "gefahr"}" type="button" data-sperre="${esc(b.bid)}"${selbst ? " disabled" : ""} title="${b.gesperrt ? "Code wieder freigeben" : "Code sperren"}" aria-label="${b.gesperrt ? "Code wieder freigeben" : "Code sperren"}">${b.gesperrt ? '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2l0 -6" /> <path d="M11 16a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /> <path d="M8 11v-5a4 4 0 0 1 8 0" /></svg>' : '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6" /> <path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" /> <path d="M8 11v-4a4 4 0 1 1 8 0v4" /></svg>'}</button>
+          <button class="knopf klein gefahr sym-knopf" type="button" data-loeschen="${esc(b.bid)}"${selbst ? " disabled" : ""} title="Benutzer löschen" aria-label="Benutzer löschen"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /> <path d="M6 21v-2a4 4 0 0 1 4 -4h3.5" /> <path d="M22 22l-5 -5" /> <path d="M17 22l5 -5" /></svg></button>
         </div>
         <div class="rueckfrage" data-frage="${esc(b.bid)}" hidden>
           <span>Benutzer wirklich löschen? Der Code gilt dann nicht mehr, und alle Geräte verlieren den Zugang.</span>
@@ -455,23 +454,68 @@ $("f-farben").addEventListener("click", (e) => {
   farbe = k.dataset.farbe;
   farbenZeichnen();
 });
-function bereicheZeichnen(rechte) {
-  $("f-bereiche").innerHTML = BEREICHE.map((f) =>
-    `<label class="kreuz"><input type="checkbox" data-bereich="${f.id}"${rechte?.[f.id] === true ? " checked" : ""}>
-      <span class="txt"><span>${esc(f.name)}</span><span class="zusatz">${esc(f.zusatz)}</span></span></label>`
-  ).join("");
+/* Ein Kästchen. schluessel ist "bereich" für einen Bereich oder "bereich:recht" für ein Unterrecht. */
+function kreuz(schluessel, name, zusatz, an, gesperrt) {
+  return `<label class="kreuz"><input type="checkbox" data-recht="${esc(schluessel)}"${an ? " checked" : ""}${gesperrt ? " disabled" : ""}>
+    <span class="txt"><span>${esc(name)}</span>${zusatz ? `<span class="zusatz">${esc(zusatz)}</span>` : ""}</span></label>`;
 }
+/* Die Arbeitsplan-Rechte in der gewohnten Gliederung: eigene und fremde Aufgaben. */
+const AP_GRUPPEN = [
+  [null, [["erstellen", "Aufgaben erstellen"]]],
+  ["Eigene Aufgaben", [["bearbeitenEigene", "bearbeiten"], ["verschiebenEigene", "verschieben"], ["loeschenEigene", "löschen"]]],
+  ["Aufgaben von anderen", [["bearbeitenFremde", "bearbeiten"], ["verschiebenFremde", "verschieben"], ["loeschenFremde", "löschen"],
+    ["erledigenFremde", "als erledigt abhaken", "Die eigenen darf ohnehin jeder abhaken"]]],
+];
+/* Alle Rechte als Baum: jeder Bereich mit seinen Unterrechten darunter. Die
+   Unterrechte erscheinen erst, wenn der Bereich angekreuzt ist. */
+function rechteZeichnen(rechte, gesperrt) {
+  const r = rechte ?? {};
+  $("f-rechte").innerHTML = BEREICHE.map((f) => {
+    const an = r[f.id] === true;
+    const tun = r[f.id + "_tun"] ?? {};
+    let unter = "";
+    if (f.id === "arbeitsplan") {
+      unter = AP_GRUPPEN.map(([titel, liste]) =>
+        (titel ? `<h3 style="margin-top:4px">${esc(titel)}</h3>` : "") +
+        liste.map(([id, name, zusatz]) => kreuz(`arbeitsplan:${id}`, name, zusatz, tun[id] === true, gesperrt)).join("")
+      ).join("") + (ZUSATZRECHTE.arbeitsplan ?? []).map((z) => kreuz(`arbeitsplan:${z.id}`, z.name, z.zusatz, tun[z.id] === true, gesperrt)).join("");
+    } else if (f.id === "admin") {
+      unter = `<p class="muted" style="font-size:13px">Ein Admin hat überall alle Rechte, auch alle Unterrechte.</p>`;
+    } else {
+      unter = (ZUSATZRECHTE[f.id] ?? []).map((z) => kreuz(`${f.id}:${z.id}`, z.name, z.zusatz, tun[z.id] === true, gesperrt)).join("");
+    }
+    return `<div class="bereich-block">${kreuz(f.id, f.name, f.zusatz, an, gesperrt)}
+      ${unter ? `<div class="unter" data-unter="${f.id}"${an ? "" : " hidden"}>${unter}</div>` : ""}</div>`;
+  }).join("");
+}
+$("f-rechte").addEventListener("change", (e) => {
+  const k = e.target.closest('[data-recht]');
+  if (!k || k.dataset.recht.includes(":")) return;
+  const unter = $("f-rechte").querySelector(`[data-unter="${k.dataset.recht}"]`);
+  if (unter) unter.hidden = !k.checked;
+});
+function rechteLesen() {
+  const rechte = { reinigung_tun: {}, sportanlagen_tun: {}, arbeitsplan_tun: {} };
+  BEREICHE.forEach((f) => { rechte[f.id] = false; });
+  $("f-rechte").querySelectorAll("[data-recht]").forEach((k) => {
+    const [bereich, recht] = k.dataset.recht.split(":");
+    if (recht) (rechte[bereich + "_tun"] ??= {})[recht] = k.checked;
+    else rechte[bereich] = k.checked;
+  });
+  return rechte;
+}
+const NEU_VORGABE = { arbeitsplan_tun: { erstellen: true, bearbeitenEigene: true, verschiebenEigene: true, loeschenEigene: true } };
 function formularOeffnen(bid) {
   bearbeite = bid;
   const b = bid ? benutzer[bid] : null;
+  const selbst = !!bid && bid === ich?.bid;
   $("f-titel").textContent = b ? `${b.name} bearbeiten` : "Benutzer hinzufügen";
   $("f-name").value = b?.name ?? "";
   $("f-code").value = b?.code ?? "";
   farbe = b?.farbe ?? FARBEN[0];
   farbenZeichnen();
-  bereicheZeichnen(b?.rechte);
-  const t = b?.rechte?.arbeitsplan_tun ?? (b ? {} : { erstellen: true, bearbeitenEigene: true, verschiebenEigene: true, loeschenEigene: true });
-  AP_RECHTE.forEach((r) => { $("r-" + r).checked = t[r] === true; });
+  rechteZeichnen(b ? b.rechte : NEU_VORGABE, selbst);
+  $("f-selbst").hidden = !selbst;
   $("f-fehler").textContent = "";
   $("formular").hidden = false;
   $("formular").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -489,10 +533,25 @@ $("formular").addEventListener("submit", async (e) => {
   const doppelt = Object.entries(benutzer).some(([k, b]) => k !== bearbeite && (b.code || "").toLowerCase() === code.toLowerCase());
   if (doppelt) { $("f-fehler").textContent = "Diesen Code hat schon jemand anderes."; return; }
   const bid = bearbeite || ("b" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6));
-  const rechte = {};
-  $("f-bereiche").querySelectorAll("[data-bereich]").forEach((k) => { rechte[k.dataset.bereich] = k.checked; });
-  rechte.arbeitsplan_tun = Object.fromEntries(AP_RECHTE.map((r) => [r, $("r-" + r).checked]));
   const alt = benutzer[bid];
+  /* Die eigenen Rechte bleiben unangetastet: nur Name, Farbe und Code gehen raus.
+     Die Datenbank lehnt alles andere am eigenen Eintrag ohnehin ab. */
+  if (bid === ich?.bid) {
+    $("f-speichern").disabled = true;
+    try {
+      await update(ref(db), {
+        [`benutzer/${bid}/name`]: name, [`benutzer/${bid}/farbe`]: farbe, [`benutzer/${bid}/code`]: code,
+        [`namen/${bid}`]: { name, farbe },
+      });
+      $("formular").hidden = true; bearbeite = null;
+      $("listen-meldung").textContent = "Gespeichert."; $("listen-meldung").classList.remove("fehler");
+    } catch (err) {
+      console.error(err);
+      $("f-fehler").textContent = istRechteFehler(err) ? "Das darfst du nicht." : "Speichern hat nicht geklappt.";
+    } finally { $("f-speichern").disabled = false; }
+    return;
+  }
+  const rechte = rechteLesen();
   const eintrag = {
     name, farbe, code, stand: alt?.stand ?? Date.now(),
     gesperrt: alt?.gesperrt === true,
@@ -590,15 +649,25 @@ $("sicherungen").addEventListener("click", async (e) => {
 });
 
 /* ---- Besucher ---- */
-function zeichneBesucher(b) {
-  const tage = b?.tage ?? {};
-  const heute = datumSchluessel(new Date());
-  const woche = Object.entries(tage)
-    .filter(([t]) => t > datumSchluessel(new Date(Date.now() - 7 * 86400000)))
-    .reduce((s, [, n]) => s + (Number(n) || 0), 0);
-  const werte = [["heute", tage[heute] ?? 0], ["diese Woche", woche], ["gesamt", b?.gesamt ?? 0]];
+function zeichneBesucher(daten) {
+  const tage = daten?.tage ?? {};
+  const jetzt = Date.now();
+  const reihe = Array.from({ length: 14 }, (_, i) => datumSchluessel(new Date(jetzt - (13 - i) * 86400000)));
+  const zahl = (t) => (typeof tage[t] === "number" ? tage[t] : 0);
+  const werte = [
+    ["Heute", zahl(reihe[reihe.length - 1])],
+    ["Letzte 7 Tage", reihe.slice(-7).reduce((summe, t) => summe + zahl(t), 0)],
+    ["Gesamt", typeof daten?.gesamt === "number" ? daten.gesamt : 0],
+  ];
   $("besucher-zahlen").innerHTML = werte
-    .map(([t, n]) => `<div class="zahl"><b>${Number(n).toLocaleString("de-DE")}</b><span>${t}</span></div>`).join("");
+    .map(([text, wert]) => `<div class="zahl"><b>${Number(wert).toLocaleString("de-DE")}</b><span>${esc(text)}</span></div>`).join("");
+  const hoechst = Math.max(1, ...reihe.map(zahl));
+  $("besucher-tage").innerHTML = reihe.map((t) => {
+    const wert = zahl(t);
+    const [, monat, tag] = t.split("-");
+    const breite = Math.round((wert / hoechst) * 100);
+    return `<div class="balken-zeile"><span class="balken-tag">${tag}.${monat}.</span><span class="balken-feld"><span class="balken-strich" style="width:${wert ? Math.max(breite, 3) : 0}%"></span></span><span class="balken-zahl">${wert}</span></div>`;
+  }).join("");
 }
 
 zeige("pruefung");
