@@ -185,8 +185,9 @@ textarea:focus-visible,.tf:focus-visible{outline:3px solid var(--accent);outline
 .switch .opt svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .mehr{position:relative;flex:none}
 .mehr > .b{width:56px;min-height:36px;position:relative}
-.mehr-zahl{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--accent);color:var(--on-accent);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.mehr-zahl{position:absolute;top:4px;right:4px;min-width:18px;height:18px;padding:0 4px;box-sizing:border-box;border-radius:9px;background:var(--accent);color:var(--on-accent);font-size:11px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;display:flex;align-items:center;justify-content:center;pointer-events:none}
 .mehr-zahl[hidden]{display:none}
+#mehr-knopf:has(.mehr-zahl:not([hidden])) svg{transform:translateX(-7px)}
 .mmenu{position:absolute;top:calc(100% + 4px);right:0;z-index:20;display:none;flex-direction:column;gap:4px;padding:6px;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.18);width:min(300px,86vw)}
 .mmenu.open{display:flex}
 .mmenu .ghost{flex:none;width:100%;min-width:0;text-align:left;padding:0 12px}
@@ -244,12 +245,20 @@ a.ghost{display:flex;align-items:center;justify-content:center;gap:2px;color:var
 .augen-knopf .auge-zu{display:none}
 .augen-knopf[aria-pressed="true"] .auge-auf{display:none}
 .augen-knopf[aria-pressed="true"] .auge-zu{display:block}
+/* Einheitlicher Kopf auf allen Personalseiten: Logo, darunter-/daneben "Helmut-Körnig-Halle" und "Personal" wie auf der Startseite */
+.hkh-kopf{display:inline-flex !important; align-items:center; gap:10px; min-width:0; flex:none; text-decoration:none; color:inherit; border-radius:6px}
+.hkh-kopf img{flex:none; display:block; height:34px !important; width:auto}
+.hkh-marke{display:flex; flex-direction:column; gap:2px; margin:0; font-family:Barlow, system-ui, -apple-system, "Segoe UI", sans-serif; font-size:13px; font-weight:500; line-height:1.15; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2)}
+#app .top{align-items:flex-start !important}
+#app .top .brand{flex-direction:column; align-items:flex-start; gap:8px}
+#app .top h1{font-size:clamp(32px, 8vw, 44px); white-space:normal; flex:none; overflow:visible}
+@media (max-height:520px){ #app .top h1{font-size:22px} #app .top .brand{flex-direction:row; align-items:center; gap:12px} }
 </style>
 </head>
 <body>
 <div id="app">
   <header class="top">
-    <div class="brand"><a class="logo-link" href="./" aria-label="Zur Startseite"><img class="logo" src="./bilder/logo.png" alt="Dortmunder Sportstätten" width="480" height="241"></a><h1>Reinigungsplan HKH</h1></div>
+    <div class="brand"><a class="logo-link hkh-kopf" href="./" aria-label="Zur Startseite"><img src="./bilder/logo.png" alt="Dortmunder Sportstätten" width="480" height="241"><span class="hkh-marke"><span>Helmut-Körnig-Halle</span><span>Personal</span></span></a><h1>Reinigungsplan</h1></div>
     <div class="hr"><span id="prog" aria-live="polite"></span><button class="live s-none" id="live" type="button" aria-label="Live-Abgleich und Zugangscode"><span class="ld"></span><span id="live-t">Nur dieses Gerät</span></button></div>
   </header>
 
@@ -847,6 +856,27 @@ function applyView(){
   V.cx=w>=OW?OW/2:clamp(V.cx,w/2-12,OW-w/2+12);
   V.cy=h>=OH?OH/2:clamp(V.cy,h/2-12,OH-h/2+12);
   svg.setAttribute("viewBox",(V.cx-w/2).toFixed(2)+" "+(V.cy-h/2).toFixed(2)+" "+w.toFixed(2)+" "+h.toFixed(2));
+  ansichtMerken();
+}
+/* Ansicht merken: Werkzeug, Strichbreite, Plan/Farbe, Bahnen/Frei, Richtung und Zoom bleiben
+   beim nächsten Öffnen so, wie sie zuletzt waren. Gilt nur für dieses Gerät. */
+var ANSICHT="hkh-putzplan-ansicht",ansichtT=0,VGEM=null;
+function ansichtMerken(){
+  clearTimeout(ansichtT);
+  ansichtT=setTimeout(function(){
+    try{localStorage.setItem(ANSICHT,JSON.stringify({mode:S.mode,brush:S.brush,view:S.view,art:S.art,dir:S.dir,rot:ROT,z:V.z,cx:V.cx,cy:V.cy}))}catch(e){}
+  },250);
+}
+function ansichtLaden(){
+  try{
+    var o=JSON.parse(localStorage.getItem(ANSICHT)||"null");if(!o)return;
+    if(["paint","erase","note","move"].indexOf(o.mode)>=0)S.mode=o.mode;
+    if(o.brush==="one"||o.brush==="all"||o.brush==="mid")S.brush=o.brush;
+    if(o.view==="plan"||o.view==="color")S.view=o.view;
+    if(o.art==="lanes"||o.art==="free")S.art=o.art;
+    if(o.dir==="down"||o.dir==="right")S.dir=o.dir;
+    if(o.rot===ROT&&isFinite(o.z)&&isFinite(o.cx)&&isFinite(o.cy))VGEM={z:+o.z,cx:+o.cx,cy:+o.cy};
+  }catch(e){}
 }
 function conv(el,x,y){var m=el.getScreenCTM();if(!m)return{x:0,y:0};var p=svg.createSVGPoint();p.x=x;p.y=y;p=p.matrixTransform(m.inverse());return{x:p.x,y:p.y}}
 function toOuter(x,y){return conv(svg,x,y)}
@@ -1100,6 +1130,7 @@ function syncButtons(){
   $("b-knopf").setAttribute("aria-label","Strichbreite: "+{all:"Breit",mid:"Mittel",one:"Schmal"}[S.brush]);
   $("b-knopf").title="Strichbreite: "+{all:"Breit",mid:"Mittel",one:"Schmal"}[S.brush];
   svg.style.cursor=S.mode==="move"||S.mode==="note"?"grab":"crosshair";
+  ansichtMerken();
 }
 /* Wer man ist, kommt aus der Anmeldung. Mit dem Recht "Fuer andere eintragen" laesst
    sich umstellen, in wessen Namen gewischt wird. Die eigenen Rechte bleiben davon unberuehrt. */
@@ -1268,8 +1299,11 @@ $("btn-bild").addEventListener("click",planBild);
 
 /* ---------- Start ---------- */
 var had=load();
+ansichtLaden();
 lanes.forEach(render);renderFree();progress();syncButtons();syncHist();
-orient();drawPins();
+orient();
+if(VGEM){V.z=VGEM.z;V.cx=VGEM.cx;V.cy=VGEM.cy;applyView()}
+drawPins();
 say(hintFor(),false);
 startSync();
 if(window.ResizeObserver){new ResizeObserver(orient).observe(map)}else{window.addEventListener("resize",orient)}
