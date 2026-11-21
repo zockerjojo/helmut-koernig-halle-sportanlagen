@@ -52,6 +52,7 @@ h1{margin:0; font-family:var(--display); font-weight:600; font-size:clamp(36px, 
 .stapel{display:flex; flex-direction:column; gap:16px}
 .anmeldung{max-width:420px; margin:48px auto 0; display:flex; flex-direction:column; gap:16px}
 .feld{display:flex; flex-direction:column; gap:6px; font-size:15px; color:var(--ink-2)}
+.feld textarea{font:inherit; font-size:16px; line-height:1.4; color:var(--ink); background:var(--bg); padding:10px 12px; border:1px solid var(--line); border-radius:10px; width:100%; resize:vertical; min-height:96px}
 input[type="password"], input[type="text"], input[type="date"], input[type="time"]{font:inherit; font-size:16px; color:var(--ink); background:var(--panel); min-height:44px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; width:100%; min-width:0}
 /* Augen-Taste: blendet den eingegebenen Code ein und aus */
 .feld-eingabe{position:relative; display:flex}
@@ -95,6 +96,11 @@ legend{font-size:14px; color:var(--ink-2); padding:0 0 6px}
 .kasten{margin:6px 0 0; padding:8px 10px; border-radius:10px; color:var(--weiss); font-family:var(--display); font-weight:600; font-size:18px; line-height:1.15}
 .kasten.gruen{background:var(--gruen)}
 .kasten.rot{background:var(--rot)}
+/* Am PC: breiter, drei Anlagen nebeneinander */
+@media (min-width:1200px){
+  .wrap{max-width:1280px}
+  .liste{grid-template-columns:repeat(3, minmax(0,1fr))}
+}
 </style>
 </head>
 <body>
@@ -105,8 +111,6 @@ legend{font-size:14px; color:var(--ink-2); padding:0 0 6px}
     <img src="./bilder/logo.png" alt="Dortmunder Sportstätten" width="480" height="241">
     <span class="marke">Helmut-Körnig-Halle · Personal</span>
   </a>
-  <button class="knopf" id="abmelden" type="button" hidden style="min-height:36px; padding:6px 14px; font-size:14px">Abmelden</button>
-  <button class="thema-knopf" id="dunkel" type="button" aria-pressed="false" aria-label="Dunkelmodus" title="Dunkelmodus"><svg class="mond" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sonne" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></button>
 </header>
 
 <p class="muted" id="pruefung" style="margin-top:48px">Einen Moment …</p>
@@ -131,9 +135,24 @@ legend{font-size:14px; color:var(--ink-2); padding:0 0 6px}
   <p class="muted">Änderungen erscheinen sofort auf der öffentlichen Anzeige.</p>
   <div class="werkzeuge">
     <button class="knopf primaer" id="startliste" type="button" hidden>Startliste anlegen</button>
-    <a class="knopf" id="adminpanel" href="./Adminpanel" hidden>Admin Panel</a>
     <span class="meldung" id="startliste-meldung" aria-live="polite"></span>
   </div>
+
+  <section class="karte" id="aushang-karte" hidden>
+    <div class="karte-kopf">
+      <h2 style="margin:0; font-family:var(--display); font-weight:600; font-size:26px; line-height:1; text-transform:uppercase">Aushang am Sportlereingang</h2>
+      <p class="muted">Steht hier nichts, zeigt die Startseite „Infos folgen.“</p>
+    </div>
+    <label class="feld">Text
+      <textarea id="aushang-feld" rows="4" maxlength="600" placeholder="Zum Beispiel: Die Südkurve ist bis Freitag gesperrt."></textarea>
+    </label>
+    <div class="werkzeuge">
+      <button class="knopf primaer" id="aushang-speichern" type="button">Speichern</button>
+      <button class="knopf" id="aushang-leeren" type="button">Leeren</button>
+      <span class="meldung" id="aushang-meldung" aria-live="polite"></span>
+    </div>
+    <p class="muted" id="aushang-stand" style="font-size:14px"></p>
+  </section>
 
   <div class="liste" id="liste"></div>
 </section>
@@ -145,39 +164,17 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, onAuthStateChanged, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getDatabase, ref, get, set, onValue, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { firebaseConfig } from "./js/config.js";
-import { sitzung, anmelden as zugangAnmelden, abmelden, darf } from "./js/zugang.js";
+import { sitzung, anmelden as zugangAnmelden, abmelden, darf, darfZusatz } from "./js/zugang.js";
+import { leisteStarten } from "./js/leiste.js";
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
-/* Farbschema wie auf der öffentlichen Anzeige, dieselbe Einstellung für alle Seiten */
+/* Farbschema wie auf der öffentlichen Anzeige. Umgeschaltet wird in der Personal-Leiste. */
 const wurzel = document.documentElement;
-function thema(dunkel) {
-  wurzel.dataset.theme = dunkel ? "dark" : "light";
-  $("dunkel").setAttribute("aria-pressed", String(dunkel));
-  try { localStorage.setItem("hkh-thema", dunkel ? "dark" : "light"); } catch (e) {}
-}
 let gemerkt = null;
 try { gemerkt = localStorage.getItem("hkh-thema"); } catch (e) {}
-thema(gemerkt ? gemerkt === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches);
-
-/* Kurz tippen schaltet hell und dunkel um. Gedrückt halten führt zur Auswahl der Bereiche. */
-const HALTEN_MS = 2000;
-const themaKnopf = $("dunkel");
-let halteUhr = 0;
-let gehalten = false;
-themaKnopf.addEventListener("click", () => {
-  if (gehalten) { gehalten = false; return; }
-  thema(wurzel.dataset.theme !== "dark");
-});
-themaKnopf.addEventListener("pointerdown", (e) => {
-  if (e.pointerType === "mouse" && e.button !== 0) return;
-  gehalten = false;
-  clearTimeout(halteUhr);
-  halteUhr = setTimeout(() => { gehalten = true; location.href = "./#auswahl"; }, HALTEN_MS);
-});
-["pointerup", "pointerleave", "pointercancel"].forEach((name) => themaKnopf.addEventListener(name, () => clearTimeout(halteUhr)));
-themaKnopf.addEventListener("contextmenu", (e) => e.preventDefault());
+wurzel.dataset.theme = (gemerkt ? gemerkt === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
 
 /* Startliste: die fünf Einträge ohne Status und ohne Zeit. Das Hallenteam trägt sie selbst ein. */
 const STARTLISTE = [
@@ -213,7 +210,6 @@ function zeigeBereich(angemeldet) {
   $("pruefung").hidden = true;
   $("anmeldung").hidden = angemeldet;
   $("panel").hidden = !angemeldet;
-  $("abmelden").hidden = !angemeldet;
 }
 /* Wer angemeldet ist, sieht diese Seite nur mit dem Recht für Sportanlagen. */
 async function starten() {
@@ -225,13 +221,48 @@ async function starten() {
     $("anmeldung-fehler").textContent = "Dieser Zugang darf die Sportanlagen nicht einstellen.";
     return;
   }
-  $("adminpanel").hidden = !s.istAdmin;
+  ICH = s;
+  leisteStarten(s, "sportanlagen");
+  $("aushang-karte").hidden = !darfZusatz(s, "sportanlagen", "aushang");
   zeigeBereich(true);
+  aushangHoeren();
 }
-$("abmelden").addEventListener("click", async () => {
-  await abmelden().catch(() => {});
-  location.reload();
-});
+/* ---- Aushang am Sportlereingang ---- */
+let ICH = null;
+let aushangHoertSchon = false;
+function aushangHoeren() {
+  if (aushangHoertSchon) return;
+  aushangHoertSchon = true;
+  onValue(ref(db, "aushang"), (snap) => {
+    const a = snap.val() ?? {};
+    const feld = $("aushang-feld");
+    /* Während jemand tippt, wird das Feld nicht überschrieben. */
+    if (document.activeElement !== feld) feld.value = String(a.text ?? "");
+    const ts = Number(a.ts) || 0;
+    $("aushang-stand").textContent = ts && (a.text ?? "")
+      ? `Zuletzt geändert am ${new Date(ts).toLocaleDateString("de-DE")} um ${new Date(ts).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}${a.von ? " von " + a.von : ""}.`
+      : "Zurzeit steht kein Aushang auf der Startseite.";
+  }, () => {});
+}
+async function aushangSpeichern(text) {
+  const knopf = $("aushang-speichern");
+  knopf.disabled = true;
+  $("aushang-meldung").textContent = "";
+  try {
+    const t = String(text).trim().slice(0, 600);
+    await update(ref(db, "aushang"), { text: t, ts: Date.now(), von: String(ICH?.name ?? "").slice(0, 40) });
+    $("aushang-feld").value = t;
+    $("aushang-meldung").textContent = t ? "Gespeichert. Die Startseite zeigt ihn jetzt." : "Geleert. Die Startseite zeigt „Infos folgen.“";
+  } catch (err) {
+    console.error(err);
+    $("aushang-meldung").textContent = /permission/i.test(String(err?.code ?? err?.message)) ? "Das darfst du nicht." : "Das konnte nicht gespeichert werden.";
+  } finally {
+    knopf.disabled = false;
+  }
+}
+$("aushang-speichern").addEventListener("click", () => aushangSpeichern($("aushang-feld").value));
+$("aushang-leeren").addEventListener("click", () => aushangSpeichern(""));
+
 starten();
 /* Augen-Taste: der Code lässt sich zum Nachsehen kurz sichtbar machen. Nach dem Anmelden wird er wieder verdeckt. */
 function augenTaste(knopfId, feldId) {
