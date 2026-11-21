@@ -30,18 +30,44 @@ export const BEREICHE = [
   { id: "admin", name: "Admin Panel", seite: "./Adminpanel", zusatz: "Benutzer, Codes, Rechte und Sicherungen" },
 ];
 
+/* Feinere Rechte innerhalb eines Bereichs. Sie stehen beim Benutzer unter
+   rechte.<bereich>_tun und gelten nur, wenn der Bereich selbst erlaubt ist.
+   "vertreten" ändert nie, was jemand darf, sondern nur, für wen eingetragen wird. */
+export const ZUSATZRECHTE = {
+  reinigung: [
+    { id: "vertreten", name: "Für andere Mitarbeiter eintragen", zusatz: "Kann umstellen, für wen gewischt wird. Die eigenen Rechte bleiben gleich." },
+    { id: "uebermalen", name: "Fremde Farben übermalen", zusatz: "Darf Flächen anderer übermalen und wegradieren, auch alles zurücksetzen." },
+  ],
+  sportanlagen: [
+    { id: "aushang", name: "Aushang bearbeiten", zusatz: "Text „Aushang am Sportlereingang“ auf der Startseite" },
+  ],
+  arbeitsplan: [
+    { id: "prio", name: "Priorität ändern", zusatz: "Darf die Reihenfolge in „Alle Aufgaben“ umstellen." },
+    { id: "vertreten", name: "Für andere Mitarbeiter eintragen", zusatz: "Kann umstellen, für wen Aufgaben angelegt werden." },
+  ],
+};
+
 /* Die Rechte innerhalb des Arbeitsplans. Die eigenen Aufgaben darf jeder abhaken,
    dafür gibt es darum kein Recht. */
 export const AP_RECHTE = [
   "erstellen",
   "bearbeitenEigene", "verschiebenEigene", "loeschenEigene",
   "bearbeitenFremde", "verschiebenFremde", "loeschenFremde", "erledigenFremde",
+  "prio", "vertreten",
 ];
 
 const ALLES_ERLAUBT = {
   reinigung: true, sportanlagen: true, arbeitsplan: true, admin: true,
+  reinigung_tun: { vertreten: true, uebermalen: true },
+  sportanlagen_tun: { aushang: true },
   arbeitsplan_tun: Object.fromEntries(AP_RECHTE.map((r) => [r, true])),
 };
+
+/* Merkzeichen für die Startseite: Nur wenn es gesetzt ist, lädt sie die Anmeldung
+   nach und blendet die Personal-Leiste ein. Für Sportler bleibt die Seite schlank. */
+const MERKER = "hkh-personal";
+const merken = (an) => { try { an ? localStorage.setItem(MERKER, "1") : localStorage.removeItem(MERKER); } catch (e) {} };
+export const vielleichtAngemeldet = () => { try { return localStorage.getItem(MERKER) === "1"; } catch (e) { return false; } };
 
 /* Wartet, bis feststeht, ob auf diesem Gerät schon jemand angemeldet ist */
 function ersterNutzer() {
@@ -74,6 +100,7 @@ export async function sitzung() {
   const bid = eintrag.benutzer || "";
   if (!bid) {
     // Mit dem Admin-Code angemeldet: kein eigener Benutzereintrag, alles erlaubt.
+    merken(true);
     return { uid: user.uid, bid: "", istAdmin: true, name: "Admin", farbe: "#17694B", rechte: ALLES_ERLAUBT };
   }
   let b = null;
@@ -85,19 +112,32 @@ export async function sitzung() {
   }
   if (!b || b.gesperrt === true) return null;
   const rechte = b.rechte ?? {};
+  merken(true);
   return {
     uid: user.uid,
     bid,
     istAdmin: rechte.admin === true,
     name: b.name ?? "",
     farbe: b.farbe ?? "#55635C",
-    rechte: { ...rechte, arbeitsplan_tun: rechte.arbeitsplan_tun ?? {} },
+    rechte: { ...rechte, arbeitsplan_tun: rechte.arbeitsplan_tun ?? {}, reinigung_tun: rechte.reinigung_tun ?? {}, sportanlagen_tun: rechte.sportanlagen_tun ?? {} },
   };
 }
 
 /* Darf die angemeldete Person diesen Bereich sehen? */
 export function darf(s, bereich) {
   return !!s && (s.istAdmin || s.rechte?.[bereich] === true);
+}
+
+/* Ein feineres Recht innerhalb eines Bereichs, z. B. darfZusatz(s, "reinigung", "uebermalen"). */
+export function darfZusatz(s, bereich, recht) {
+  if (!s) return false;
+  if (s.istAdmin) return true;
+  return s.rechte?.[bereich] === true && s.rechte?.[bereich + "_tun"]?.[recht] === true;
+}
+
+/* Darf sie in diesem Bereich einstellen, für wen eingetragen wird? Ändert keine Rechte. */
+export function darfVertreten(s, bereich) {
+  return darfZusatz(s, bereich, "vertreten");
 }
 
 /* Darf sie das im Arbeitsplan? eigen sagt, ob es die eigene Aufgabe ist. */
@@ -108,6 +148,7 @@ export function darfAufgabe(s, was, eigen) {
   const t = s.rechte?.arbeitsplan_tun ?? {};
   if (was === "erstellen") return t.erstellen === true;
   if (was === "erledigen") return eigen ? true : t.erledigenFremde === true;
+  if (was === "prio") return t.prio === true;
   const schl = { bearbeiten: "bearbeiten", verschieben: "verschieben", loeschen: "loeschen" }[was];
   if (!schl) return false;
   return t[schl + (eigen ? "Eigene" : "Fremde")] === true;
@@ -150,6 +191,7 @@ export async function anmelden(code) {
 }
 
 export async function abmelden() {
+  merken(false);
   const user = auth.currentUser;
   if (user) {
     // Den Geräteeintrag mitnehmen, damit er nicht liegen bleibt.
