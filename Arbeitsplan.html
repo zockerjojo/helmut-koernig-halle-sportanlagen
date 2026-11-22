@@ -79,7 +79,7 @@ textarea{resize:vertical; line-height:1.35}
 .person[aria-pressed="true"]{border:2px solid var(--ink)}
 .person .farbe{width:12px; height:12px; border-radius:50%; border:1px solid var(--ink); flex:none}
 /* Karte mit dem Plan */
-.map{position:relative; width:100%; aspect-ratio:793/525.1; min-height:220px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--weiss); touch-action:none}
+.map{position:relative; width:100%; aspect-ratio:793/525.1; min-height:220px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--panel); touch-action:none}
 #svg{position:absolute; inset:0; width:100%; height:100%; display:block; touch-action:none}
 .map.setzen{cursor:crosshair}
 .zoom{position:absolute; right:8px; bottom:8px; display:flex; flex-direction:column; gap:6px}
@@ -234,8 +234,8 @@ textarea{resize:vertical; line-height:1.35}
     <svg id="svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Plan der Halle, Ebene -4, mit Aufgaben und Pfeilen">
       <defs><filter id="etikett-schatten" x="-20%" y="-30%" width="140%" height="170%"><feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-opacity=".22"></feDropShadow></filter></defs>
       <g id="world">
-        <g id="ebene-halle"><image id="gelaende" href="./bilder/gelaende-aussen.jpg" x="86.56" y="65.2" width="704.16" height="452.85" aria-hidden="true"></image><image id="plan" href="./bilder/hallenplan-ebene-4.svg" x="30.6" y="23" width="793" height="525.1" aria-hidden="true"></image></g>
-        <g id="ebene-aussen"><image id="gelaende-voll" href="./bilder/gelaende-voll.jpg" x="86.56" y="65.2" width="704.16" height="452.85" transform="rotate(180 438.64 291.625)" aria-hidden="true"></image></g>
+        <g id="ebene-halle"><image id="gelaende" href="./bilder/gelaende-aussen.webp" x="86.56" y="65.2" width="704.16" height="452.85" aria-hidden="true"></image><image id="plan" href="./bilder/hallenplan-ebene-4.svg" x="30.6" y="23" width="793" height="525.1" aria-hidden="true"></image></g>
+        <g id="ebene-aussen"><image id="gelaende-voll" href="./bilder/gelaende-voll.webp" x="86.56" y="65.2" width="704.16" height="452.85" transform="rotate(180 438.64 291.625)" aria-hidden="true"></image></g>
         <g id="pfeile"></g>
         <g id="punkte"></g>
         <g id="etiketten"></g>
