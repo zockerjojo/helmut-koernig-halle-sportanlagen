@@ -120,21 +120,20 @@ details.sicher > summary::-webkit-details-marker{display:none}
 .balken-strich{display:block; height:100%; min-width:3px; border-radius:999px; background:var(--accent)}
 .balken-zahl{text-align:right; font-variant-numeric:tabular-nums}
 .rueckfrage{border:1px solid var(--fehler); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; font-size:14px}
-/* Am PC: Benutzer links, Formular, Besucher und Sicherungen rechts daneben */
+/* Am PC: Besucher und Sicherungen links, Benutzer und Formular rechts daneben */
 @media (min-width:1100px){
   .wrap{max-width:1280px}
-  #panel{display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr); column-gap:24px; row-gap:20px; align-items:start}
-  #panel > :nth-child(1){grid-column:1 / -1}
-  #panel > :nth-child(2){grid-column:1; grid-row:2 / span 3}
+  #panel{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.25fr); column-gap:24px; row-gap:20px; align-items:start}
+  #panel > :first-child{grid-column:1 / -1}
+  /* links Besucher und Sicherungen, rechts Benutzer und das Formular */
   #panel{grid-auto-flow:row dense}
-  /* rechts der Reihe nach; ein zugeklapptes Formular nimmt keinen Platz weg */
-  #panel > :nth-child(n+3){grid-column:2}
-  #panel > #formular{position:sticky; top:12px; max-height:calc(100vh - 96px); overflow:auto}
+  #spalte-rechts > #formular{position:sticky; top:12px; max-height:calc(100vh - 96px); overflow:auto}
 }
 /* Einheitlicher Kopf auf allen Personalseiten: Logo, darunter-/daneben "Helmut-Körnig-Halle" und "Personal" wie auf der Startseite */
 .hkh-kopf{display:inline-flex !important; align-items:center; gap:10px; min-width:0; flex:none; text-decoration:none; color:inherit; border-radius:6px}
 .hkh-kopf img{flex:none; display:block; height:34px !important; width:auto}
 .hkh-marke{display:flex; flex-direction:column; gap:2px; margin:0; font-family:Barlow, system-ui, -apple-system, "Segoe UI", sans-serif; font-size:13px; font-weight:500; line-height:1.15; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2)}
+.spalte{display:flex; flex-direction:column; gap:20px; min-width:0}
 </style>
 </head>
 <body>
@@ -178,7 +177,37 @@ details.sicher > summary::-webkit-details-marker{display:none}
       <p class="muted" id="wer"></p>
     </div>
 
-    <section class="karte">
+    <div class="spalte" id="spalte-links">
+    <section class="karte" id="k-besucher">
+      <h2>Besucher</h2>
+      <p class="muted">Gezählt wird die öffentliche Anzeige, jedes Gerät einmal pro Tag. Die Personal-Seiten zählen nicht mit.</p>
+      <div class="zahlen" id="besucher-zahlen"></div>
+      <div class="balken" id="besucher-tage"></div>
+    </section>
+
+    <section class="karte" id="k-sicher">
+      <div class="kopfzeile">
+        <div>
+          <h2>Sicherungen</h2>
+          <p class="notfall">Nur für den Notfall. Jede Nacht um 0 Uhr, die sieben neuesten bleiben.</p>
+        </div>
+        <details class="sicher">
+          <summary class="knopf klein">Sicherungen öffnen</summary>
+          <div style="min-width:min(520px,78vw)">
+            <div class="sich" id="sicherungen"></div>
+            <p class="muted" id="sicherungen-leer" hidden>Noch keine Sicherung vorhanden.</p>
+            <p class="meldung" id="sicherung-meldung" aria-live="polite"></p>
+            <div class="aktionen" style="margin-top:10px">
+              <button class="knopf klein" id="jetzt-sichern" type="button">Jetzt sichern</button>
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+    </div>
+
+    <div class="spalte" id="spalte-rechts">
+    <section class="karte" id="k-benutzer">
       <div class="kopfzeile">
         <h2>Benutzer</h2>
         <button class="knopf primaer" id="neu" type="button">+ Benutzer hinzufügen</button>
@@ -213,33 +242,7 @@ details.sicher > summary::-webkit-details-marker{display:none}
         <button class="knopf primaer" id="f-speichern" type="submit">Speichern</button>
       </div>
     </form>
-
-    <section class="karte">
-      <h2>Besucher</h2>
-      <p class="muted">Gezählt wird die öffentliche Anzeige, jedes Gerät einmal pro Tag. Die Personal-Seiten zählen nicht mit.</p>
-      <div class="zahlen" id="besucher-zahlen"></div>
-      <div class="balken" id="besucher-tage"></div>
-    </section>
-
-    <section class="karte">
-      <div class="kopfzeile">
-        <div>
-          <h2>Sicherungen</h2>
-          <p class="notfall">Nur für den Notfall. Jede Nacht um 0 Uhr, die sieben neuesten bleiben.</p>
-        </div>
-        <details class="sicher">
-          <summary class="knopf klein">Sicherungen öffnen</summary>
-          <div style="min-width:min(520px,78vw)">
-            <div class="sich" id="sicherungen"></div>
-            <p class="muted" id="sicherungen-leer" hidden>Noch keine Sicherung vorhanden.</p>
-            <p class="meldung" id="sicherung-meldung" aria-live="polite"></p>
-            <div class="aktionen" style="margin-top:10px">
-              <button class="knopf klein" id="jetzt-sichern" type="button">Jetzt sichern</button>
-            </div>
-          </div>
-        </details>
-      </div>
-    </section>
+    </div>
   </section>
 </div>
 
