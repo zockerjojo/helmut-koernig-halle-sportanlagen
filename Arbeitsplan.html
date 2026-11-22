@@ -168,6 +168,29 @@ textarea{resize:vertical; line-height:1.35}
 .hkh-kopf img{flex:none; display:block; height:34px !important; width:auto}
 .hkh-marke{display:flex; flex-direction:column; gap:2px; margin:0; font-family:Barlow, system-ui, -apple-system, "Segoe UI", sans-serif; font-size:13px; font-weight:500; line-height:1.15; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2)}
 .kopf{flex-wrap:nowrap}
+/* Anhänge: Bilder und Dateien in einer Aufgabe */
+.zeile-knoepfe{display:flex; flex-wrap:wrap; gap:8px}
+.zeile-knoepfe .knopf svg{width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; vertical-align:-4px; margin-right:4px}
+.anhang-zeile{display:flex; align-items:center; gap:10px; min-width:0}
+.anhang-mini{flex:none; width:64px; height:64px; border-radius:8px; border:1px solid var(--line); background:var(--panel); object-fit:cover; display:flex; align-items:center; justify-content:center; overflow:hidden}
+.anhang-mini svg{width:28px; height:28px; fill:none; stroke:var(--ink-2); stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round}
+.anhang-info{display:flex; flex-direction:column; gap:2px; min-width:0; font-size:14px}
+.anhang-name{font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.anhang-stand{color:var(--ink-2)}
+.anhang-stand.fehler{color:var(--fehler)}
+.anhang-bild{display:block; width:100%; padding:0; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--bg); cursor:zoom-in; min-height:80px}
+.anhang-bild img{display:block; width:100%; max-height:420px; object-fit:contain}
+.anhang-datei{display:flex; align-items:center; gap:10px; width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:12px; background:var(--bg); color:var(--ink); font:inherit; text-align:left; cursor:pointer}
+.anhang-datei svg{flex:none; width:26px; height:26px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round}
+.anhang-laedt{font-size:14px; color:var(--ink-2); padding:10px}
+.bild-gross{position:fixed; inset:0; z-index:90; background:rgba(8,12,10,.92); display:flex; flex-direction:column}
+.bild-gross[hidden]{display:none}
+.bild-gross-kopf{display:flex; align-items:center; gap:12px; padding:max(10px, env(safe-area-inset-top)) 14px 10px}
+.bild-gross-kopf p{flex:1 1 auto; margin:0; color:#FFFFFF; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.bild-gross-flaeche{flex:1 1 auto; min-height:0; overflow:auto; display:flex; align-items:center; justify-content:center; touch-action:pinch-zoom pan-x pan-y}
+.bild-gross-flaeche img{max-width:100%; max-height:100%; object-fit:contain}
+.anhang-marke{display:inline-flex; vertical-align:-3px; margin-left:4px}
+.anhang-marke svg{width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
 </style>
 </head>
 <body>
@@ -291,10 +314,14 @@ textarea{resize:vertical; line-height:1.35}
           <div class="personen" role="group" aria-labelledby="f-wer-text" id="f-personen"></div>
         </div>
         <div class="feld" style="gap:8px">
-          <span id="f-zeilen-text">Textzeilen (optional)</span>
+          <span id="f-zeilen-text">Textzeilen, Bilder und Dateien (optional)</span>
           <ul class="zeilen-liste" id="f-zeilen" aria-labelledby="f-zeilen-text"></ul>
-          <p class="muted" id="f-zeilen-leer">Noch keine Textzeilen. Mit „+ Textzeile“ kommt eine dazu.</p>
-          <div><button class="knopf klein" id="f-zeile-neu" type="button">+ Textzeile</button></div>
+          <p class="muted" id="f-zeilen-leer">Noch nichts dabei. Mit „+ Textzeile“ oder „+ Bild oder Datei“ kommt etwas dazu.</p>
+          <div class="zeile-knoepfe">
+            <button class="knopf klein" id="f-zeile-neu" type="button">+ Textzeile</button>
+            <button class="knopf klein" id="f-anhang-neu" type="button"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5" /></svg>+ Bild oder Datei</button>
+            <input type="file" id="f-anhang-datei" multiple hidden>
+          </div>
         </div>
         <p class="muted" id="f-hinweis">Bleibt die Person frei, gilt die Aufgabe für das ganze Personal.</p>
         <p class="meldung fehler" id="f-fehler" role="alert"></p>
@@ -364,6 +391,16 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 const BASIS = "arbeitsplan";
+/* Anhänge (Bilder und Dateien) liegen getrennt unter "anhaenge/<id>". */
+const ANHANG = "anhaenge";
+const ANHANG_ID = /^[A-Za-z0-9_-]{4,40}$/;
+const MAX_DATEI = 7 * 1024 * 1024;
+const DATEI_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /></svg>`;
+const istBild = (typ) => /^image\/(png|jpe?g|gif|webp|bmp|avif)$/i.test(typ || "");
+function groesseText(b) {
+  if (!b) return "";
+  return b >= 1048576 ? (b / 1048576).toFixed(1).replace(".", ",") + " MB" : Math.max(1, Math.round(b / 1024)) + " KB";
+}
 
 const istRechteFehler = (err) => /PERMISSION_DENIED/.test(`${err?.code ?? ""} ${err?.message ?? ""}`);
 function anmeldeFehler(err) {
@@ -1006,10 +1043,143 @@ $("d-schliessen").addEventListener("click", abwaehlen);
 
 function zeilenAnsichtZeichnen(e) {
   const zeilen = e.zeilen ?? [];
-  $("d-zeilen").innerHTML = zeilen.map((z) =>
-    `<div class="zeile-block">${z.titel ? `<p class="zeile-titel">${esc(z.titel)}</p>` : ""}<div class="zeile-text">${formatiert(z.text)}</div></div>`
-  ).join("");
+  $("d-zeilen").innerHTML = zeilen.map((z) => {
+    const titel = z.titel ? `<p class="zeile-titel">${esc(z.titel)}</p>` : "";
+    if (z.art !== "anhang") return `<div class="zeile-block">${titel}<div class="zeile-text">${formatiert(z.text)}</div></div>`;
+    if (istBild(z.typ)) {
+      return `<div class="zeile-block">${titel}<button class="anhang-bild" type="button" data-bild="${esc(z.anhang)}" data-titel="${esc(z.titel || z.name)}" aria-label="Bild groß ansehen"><span class="anhang-laedt">Bild wird geladen …</span></button></div>`;
+    }
+    return `<div class="zeile-block">${titel}<button class="anhang-datei" type="button" data-datei="${esc(z.anhang)}" data-name="${esc(z.name)}" data-typ="${esc(z.typ)}">${DATEI_SVG}<span class="anhang-info"><span class="anhang-name">${esc(z.name)}</span><span class="anhang-stand">${esc(groesseText(z.groesse))} · Antippen zum Öffnen</span></span></button></div>`;
+  }).join("");
   $("d-zeilen").hidden = zeilen.length === 0;
+  /* Bilder erst jetzt laden: so bleibt der Plan schnell, und nur wer die Aufgabe öffnet, lädt sie. */
+  $("d-zeilen").querySelectorAll("[data-bild]").forEach((knopf) => {
+    anhangLaden(knopf.dataset.bild).then((a) => {
+      if (!knopf.isConnected) return;
+      knopf.innerHTML = `<img src="${a.url}" alt="${esc(knopf.dataset.titel)}">`;
+    }).catch(() => { knopf.innerHTML = `<span class="anhang-laedt">Das Bild konnte nicht geladen werden.</span>`; });
+  });
+}
+$("d-zeilen").addEventListener("click", async (ev) => {
+  const bild = ev.target.closest("[data-bild]");
+  if (bild) {
+    try { const a = await anhangLaden(bild.dataset.bild); bildGrossZeigen(a.url, bild.dataset.titel); } catch (err) {}
+    return;
+  }
+  const datei = ev.target.closest("[data-datei]");
+  if (!datei) return;
+  /* PDFs öffnen sich in einem neuen Tab, alles andere wird heruntergeladen. Das Fenster wird
+     sofort geöffnet, sonst blockiert der Browser es nach dem Laden. */
+  const pdf = datei.dataset.typ === "application/pdf";
+  const fenster = pdf ? window.open("", "_blank") : null;
+  const stand = datei.querySelector(".anhang-stand");
+  const alt = stand?.textContent;
+  if (stand) stand.textContent = "Wird geladen …";
+  try {
+    const a = await anhangLaden(datei.dataset.datei);
+    if (fenster) { fenster.location.href = a.url; }
+    else {
+      const link = document.createElement("a");
+      link.href = a.url; link.download = datei.dataset.name || "Datei";
+      document.body.appendChild(link); link.click(); link.remove();
+    }
+    if (stand) stand.textContent = alt;
+  } catch (err) {
+    if (fenster) fenster.close();
+    if (stand) stand.textContent = "Konnte nicht geladen werden.";
+  }
+});
+function bildGrossZeigen(url, titel) {
+  $("bild-gross-img").src = url;
+  $("bild-gross-img").alt = titel || "";
+  $("bild-gross-titel").textContent = titel || "";
+  $("bild-gross").hidden = false;
+  $("bild-gross-zu").focus();
+}
+function bildGrossZu() { $("bild-gross").hidden = true; $("bild-gross-img").removeAttribute("src"); }
+$("bild-gross-zu").addEventListener("click", bildGrossZu);
+$("bild-gross").addEventListener("click", (ev) => { if (ev.target.id === "bild-gross" || ev.target.classList.contains("bild-gross-flaeche")) bildGrossZu(); });
+document.addEventListener("keydown", (ev) => { if (ev.key === "Escape" && !$("bild-gross").hidden) bildGrossZu(); });
+
+/* ---- Anhänge: Bilder und Dateien. Sie liegen getrennt unter "anhaenge/<id>", damit der Plan
+   sie nicht mitlädt. In der Aufgabe steht nur ein Verweis mit Name, Art und Größe. ---- */
+const anhangCache = new Map();
+function anhangLaden(aid) {
+  if (!anhangCache.has(aid)) {
+    anhangCache.set(aid, get(ref(db, `${ANHANG}/${aid}`)).then(async (snap) => {
+      const v = snap.val();
+      if (!v || typeof v.daten !== "string") throw new Error("fehlt");
+      const typ = typeof v.typ === "string" && v.typ ? v.typ : "application/octet-stream";
+      const blob = await (await fetch(`data:${typ};base64,${v.daten}`)).blob();
+      return { url: URL.createObjectURL(blob), typ, name: v.name };
+    }).catch((err) => { anhangCache.delete(aid); throw err; }));
+  }
+  return anhangCache.get(aid);
+}
+/* Fotos vom Handy sind oft mehrere MB groß. Sie werden auf höchstens 1600 Pixel verkleinert. */
+async function bildVerkleinern(datei) {
+  if (!/^image\/(jpe?g|png|webp|bmp)$/i.test(datei.type)) return datei;
+  try {
+    const bild = await createImageBitmap(datei);
+    const f = Math.min(1, 1600 / Math.max(bild.width, bild.height));
+    const c = document.createElement("canvas");
+    c.width = Math.round(bild.width * f); c.height = Math.round(bild.height * f);
+    const g = c.getContext("2d");
+    g.fillStyle = "#FFFFFF"; g.fillRect(0, 0, c.width, c.height);
+    g.drawImage(bild, 0, 0, c.width, c.height);
+    const blob = await new Promise((ok) => c.toBlob(ok, "image/jpeg", 0.82));
+    if (!blob || blob.size >= datei.size) return datei;
+    return new File([blob], datei.name.replace(/\.[^.]+$/, "") + ".jpg", { type: "image/jpeg" });
+  } catch (err) { return datei; }
+}
+const alsBase64 = (blob) => new Promise((ok, fehler) => {
+  const r = new FileReader();
+  r.onload = () => ok(String(r.result).replace(/^data:[^,]*,/, ""));
+  r.onerror = () => fehler(r.error);
+  r.readAsDataURL(blob);
+});
+async function anhangHochladen(z, datei) {
+  try {
+    const klein = await bildVerkleinern(datei);
+    if (klein.size > MAX_DATEI) throw Object.assign(new Error("zu groß"), { code: "gross" });
+    z.typ = klein.type || "application/octet-stream";
+    z.name = klein.name.slice(0, 200);
+    z.groesse = klein.size;
+    if (istBild(z.typ)) z.vorschau = URL.createObjectURL(klein);
+    zeilenLesen(); zeilenZeichnen();
+    const daten = await alsBase64(klein);
+    await set(ref(db, `${ANHANG}/${z.anhang}`), {
+      daten, typ: z.typ, name: z.name, groesse: z.groesse,
+      eintrag: S.bearbeiten || S.neuId, ts: Date.now(), von: ICH?.bid || "",
+    });
+    z.status = "fertig";
+  } catch (err) {
+    console.error(err);
+    z.status = "fehler";
+    z.fehler = err?.code === "gross" ? "Zu groß (höchstens 7 MB)." : istRechteFehler(err) ? "Keine Berechtigung." : "Hochladen hat nicht geklappt.";
+  }
+  zeilenLesen(); zeilenZeichnen();
+}
+$("f-anhang-neu").addEventListener("click", () => $("f-anhang-datei").click());
+$("f-anhang-datei").addEventListener("change", (ev) => {
+  const dateien = [...ev.target.files];
+  ev.target.value = "";
+  if (!dateien.length) return;
+  zeilenLesen();
+  dateien.forEach((datei) => {
+    const z = { id: neueId(), art: "anhang", titel: "", anhang: neueId(), name: datei.name, typ: datei.type, groesse: datei.size, status: "laedt", neu: true };
+    S.zeilen.push(z);
+    z.laeuft = anhangHochladen(z, datei);
+  });
+  zeilenZeichnen();
+  const letzte = $("f-zeilen").querySelector("li:last-child [data-feld='titel']");
+  if (letzte) { letzte.focus(); letzte.scrollIntoView({ block: "center", behavior: "smooth" }); }
+});
+/* Neu hochgeladene, aber nicht gespeicherte Anhänge wieder löschen. */
+function anhaengeVerwerfen(liste) {
+  const weg = {};
+  liste.forEach((z) => { if (z.art === "anhang" && z.anhang) weg[`${ANHANG}/${z.anhang}`] = null; });
+  if (Object.keys(weg).length) update(ref(db), weg).catch((err) => console.error(err));
 }
 
 /* Einfache Auszeichnung in Textzeilen: **fett**, __unterstrichen__, Zeilen mit "- " sind Stichpunkte.
@@ -1060,7 +1230,11 @@ function formularOeffnen(id) {
   const pfeil = e ? istPfeil(e) : S.entwurf?.art === "pfeil";
   /* Neue Einträge gehen an die Person, für die gerade eingetragen wird. */
   S.personen = e ? [...e.personen] : (ALS && PERSONEN.some((p) => p.n === ALS) ? [ALS] : []);
-  S.zeilen = e ? (e.zeilen ?? []).map((z) => ({ id: z.id, titel: z.titel ?? "", text: z.text ?? "" })) : [];
+  S.zeilen = e ? (e.zeilen ?? []).map((z) => z.art === "anhang"
+    ? { id: z.id, art: "anhang", titel: z.titel ?? "", anhang: z.anhang, name: z.name, typ: z.typ, groesse: z.groesse, status: "fertig" }
+    : { id: z.id, titel: z.titel ?? "", text: z.text ?? "" }) : [];
+  S.neuId = e ? null : neueId();
+  S.anhangWeg = [];
   $("f-titel").textContent = e
     ? (pfeil ? "Pfeil bearbeiten" : "Aufgabe bearbeiten")
     : (pfeil ? "Pfeil: dorthin bringen" : "Aufgabe an dieser Stelle");
@@ -1080,13 +1254,29 @@ function formularOeffnen(id) {
 }
 function formularSchliessen() {
   const war = S.bearbeiten;
+  anhaengeVerwerfen(S.zeilen.filter((z) => z.neu));
   S.entwurf = null; S.start = null; S.bearbeiten = null; S.personen = []; S.zeilen = [];
   if (war) waehle(war); else abwaehlen();
 }
 $("f-abbrechen").addEventListener("click", formularSchliessen);
 
+function anhangZeileHtml(z) {
+  const stand = z.status === "laedt" ? "Wird hochgeladen …" : z.status === "fehler" ? (z.fehler || "Fehler") : groesseText(z.groesse);
+  const mini = istBild(z.typ)
+    ? `<img class="anhang-mini" data-mini="${esc(z.anhang)}" alt=""${z.vorschau ? ` src="${z.vorschau}"` : ""}>`
+    : `<span class="anhang-mini">${DATEI_SVG}</span>`;
+  return `
+    <li class="zeile-bearbeiten" data-id="${esc(z.id)}">
+      <div class="zeile-kopf">
+        <button class="griff" type="button" aria-label="Verschieben: nach oben oder unten ziehen" title="Zum Verschieben ziehen">${GRIFF_SVG}</button>
+        <input type="text" data-feld="titel" maxlength="80" placeholder="Überschrift, zum Beispiel: Foto vom Schaden" value="${esc(z.titel)}" aria-label="Überschrift des Anhangs">
+        <button class="zeile-weg" type="button" data-weg="${esc(z.id)}">Entfernen</button>
+      </div>
+      <div class="anhang-zeile">${mini}<span class="anhang-info"><span class="anhang-name">${esc(z.name || "Datei")}</span><span class="anhang-stand${z.status === "fehler" ? " fehler" : ""}">${esc(stand)}</span></span></div>
+    </li>`;
+}
 function zeilenZeichnen() {
-  $("f-zeilen").innerHTML = S.zeilen.map((z) => `
+  $("f-zeilen").innerHTML = S.zeilen.map((z) => z.art === "anhang" ? anhangZeileHtml(z) : `
     <li class="zeile-bearbeiten" data-id="${esc(z.id)}">
       <div class="zeile-kopf">
         <button class="griff" type="button" aria-label="Textzeile verschieben: nach oben oder unten ziehen" title="Zum Verschieben ziehen">${GRIFF_SVG}</button>
@@ -1101,6 +1291,10 @@ function zeilenZeichnen() {
       <textarea data-feld="text" rows="2" maxlength="1000" placeholder="Was soll in dieser Zeile stehen?" aria-label="Text der Textzeile">${esc(z.text)}</textarea>
     </li>`).join("");
   $("f-zeilen-leer").hidden = S.zeilen.length > 0;
+  /* Vorschau gespeicherter Bilder nachladen */
+  $("f-zeilen").querySelectorAll("img[data-mini]:not([src])").forEach((img) => {
+    anhangLaden(img.dataset.mini).then((a) => { if (img.isConnected) img.src = a.url; }).catch(() => {});
+  });
 }
 /* Liest die Felder direkt aus der Anzeige. Noetig vor jedem Neuaufbau der Liste: ginge ein
    Eingabe-Ereignis verloren, waere sonst das Getippte weg. */
@@ -1129,6 +1323,9 @@ $("f-zeilen").addEventListener("click", (e) => {
   const weg = e.target.closest("[data-weg]");
   if (!weg) return;
   zeilenLesen();
+  const z = S.zeilen.find((x) => x.id === weg.dataset.weg);
+  /* Neu Hochgeladenes kommt sofort weg, schon Gespeichertes erst beim Speichern (Abbrechen bleibt möglich). */
+  if (z?.art === "anhang") { if (z.neu) anhaengeVerwerfen([z]); else S.anhangWeg.push(z); }
   S.zeilen = S.zeilen.filter((x) => x.id !== weg.dataset.weg);
   zeilenZeichnen();
 });
@@ -1154,6 +1351,10 @@ function zeilenFuerSpeichern() {
   const ausgabe = [];
   S.zeilen.forEach((z) => {
     const titel = (z.titel || "").trim().slice(0, 80);
+    if (z.art === "anhang") {
+      if (z.status === "fertig") ausgabe.push({ art: "anhang", titel, anhang: z.anhang, name: z.name, typ: z.typ, groesse: z.groesse });
+      return;
+    }
     const text = (z.text || "").trimEnd().replace(/^\s*\n/, "").slice(0, 1000);
     if (!titel && !text.trim()) return;
     ausgabe.push({ titel, text });
@@ -1165,10 +1366,22 @@ $("t-formular").addEventListener("submit", async (e) => {
   e.preventDefault();
   const titel = $("f-text").value.trim();
   if (!titel) { $("f-fehler").textContent = "Bitte den Titel eintragen."; $("f-text").focus(); return; }
-  const zeilen = zeilenFuerSpeichern();
   const knopf = $("f-speichern");
   knopf.disabled = true;
   try {
+    /* Erst speichern, wenn alle Anhänge oben sind. */
+    if (S.zeilen.some((z) => z.status === "laedt")) {
+      $("f-fehler").textContent = "Anhänge werden noch hochgeladen …";
+      await Promise.all(S.zeilen.map((z) => z.laeuft).filter(Boolean));
+      $("f-fehler").textContent = "";
+    }
+    if (S.zeilen.some((z) => z.art === "anhang" && z.status === "fehler")) {
+      $("f-fehler").textContent = "Ein Anhang konnte nicht hochgeladen werden. Bitte entfernen oder noch einmal hinzufügen.";
+      return;
+    }
+    const zeilen = zeilenFuerSpeichern();
+    const wegAnhaenge = {};
+    (S.anhangWeg || []).forEach((z) => { wegAnhaenge[`${ANHANG}/${z.anhang}`] = null; });
     if (S.bearbeiten) {
       const id = S.bearbeiten;
       if (!S.eintraege[id]) { formularSchliessen(); return; }
@@ -1180,11 +1393,12 @@ $("t-formular").addEventListener("submit", async (e) => {
         [`${BASIS}/eintraege/${id}/zeilen`]: zeilen,
         ...verlaufPaar("bearbeitet", titel, S.personen[0] ?? null),
       });
+      if (ok && Object.keys(wegAnhaenge).length) update(ref(db), wegAnhaenge).catch((err) => console.error(err));
       if (!ok) return;
-      S.bearbeiten = null; S.personen = []; S.zeilen = [];
+      S.bearbeiten = null; S.personen = []; S.zeilen = []; S.anhangWeg = [];
       waehle(id);
     } else {
-      const id = neueId();
+      const id = S.neuId || neueId();
       /* Wer für jemand anderen einträgt, legt die Aufgabe in dessen Namen an:
          sie gehört dann dieser Person, als hätte sie sie selbst erstellt. */
       const vertreten = ALS && ICH && ALS !== ICH.name && darfVertreten(ICH, "arbeitsplan");
@@ -1203,7 +1417,7 @@ $("t-formular").addEventListener("submit", async (e) => {
         ...verlaufPaar("erstellt", titel, eintrag.person),
       });
       if (!ok) return;
-      S.entwurf = null; S.personen = []; S.zeilen = [];
+      S.entwurf = null; S.personen = []; S.zeilen = []; S.neuId = null;
       abwaehlen();
       hinweisSetzen("Gespeichert. Die Karte zeigt es jetzt.");
     }
@@ -1232,10 +1446,11 @@ $("d-loeschen-ja").addEventListener("click", async () => {
   const id = S.gewaehlt;
   const e = id && S.eintraege[id];
   if (!e) return;
-  await schreiben({
+  const ok = await schreiben({
     [`${BASIS}/eintraege/${id}`]: null,
     ...verlaufPaar("geloescht", titelVon(e), e.person ?? null),
   });
+  if (ok) anhaengeVerwerfen(e.zeilen ?? []);
   abwaehlen();
   hinweisSetzen("Gelöscht. Der Verlauf zeigt es.");
 });
@@ -1438,7 +1653,7 @@ function alleZeichnen() {
     const griff = nr && !gefiltert && darfAufgabe(ICH, "prio")
       ? `<button class="griff" type="button" data-griff="${esc(e.id)}" aria-label="Priorität ändern: nach oben oder unten ziehen" title="Zum Ändern der Priorität ziehen">${GRIFF_SVG}</button>`
       : `<span class="griff-platz" aria-hidden="true"></span>`;
-    return `<li class="${istOffen(e) ? "offen" : "erledigt"}" data-id="${esc(e.id)}">${griff}<span class="abzeichen" style="background:${farbe}; color:${kontrast(farbe)}">${nr ?? ""}</span><span class="zeile"><button class="textknopf" type="button" data-zeigen="${esc(e.id)}" style="text-align:left; color:var(--ink); min-height:auto">${esc(titelVon(e))}</button><span class="wann">${esc(untertitelVon(e))}</span></span><button class="hin-knopf" type="button" data-hin="${esc(e.id)}" aria-label="Auf der Karte zeigen" title="Auf der Karte zeigen"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 12a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /> <path d="M4 12a8 8 0 1 0 16 0a8 8 0 1 0 -16 0" /> <path d="M12 2l0 2" /> <path d="M12 20l0 2" /> <path d="M20 12l2 0" /> <path d="M2 12l2 0" /></svg></button></li>`;
+    return `<li class="${istOffen(e) ? "offen" : "erledigt"}" data-id="${esc(e.id)}">${griff}<span class="abzeichen" style="background:${farbe}; color:${kontrast(farbe)}">${nr ?? ""}</span><span class="zeile"><button class="textknopf" type="button" data-zeigen="${esc(e.id)}" style="text-align:left; color:var(--ink); min-height:auto">${esc(titelVon(e))}</button><span class="wann">${esc(untertitelVon(e))}${(e.zeilen ?? []).some((z) => z.art === "anhang") ? `<span class="anhang-marke" title="Mit Anhang" aria-label="Mit Anhang"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5" /></svg></span>` : ""}</span></span><button class="hin-knopf" type="button" data-hin="${esc(e.id)}" aria-label="Auf der Karte zeigen" title="Auf der Karte zeigen"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 12a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /> <path d="M4 12a8 8 0 1 0 16 0a8 8 0 1 0 -16 0" /> <path d="M12 2l0 2" /> <path d="M12 20l0 2" /> <path d="M20 12l2 0" /> <path d="M2 12l2 0" /></svg></button></li>`;
   }).join("");
   $("alle-leer").hidden = alle.length > 0;
   $("alle-hinweis").textContent = gefiltert
@@ -1588,13 +1803,17 @@ function sauber(roh) {
       ? zRoh.map((z, i) => ({ id: "z" + i, z, reihe: i }))
       : Object.entries(zRoh || {}).map(([zid, z]) => ({ id: zid, z, reihe: zahl(z?.reihe) ?? 0 }));
     const zeilen = zListe
-      .map(({ id: zid, z, reihe }) => ({
-        id: zid,
-        titel: typeof z?.titel === "string" ? z.titel.slice(0, 80) : "",
-        text: typeof z?.text === "string" ? z.text.slice(0, 1000) : "",
-        reihe,
-      }))
-      .filter((z) => z.titel || z.text)
+      .map(({ id: zid, z, reihe }) => {
+        const titel = typeof z?.titel === "string" ? z.titel.slice(0, 80) : "";
+        if (z?.art === "anhang" && typeof z.anhang === "string" && ANHANG_ID.test(z.anhang)) {
+          return { id: zid, art: "anhang", titel, anhang: z.anhang,
+            name: typeof z.name === "string" ? z.name.slice(0, 200) : "Datei",
+            typ: typeof z.typ === "string" ? z.typ.slice(0, 100) : "",
+            groesse: zahl(z.groesse) ?? 0, reihe };
+        }
+        return { id: zid, titel, text: typeof z?.text === "string" ? z.text.slice(0, 1000) : "", reihe };
+      })
+      .filter((z) => z.art === "anhang" || z.titel || z.text)
       .sort((a, b) => a.reihe - b.reihe);
     /* Mehrere Mitarbeiter stehen als "Arno|Joel" in personen; alte Einträge haben person. */
     const personen = typeof e.personen === "string"
@@ -1683,5 +1902,10 @@ hinweisZurueck();
 tafelZeigen("aus");
 seiteStarten().catch((err) => { console.error(err); zeigeBereich(false); });
 </script>
+<!-- Bild groß ansehen -->
+<div class="bild-gross" id="bild-gross" role="dialog" aria-modal="true" aria-label="Bild" hidden>
+  <div class="bild-gross-kopf"><p id="bild-gross-titel"></p><button class="knopf klein" id="bild-gross-zu" type="button">Schließen</button></div>
+  <div class="bild-gross-flaeche"><img id="bild-gross-img" alt=""></div>
+</div>
 </body>
 </html>

@@ -400,6 +400,37 @@
           }
         }
       }
+    },
+    "anhaenge": {
+      ".read": "(auth != null && root.child('geraete').child(auth.uid).child('code').val() === root.child('zugang').child('admin').val()) || ((auth != null && root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('code').val() === root.child('geraete').child(auth.uid).child('code').val() && root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('gesperrt').val() !== true && (!root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('stand').exists() || root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('stand').val() <= root.child('geraete').child(auth.uid).child('seit').val())) && (root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('arbeitsplan').val() === true || root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('admin').val() === true))",
+      "$aid": {
+        ".write": "(!data.exists() || !newData.exists()) && ((auth != null && root.child('geraete').child(auth.uid).child('code').val() === root.child('zugang').child('admin').val()) || (((auth != null && root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('code').val() === root.child('geraete').child(auth.uid).child('code').val() && root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('gesperrt').val() !== true && (!root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('stand').exists() || root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('stand').val() <= root.child('geraete').child(auth.uid).child('seit').val())) && (root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('arbeitsplan').val() === true || root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('admin').val() === true)) && (!root.child('arbeitsplan').child('eintraege').child((newData.exists() ? newData.child('eintrag').val() : data.child('eintrag').val())).exists() ? ((root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('admin').val() === true || (root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('arbeitsplan').val() === true && root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('arbeitsplan_tun').child('erstellen').val() === true)) || (root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('admin').val() === true || (root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('arbeitsplan').val() === true && root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('arbeitsplan_tun').child('bearbeitenEigene').val() === true)) || (root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('admin').val() === true || (root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('arbeitsplan').val() === true && root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('arbeitsplan_tun').child('bearbeitenFremde').val() === true))) : ((root.child('arbeitsplan').child('eintraege').child((newData.exists() ? newData.child('eintrag').val() : data.child('eintrag').val())).child('ersteller').val() === root.child('geraete').child(auth.uid).child('benutzer').val()) ? ((root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('admin').val() === true || (root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('arbeitsplan').val() === true && root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('arbeitsplan_tun').child('bearbeitenEigene').val() === true)) || (root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('admin').val() === true || (root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('arbeitsplan').val() === true && root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('arbeitsplan_tun').child('loeschenEigene').val() === true))) : ((root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('admin').val() === true || (root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('arbeitsplan').val() === true && root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('arbeitsplan_tun').child('bearbeitenFremde').val() === true)) || (root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('admin').val() === true || (root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('arbeitsplan').val() === true && root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('arbeitsplan_tun').child('loeschenFremde').val() === true)))))))",
+        ".validate": "$aid.matches(/^[A-Za-z0-9_-]+$/) && $aid.length >= 4 && $aid.length <= 40 && newData.hasChildren(['daten', 'typ', 'name', 'groesse', 'eintrag', 'ts'])",
+        "daten": {
+          ".validate": "newData.isString() && newData.val().length <= 10000000"
+        },
+        "typ": {
+          ".validate": "newData.isString() && newData.val().length <= 100"
+        },
+        "name": {
+          ".validate": "newData.isString() && newData.val().length <= 200"
+        },
+        "groesse": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 7340032"
+        },
+        "eintrag": {
+          ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9_-]+$/) && newData.val().length >= 4 && newData.val().length <= 40"
+        },
+        "ts": {
+          ".validate": "newData.isNumber()"
+        },
+        "von": {
+          ".validate": "newData.isString() && newData.val().length <= 60"
+        },
+        "$anderes": {
+          ".validate": false
+        }
+      }
     }
   }
 }
