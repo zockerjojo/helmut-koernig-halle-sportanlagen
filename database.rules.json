@@ -385,6 +385,21 @@
       "$anderes": {
         ".validate": false
       }
+    },
+    "push": {
+      ".read": false,
+      "abos": {
+        "$token": {
+          ".write": true,
+          ".validate": "$token.length >= 20 && $token.length <= 400 && newData.hasChildren(['ts'])",
+          "ts": {
+            ".validate": "newData.isNumber() && newData.val() <= now + 60000"
+          },
+          "$anderes": {
+            ".validate": false
+          }
+        }
+      }
     }
   }
 }
