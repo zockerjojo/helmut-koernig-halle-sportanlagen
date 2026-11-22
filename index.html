@@ -7,6 +7,8 @@
 <title>helmut-körnig-halle-sportanlagen</title>
 <link rel="icon" type="image/png" href="./bilder/favicon.png">
 <link rel="apple-touch-icon" href="./bilder/symbol.png">
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#17694B">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600&display=swap" rel="stylesheet">
@@ -119,6 +121,13 @@ tbody th{font-weight:400}
   .seite > .verbindung{grid-column:1; grid-row:5}
   .seite > .hinweis-block{grid-column:2; grid-row:3; align-self:start}
 }
+/* Glocke für Push-Nachrichten links neben Hell/Dunkel; durchgestrichen = aus */
+.kopf-knoepfe{display:flex; gap:10px; flex:none; align-items:center}
+.glocke .glocke-strich{display:inline}
+.glocke[aria-pressed="true"]{background:var(--ink); border-color:var(--ink); color:var(--panel)}
+.glocke[aria-pressed="true"] .glocke-strich{display:none}
+.glocke[disabled]{opacity:.5; cursor:progress}
+.push-hinweis{margin:4px 0 0; padding:10px 12px; border:1px solid var(--line); border-radius:12px; background:var(--panel); font-size:14px; line-height:1.4; color:var(--ink)}
 </style>
 </head>
 <body>
@@ -130,10 +139,14 @@ tbody th{font-weight:400}
       <img src="./bilder/logo.png" alt="Dortmunder Sportstätten" width="480" height="241">
       <span class="marke">Helmut-Körnig-Halle</span>
     </a>
-    <button class="thema-knopf" id="dunkel" type="button" aria-pressed="false" aria-label="Dunkelmodus" title="Dunkelmodus"><svg class="mond" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sonne" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></button>
+    <div class="kopf-knoepfe">
+      <button class="thema-knopf glocke" id="glocke" type="button" aria-pressed="false" aria-label="Push-Nachrichten einschalten" title="Push-Nachrichten einschalten"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6" /><path d="M9 17v1a3 3 0 0 0 6 0v-1" /><path class="glocke-strich" d="M3 3l18 18" /></svg></button>
+  <button class="thema-knopf" id="dunkel" type="button" aria-pressed="false" aria-label="Dunkelmodus" title="Dunkelmodus"><svg class="mond" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sonne" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></button>
+    </div>
   </div>
   <h1>Status Sportanlagen</h1>
   <p class="stand" id="stand">Stand: –</p>
+  <p class="push-hinweis" id="push-hinweis" role="status" hidden></p>
 </header>
 
 <section class="aushang" aria-labelledby="aushang-titel">
@@ -406,6 +419,63 @@ function standZeit(ms) {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+
+/* ---- Glocke: Push-Nachrichten bei neuem Aushang oder geänderter Anlage ---- */
+const glocke = $("glocke");
+let pushModul = null;
+const ladePush = async () => (pushModul ??= await import("./js/push.js"));
+let hinweisUhr = 0;
+function pushHinweis(text, dauer = 9000) {
+  const el = $("push-hinweis");
+  el.textContent = text;
+  el.hidden = !text;
+  clearTimeout(hinweisUhr);
+  if (text && dauer) hinweisUhr = setTimeout(() => { el.hidden = true; }, dauer);
+}
+function glockeZeigen(an) {
+  glocke.setAttribute("aria-pressed", String(an));
+  const text = an ? "Push-Nachrichten ausschalten" : "Push-Nachrichten einschalten";
+  glocke.setAttribute("aria-label", text);
+  glocke.title = text;
+}
+(async () => {
+  try {
+    const m = await ladePush();
+    glockeZeigen(m.istAn());
+    if (m.istAn()) m.auffrischen();
+  } catch (err) { console.error(err); glockeZeigen(false); }
+})();
+glocke.addEventListener("click", async () => {
+  if (glocke.disabled) return;
+  glocke.disabled = true;
+  try {
+    const m = await ladePush();
+    if (m.istAn()) {
+      await m.ausschalten();
+      glockeZeigen(false);
+      pushHinweis("Push-Nachrichten sind aus.");
+      return;
+    }
+    if (!(await m.unterstuetzt())) {
+      pushHinweis(m.istApple() && !m.alsAppGeoeffnet()
+        ? "Auf dem iPhone geht das so: unten auf „Teilen“ tippen, dann „Zum Home-Bildschirm“. Danach die Seite über das neue Symbol öffnen und hier die Glocke antippen."
+        : "Dieser Browser kann leider keine Push-Nachrichten empfangen.", 0);
+      return;
+    }
+    pushHinweis("Einen Moment …", 0);
+    await m.einschalten();
+    glockeZeigen(true);
+    pushHinweis("Push-Nachrichten sind an. Du bekommst eine Nachricht, wenn sich der Aushang oder eine Anlage ändert.");
+  } catch (err) {
+    console.error(err);
+    glockeZeigen(false);
+    pushHinweis(err?.code === "verweigert"
+      ? "Nachrichten sind für diese Seite im Browser gesperrt. Das lässt sich in den Einstellungen des Browsers bei dieser Seite wieder erlauben."
+      : "Das hat nicht geklappt. Bitte später noch einmal versuchen.", 0);
+  } finally {
+    glocke.disabled = false;
+  }
+});
 
 /* Stand = jüngste Änderung an den Anlagen oder am Aushang */
 let standAnlagen = 0;
