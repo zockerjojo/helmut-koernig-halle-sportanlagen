@@ -106,6 +106,13 @@ legend{font-size:14px; color:var(--ink-2); padding:0 0 6px}
 .hkh-kopf img{flex:none; display:block; height:34px !important; width:auto}
 .hkh-marke{display:flex; flex-direction:column; gap:2px; margin:0; font-family:Barlow, system-ui, -apple-system, "Segoe UI", sans-serif; font-size:13px; font-weight:500; line-height:1.15; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2)}
 #panel{margin-top:22px}
+/* Speichern-Leiste: erscheint, sobald etwas geändert wurde, immer unten sichtbar (über der Personal-Leiste) */
+.speicher-leiste{position:fixed; z-index:58; left:max(12px, env(safe-area-inset-left)); right:max(12px, env(safe-area-inset-right)); bottom:calc(max(12px, env(safe-area-inset-bottom)) + 62px); max-width:640px; margin:0 auto; display:flex; align-items:center; gap:10px; padding:8px 8px 8px 16px; border-radius:16px; border:1px solid var(--accent); background:var(--panel); box-shadow:0 6px 24px rgba(20,32,27,.22)}
+.speicher-leiste[hidden]{display:none}
+.speicher-text{flex:1 1 auto; min-width:0; font-size:14px; font-weight:600; color:var(--ink)}
+.speicher-text.fehler{color:var(--fehler)}
+body.mit-speichern{padding-bottom:calc(150px + env(safe-area-inset-bottom))}
+.karte.geaendert{border-color:var(--accent); box-shadow:inset 4px 0 0 var(--accent)}
 </style>
 </head>
 <body>
@@ -137,7 +144,7 @@ legend{font-size:14px; color:var(--ink-2); padding:0 0 6px}
 
 <section id="panel" class="stapel" hidden>
   <div class="kopfzeile"><h1>Einstellungen Sportanlagen</h1></div>
-  <p class="muted">Änderungen erscheinen sofort auf der öffentlichen Anzeige.</p>
+  <p class="muted">Änderungen erscheinen auf der öffentlichen Anzeige, sobald du unten auf „Speichern“ drückst.</p>
   <div class="werkzeuge">
     <button class="knopf primaer" id="startliste" type="button" hidden>Startliste anlegen</button>
     <span class="meldung" id="startliste-meldung" aria-live="polite"></span>
@@ -392,9 +399,15 @@ function zeichne(v) {
   $("startliste").hidden = liste.length > 0;
   $("liste").innerHTML = liste.map(karte).join("");
 }
+/* Änderungen werden erst gesammelt und gehen mit "Speichern" auf einmal in die Datenbank.
+   Solange etwas offen ist, wartet die Liste mit dem Neuzeichnen, damit nichts verloren geht. */
+let letzte = {};
+const offen = {};
+const hatOffen = () => Object.keys(offen).length > 0;
 onValue(ref(db, "matten"), (snap) => {
   const v = snap.val() ?? {};
-  if (fokus) { ausstehend = v; return; }
+  letzte = v;
+  if (fokus || hatOffen()) { ausstehend = v; return; }
   zeichne(v);
 });
 const liste = $("liste");
@@ -402,47 +415,86 @@ liste.addEventListener("focusin", () => { fokus = true; });
 liste.addEventListener("focusout", (e) => {
   if (liste.contains(e.relatedTarget)) return;
   fokus = false;
-  if (ausstehend) { const v = ausstehend; ausstehend = null; zeichne(v); }
+  if (ausstehend && !hatOffen()) { const v = ausstehend; ausstehend = null; zeichne(v); }
 });
-
-/* Speichern: jede Änderung geht direkt in die Datenbank. Jede Änderung schreibt nur ihr eigenes Feld. */
-async function speichere(key, werte, meldung) {
+function leisteZeigen(text, fehler) {
+  const zu = !hatOffen() && !text;
+  $("speicher-leiste").hidden = zu;
+  document.body.classList.toggle("mit-speichern", !zu);
+  const t = $("speicher-text");
+  const n = Object.keys(offen).length;
+  t.textContent = text || (n === 1 ? "Nicht gespeichert" : `${n} Anlagen nicht gespeichert`);
+  t.classList.toggle("fehler", !!fehler);
+  $("speicher-knopf").disabled = !hatOffen();
+  $("speicher-verwerfen").hidden = !hatOffen();
+}
+function vormerken(kartenEl, werte) {
+  const key = kartenEl.dataset.key;
+  offen[key] = { ...(offen[key] ?? {}), ...werte };
+  kartenEl.classList.add("geaendert");
+  const meldung = kartenEl.querySelector(".meldung");
   meldung.classList.remove("fehler");
-  meldung.textContent = "Speichere …";
-  try {
-    await update(ref(db, `matten/${key}`), { ...werte, geaendert: serverTimestamp() });
-    meldung.textContent = "Gespeichert. Die Anzeige ist aktualisiert.";
-  } catch (err) {
-    console.error(err);
-    if (await zugangAbgelaufen(err)) { meldung.textContent = ""; return; }
-    meldung.classList.add("fehler");
-    meldung.textContent = "Speichern hat nicht geklappt. Bitte noch einmal versuchen.";
-  }
+  meldung.textContent = "Noch nicht gespeichert.";
+  leisteZeigen();
 }
 liste.addEventListener("change", (e) => {
   const kartenEl = e.target.closest(".karte");
   if (!kartenEl) return;
-  const key = kartenEl.dataset.key;
   const meldung = kartenEl.querySelector(".meldung");
   if (e.target.matches('input[type="radio"]')) {
     sprintAktualisieren(kartenEl, e.target.value);
-    speichere(key, { status: e.target.value }, meldung);
+    vormerken(kartenEl, { status: e.target.value });
     return;
   }
   const paar = e.target.dataset.paar;
   if (!paar) return;
   const datum = kartenEl.querySelector(`input[data-paar="${paar}"][data-feld="datum"]`).value;
   const zeit = kartenEl.querySelector(`input[data-paar="${paar}"][data-feld="zeit"]`).value.slice(0, 5);
-  if (!datum && !zeit) {
-    speichere(key, { [paar]: null }, meldung);
-    return;
-  }
+  if (!datum && !zeit) { vormerken(kartenEl, { [paar]: null }); return; }
   if (!datum) {
     meldung.classList.add("fehler");
     meldung.textContent = "Bitte ein Datum eintragen.";
     return;
   }
-  speichere(key, { [paar]: zeit ? `${datum}T${zeit}` : datum }, meldung);
+  vormerken(kartenEl, { [paar]: zeit ? `${datum}T${zeit}` : datum });
+});
+function neuZeichnen() {
+  const v = ausstehend ?? letzte;
+  ausstehend = null;
+  zeichne(v);
+}
+$("speicher-knopf").addEventListener("click", async () => {
+  if (!hatOffen()) return;
+  const knopf = $("speicher-knopf");
+  knopf.disabled = true;
+  leisteZeigen("Speichere …");
+  const auftraege = Object.entries(offen).map(([key, werte]) => update(ref(db, `matten/${key}`), { ...werte, geaendert: serverTimestamp() }).then(() => key));
+  const ergebnis = await Promise.allSettled(auftraege);
+  let fehlerZahl = 0, ersterFehler = null;
+  ergebnis.forEach((r) => {
+    if (r.status === "fulfilled") delete offen[r.value];
+    else { fehlerZahl++; ersterFehler ??= r.reason; console.error(r.reason); }
+  });
+  if (fehlerZahl) {
+    if (await zugangAbgelaufen(ersterFehler)) return;
+    leisteZeigen("Speichern hat nicht geklappt. Bitte noch einmal drücken.", true);
+    $("speicher-knopf").disabled = false;
+    return;
+  }
+  neuZeichnen();
+  leisteZeigen("Gespeichert. Die Anzeige ist aktualisiert.");
+  setTimeout(() => { if (!hatOffen()) leisteZeigen(); }, 2500);
+});
+$("speicher-verwerfen").addEventListener("click", () => {
+  Object.keys(offen).forEach((k) => delete offen[k]);
+  neuZeichnen();
+  leisteZeigen();
+});
+/* Wer mit offenen Änderungen die Seite verlässt, wird gefragt. */
+window.addEventListener("beforeunload", (e) => {
+  if (!hatOffen()) return;
+  e.preventDefault();
+  e.returnValue = "";
 });
 
 /* Startliste anlegen (nur wenn die Liste leer ist) */
@@ -461,5 +513,10 @@ $("startliste").addEventListener("click", async () => {
   }
 });
 </script>
+<div class="speicher-leiste" id="speicher-leiste" role="region" aria-label="Nicht gespeicherte Änderungen" hidden>
+  <span class="speicher-text" id="speicher-text" aria-live="polite">Nicht gespeichert</span>
+  <button class="knopf" id="speicher-verwerfen" type="button">Verwerfen</button>
+  <button class="knopf primaer" id="speicher-knopf" type="button">Speichern</button>
+</div>
 </body>
 </html>
