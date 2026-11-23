@@ -30,14 +30,17 @@ const CSS = `
 .hkh-einst{position:fixed; z-index:61; right:calc(max(12px, env(safe-area-inset-right)) + 60px); bottom:calc(max(12px, env(safe-area-inset-bottom)) + var(--hkh-leiste-h, 62px)); min-width:200px; padding:6px; border-radius:14px; border:1px solid var(--l-line); background:var(--l-panel); color:var(--l-ink); box-shadow:var(--l-schatten); display:flex; flex-direction:column; gap:2px}
 .hkh-einst[hidden]{display:none}
 .hkh-einst button{display:flex; align-items:center; gap:10px; min-height:44px; padding:0 12px; border:0; border-radius:10px; background:none; color:var(--l-ink); font:500 15px Barlow, system-ui, -apple-system, "Segoe UI", sans-serif; text-align:left; cursor:pointer}
+.hkh-einst button[hidden]{display:none}
 .hkh-einst button:hover{background:color-mix(in srgb, var(--l-ink) 8%, transparent)}
 .hkh-leiste :focus-visible{outline:3px solid var(--l-akzent); outline-offset:2px}
 body.hkh-mit-leiste{padding-bottom:calc(var(--hkh-leiste-h, 62px) + 14px + env(safe-area-inset-bottom))}
 /* Schmale Bildschirme: die Leiste wird zweizeilig, damit nichts abgeschnitten ist und nichts gescrollt werden muss. */
 @media (max-width:899px){
+  /* zwei Ebenen: oben Name mit Farbe und Einstellungen, unten nur die Symbole */
   .hkh-band{height:auto; min-height:52px; flex-wrap:wrap; row-gap:2px}
-  .hkh-trenn{display:none}
-  .hkh-wer{flex:1 1 130px; min-height:42px}
+  .hkh-trenn{display:block; order:-1; flex:1 0 100%; width:auto; height:1px; margin:2px 4px}
+  .hkh-wer{order:-3; flex:1 1 0; min-height:42px}
+  .hkh-sym[data-einst]{order:-2}
 }
 `;
 
@@ -67,20 +70,23 @@ export function leisteStarten(sitz, aktiv = "") {
   const bereiche = BEREICHE.filter((f) => darf(sitz, f.id)).sort((x, y) => rang(x.id) - rang(y.id));
   leiste = document.createElement("div");
   leiste.className = "hkh-leiste";
-  let offen = false;
-  try { offen = localStorage.getItem("hkh-leiste") === "auf"; } catch (e) {}
+  /* Auf dem Pausenraum-Tablett zeigen alle Links auf die Tablett-Seiten, und es gibt kein Abmelden. */
+  const tab = !!sitz.tablett;
+  const ziel = (seite) => (tab ? seite.replace(/^\.\//, "./Tablett/") : seite);
+  let offen = tab;
+  if (!tab) try { offen = localStorage.getItem("hkh-leiste") === "auf"; } catch (e) {}
   leiste.dataset.offen = String(offen);
   leiste.innerHTML = `
     <nav class="hkh-band" id="hkh-band" aria-label="Personalbereiche">
-      <a class="hkh-sym" href="./" aria-label="Startseite" title="Startseite"${aktiv === "" ? ' aria-current="page"' : ""}>${svg("clipboard-list")}</a>
-      ${bereiche.map((f) => `<a class="hkh-sym" href="${esc(f.seite)}" aria-label="${esc(f.name)}" title="${esc(f.name)}"${aktiv === f.id ? ' aria-current="page"' : ""}>${svg(BEREICH_SYMBOL[f.id])}</a>`).join("")}
+      <a class="hkh-sym" href="${tab ? "./Tablett/" : "./"}" aria-label="Startseite" title="Startseite"${aktiv === "" ? ' aria-current="page"' : ""}>${svg("clipboard-list")}</a>
+      ${bereiche.map((f) => `<a class="hkh-sym" href="${esc(ziel(f.seite))}" aria-label="${esc(f.name)}" title="${esc(f.name)}"${aktiv === f.id ? ' aria-current="page"' : ""}>${svg(BEREICH_SYMBOL[f.id])}</a>`).join("")}
       <span class="hkh-trenn" aria-hidden="true"></span>
       <span class="hkh-wer" title="Angemeldet"><span class="hkh-punkt" style="background:${esc(sitz.farbe)}"></span><span>${esc(sitz.name)}</span></span>
       <button class="hkh-sym" type="button" data-einst aria-label="Einstellungen" title="Einstellungen" aria-haspopup="true" aria-expanded="false">${svg("settings")}</button>
     </nav>
     <div class="hkh-einst" role="menu" aria-label="Einstellungen" hidden>
       <button type="button" role="menuitem" data-thema></button>
-      <button type="button" role="menuitem" data-ab>${svg("logout")}<span>Abmelden</span></button>
+      <button type="button" role="menuitem" data-ab${tab ? " hidden" : ""}>${svg("logout")}<span>Abmelden</span></button>
     </div>
     <button class="hkh-schalter" type="button" aria-controls="hkh-band" aria-expanded="${offen}" aria-label="Personal-Leiste ein- oder ausklappen" title="Bereiche">${svg("apps")}</button>`;
   document.body.appendChild(leiste);

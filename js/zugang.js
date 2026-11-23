@@ -90,8 +90,39 @@ function ersterNutzer() {
   });
 }
 
+/* Pausenraum-Tablett: Seiten unter /Tablett/ laufen ohne Code und nur zum Ansehen.
+   Ein Admin schaltet das Tablett einmal frei, dann steht es unter "tabletts". */
+export const TABLETT = /^\/Tablett(\/|$)/.test(location.pathname) || globalThis.HKH_TABLETT === true;
+const NUR_ANSEHEN = { reinigung: true, arbeitsplan: true, dienstplan: true, reinigung_tun: {}, sportanlagen_tun: {}, arbeitsplan_tun: {}, dienstplan_tun: {} };
+async function tablettSitzung() {
+  const user = await ersterNutzer();
+  if (!user) return null;
+  let t = null;
+  try {
+    t = (await get(ref(db, `tabletts/${user.uid}`))).val();
+  } catch (err) {
+    if (istRechteFehler(err)) return null;
+    throw err;
+  }
+  if (!t) return null;
+  return { uid: user.uid, bid: "tablett", tablett: true, istAdmin: false, name: t.name || "Pausenraum", farbe: "#55635C", rechte: NUR_ANSEHEN };
+}
+/* Schaltet dieses Gerät mit dem Admin-Code als Tablett frei. Der Admin-Code bleibt danach nicht auf dem Gerät. */
+export async function tablettFreischalten(code, name) {
+  const user = auth.currentUser ?? (await signInAnonymously(auth)).user;
+  const jetzt = Date.now();
+  await set(ref(db, `geraete/${user.uid}`), { code, seit: jetzt });   // wirft bei falschem Code
+  try {
+    await set(ref(db, `tabletts/${user.uid}`), { seit: jetzt, name: String(name || "Pausenraum").slice(0, 40) });
+  } finally {
+    await remove(ref(db, `geraete/${user.uid}`)).catch(() => {});
+  }
+  return tablettSitzung();
+}
+
 /* Die angemeldete Person, oder null. Enthält Name, Farbe und Rechte. */
 export async function sitzung() {
+  if (TABLETT) return tablettSitzung();
   const user = await ersterNutzer();
   if (!user) return null;
   let eintrag = null;
