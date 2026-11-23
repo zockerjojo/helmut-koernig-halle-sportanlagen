@@ -27,6 +27,7 @@ export const BEREICHE = [
   { id: "reinigung", name: "Hallenreinigung", seite: "./Reinigungsplan", zusatz: "Gereinigte Bereiche eintragen und einsehen" },
   { id: "sportanlagen", name: "Einstellungen Sportanlagen", seite: "./Sportanlagen", zusatz: "Status der Anlagen und der Tribüne einstellen" },
   { id: "arbeitsplan", name: "Aufgaben und Arbeitsplan", seite: "./Arbeitsplan", zusatz: "Aufgaben und Pfeile auf dem Hallenplan" },
+  { id: "dienstplan", name: "Dienstplan", seite: "./Dienstplan", zusatz: "Dienstplan des Monats ansehen und drucken" },
   { id: "admin", name: "Admin Panel", seite: "./Adminpanel", zusatz: "Benutzer, Codes, Rechte und Sicherungen" },
 ];
 
@@ -40,6 +41,9 @@ export const ZUSATZRECHTE = {
   ],
   sportanlagen: [
     { id: "aushang", name: "Aushang bearbeiten", zusatz: "Text „Aushang am Sportlereingang“ auf der Startseite" },
+  ],
+  dienstplan: [
+    { id: "bearbeiten", name: "Dienstplan bearbeiten", zusatz: "Darf Namen, Schichten, Veranstaltungen, Zeilen und Spalten eintragen und ändern." },
   ],
   arbeitsplan: [
     { id: "prio", name: "Priorität ändern", zusatz: "Darf die Reihenfolge in „Alle Aufgaben“ umstellen." },
@@ -57,9 +61,10 @@ export const AP_RECHTE = [
 ];
 
 const ALLES_ERLAUBT = {
-  reinigung: true, sportanlagen: true, arbeitsplan: true, admin: true,
+  reinigung: true, sportanlagen: true, arbeitsplan: true, dienstplan: true, admin: true,
   reinigung_tun: { vertreten: true, uebermalen: true },
   sportanlagen_tun: { aushang: true },
+  dienstplan_tun: { bearbeiten: true },
   arbeitsplan_tun: Object.fromEntries(AP_RECHTE.map((r) => [r, true])),
 };
 
@@ -119,7 +124,7 @@ export async function sitzung() {
     istAdmin: rechte.admin === true,
     name: b.name ?? "",
     farbe: b.farbe ?? "#55635C",
-    rechte: { ...rechte, arbeitsplan_tun: rechte.arbeitsplan_tun ?? {}, reinigung_tun: rechte.reinigung_tun ?? {}, sportanlagen_tun: rechte.sportanlagen_tun ?? {} },
+    rechte: { ...rechte, arbeitsplan_tun: rechte.arbeitsplan_tun ?? {}, reinigung_tun: rechte.reinigung_tun ?? {}, sportanlagen_tun: rechte.sportanlagen_tun ?? {}, dienstplan_tun: rechte.dienstplan_tun ?? {} },
   };
 }
 
