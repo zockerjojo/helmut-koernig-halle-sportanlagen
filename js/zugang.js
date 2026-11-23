@@ -105,15 +105,15 @@ async function tablettSitzung() {
     throw err;
   }
   if (!t) return null;
-  return { uid: user.uid, bid: "tablett", tablett: true, istAdmin: false, name: t.name || "Pausenraum", farbe: "#55635C", rechte: NUR_ANSEHEN };
+  return { uid: user.uid, bid: "tablett", tablett: true, istAdmin: false, name: "Tablett", farbe: "#55635C", rechte: NUR_ANSEHEN };
 }
 /* Schaltet dieses Gerät mit dem Admin-Code als Tablett frei. Der Admin-Code bleibt danach nicht auf dem Gerät. */
-export async function tablettFreischalten(code, name) {
+export async function tablettFreischalten(code) {
   const user = auth.currentUser ?? (await signInAnonymously(auth)).user;
   const jetzt = Date.now();
   await set(ref(db, `geraete/${user.uid}`), { code, seit: jetzt });   // wirft bei falschem Code
   try {
-    await set(ref(db, `tabletts/${user.uid}`), { seit: jetzt, name: String(name || "Pausenraum").slice(0, 40) });
+    await set(ref(db, `tabletts/${user.uid}`), { seit: jetzt, name: "Tablett" });
   } finally {
     await remove(ref(db, `geraete/${user.uid}`)).catch(() => {});
   }
