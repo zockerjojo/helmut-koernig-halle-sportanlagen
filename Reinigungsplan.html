@@ -459,7 +459,8 @@ function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
 
 /* ---------- Bahnen und Streifen ---------- */
 var lanes=[],hallEl=$("hallp"),gcount={};
-var ZEIGE_OFFEN=false; /* zeigt noch nicht gewischte Bahnen hellgrau */
+var ZEIGE_OFFEN=true; /* zeigt noch nicht gewischte Bahnen hellgrau; ist von Anfang an eingeschaltet */
+var NUR_ANSEHEN=window.HKH_TABLETT===true; /* Pausenraum-Tablett: nur ansehen, nichts eintragen */
 function inHall(p){try{var pt=svg.createSVGPoint();pt.x=p.x;pt.y=p.y;return hallEl.isPointInFill(pt)}catch(e){return p.x>=6&&p.x<=697&&p.y>=6&&p.y<=315}}
 var ZAUN=[[661,202],[655,277],[640,296],[597,296],[597,276.65],[620,264],[645,238]];
 function inPoly(p,q){var c=false;for(var i=0,j=q.length-1;i<q.length;j=i++){var a=q[i],b=q[j];if((a[1]>p.y)!==(b[1]>p.y)&&p.x<(b[0]-a[0])*(p.y-a[1])/(b[1]-a[1])+a[0])c=!c}return c}
@@ -610,12 +611,12 @@ function onErr(e){
   if(/permission/i.test(m)&&sync.state!=="denied"&&sync.state!=="nocode"){setState("denied");openCode("Der Zugang ist nicht mehr gültig. Bitte den Code neu eingeben.")}
 }
 function put(o){
-  if(!sync.on)return;
+  if(!sync.on||NUR_ANSEHEN)return;
   if(!sync.db){sync.outbox.push(o);return}
   sync.fn.update(sync.fn.ref(sync.db,sync.base),o).catch(onErr);
 }
 function mark(l,x,v){
-  if(!sync.on)return;
+  if(!sync.on||NUR_ANSEHEN)return;
   (sync.pending[l.id]=sync.pending[l.id]||{})[x]=v;
   if(!sync.timer)sync.timer=setTimeout(flush,120);
 }
@@ -744,6 +745,7 @@ var hist={u:[],r:[]},fr=null,freeG=$("free"),ERASE_R=7;
 function pushOp(op){hist.u.push(op);hist.r=[];if(hist.u.length>200)hist.u.shift();syncHist()}
 function syncHist(){$("undo").disabled=!hist.u.length;$("redo").disabled=!hist.r.length}
 function hintFor(){
+  if(NUR_ANSEHEN)return "Zum Ansehen. Grau ist noch offen. Antippen zeigt, wer wann gewischt hat. Mit zwei Fingern zoomen.";
   if(S.art==="free"&&(S.mode==="paint"||S.mode==="erase"))return S.mode==="paint"?"Mit dem Finger frei malen. Radieren entfernt ganze Freihand-Striche.":"Über einen Freihand-Strich ziehen, um ihn zu entfernen.";
   return HINT[S.mode];
 }
@@ -970,6 +972,7 @@ svg.addEventListener("pointerdown",function(e){
     var m=midDist();pinch={A:toOuter(m.x,m.y),d0:m.d,z0:V.z};return;
   }
   if(ptrs.size>2)return;
+  if(NUR_ANSEHEN){gesture="pan";pan={sx:e.clientX,sy:e.clientY,moved:false,A:toOuter(e.clientX,e.clientY)};return}
   if((S.mode==="paint"||S.mode==="erase")&&S.art==="free"){freeStart(e);return}
   if(S.mode==="paint"||S.mode==="erase"){
     gesture="stroke";act={sx:e.clientX,sy:e.clientY,moved:false,items:null,changed:false};
@@ -1215,6 +1218,9 @@ function offenUmschalten(){
   say(ZEIGE_OFFEN?"Grau ist, was noch nicht gewischt wurde. Das Gewischte ist ausgeblendet.":"Wieder alles zu sehen.",true);
 }
 $("btn-offen").addEventListener("click",offenUmschalten);
+/* Standard: die nicht gereinigten Bereiche sind gleich beim Öffnen zu sehen */
+$("btn-offen").setAttribute("aria-pressed",String(ZEIGE_OFFEN));
+map.classList.toggle("nuroffen",ZEIGE_OFFEN);
 
 /* ---------- Plan als Bild herunterladen ---------- */
 /* Der Plan im SVG lebt von den Farben der Seite. Fuer das Bild werden sie
@@ -1300,6 +1306,7 @@ $("btn-bild").addEventListener("click",planBild);
 /* ---------- Start ---------- */
 var had=load();
 ansichtLaden();
+if(NUR_ANSEHEN)S.mode="move";
 lanes.forEach(render);renderFree();progress();syncButtons();syncHist();
 orient();
 if(VGEM){V.z=VGEM.z;V.cx=VGEM.cx;V.cy=VGEM.cy;applyView()}

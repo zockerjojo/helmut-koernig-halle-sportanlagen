@@ -118,6 +118,8 @@ body.mit-speichern{padding-bottom:calc(var(--hkh-leiste-h, 62px) + 90px + env(sa
   @page{size:A4 landscape; margin:8mm}
   :root,:root[data-theme="dark"]{--panel:#FFFFFF; --bg:#FFFFFF; --ink:#000; --ink-2:#000; --line:#000; --wochenende:#D6D6D6; --ich:#FFFFFF; --accent:#000}
   body{background:#FFF; font-size:11px}
+  /* Wochenenden und Feiertage auch im Druck grau: Hintergründe immer mitdrucken */
+  *{-webkit-print-color-adjust:exact !important; print-color-adjust:exact !important}
   .nicht-drucken,.kopf,.leiste,.hinweis,h1,.muted,.weg-sp,tfoot,.neu-spalte,.speicher-leiste,.hkh-leiste,.leer{display:none !important}
   body.mit-speichern,body.hkh-mit-leiste{padding:0 !important}
   .wrap{max-width:none; padding:0}
