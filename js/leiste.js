@@ -70,16 +70,16 @@ export function leisteStarten(sitz, aktiv = "") {
   const bereiche = BEREICHE.filter((f) => darf(sitz, f.id)).sort((x, y) => rang(x.id) - rang(y.id));
   leiste = document.createElement("div");
   leiste.className = "hkh-leiste";
-  /* Auf dem Pausenraum-Tablett gibt es keine Leiste: die Knöpfe stehen oben in der Tablett-Hülle. */
+  /* Auf dem Pausenraum-Tablet gibt es keine Leiste: die Knöpfe stehen oben in der Tablet-Hülle. */
   if (sitz?.tablett) return;
   const tab = false;
-  const ziel = (seite) => (tab ? seite.replace(/^\.\//, "./Tablett/") : seite);
+  const ziel = (seite) => (tab ? seite.replace(/^\.\//, "./Tablet/") : seite);
   let offen = tab;
   if (!tab) try { offen = localStorage.getItem("hkh-leiste") === "auf"; } catch (e) {}
   leiste.dataset.offen = String(offen);
   leiste.innerHTML = `
     <nav class="hkh-band" id="hkh-band" aria-label="Personalbereiche">
-      <a class="hkh-sym" href="${tab ? "./Tablett/" : "./"}" aria-label="Startseite" title="Startseite"${aktiv === "" ? ' aria-current="page"' : ""}>${svg("clipboard-list")}</a>
+      <a class="hkh-sym" href="${tab ? "./Tablet/" : "./"}" aria-label="Startseite" title="Startseite"${aktiv === "" ? ' aria-current="page"' : ""}>${svg("clipboard-list")}</a>
       ${bereiche.map((f) => `<a class="hkh-sym" href="${esc(ziel(f.seite))}" aria-label="${esc(f.name)}" title="${esc(f.name)}"${aktiv === f.id ? ' aria-current="page"' : ""}>${svg(BEREICH_SYMBOL[f.id])}</a>`).join("")}
       <span class="hkh-trenn" aria-hidden="true"></span>
       <span class="hkh-wer" title="Angemeldet"><span class="hkh-punkt" style="background:${esc(sitz.farbe)}"></span><span>${esc(sitz.name)}</span></span>
@@ -100,8 +100,8 @@ export function leisteStarten(sitz, aktiv = "") {
   const themaKnopf = leiste.querySelector("[data-thema]");
   const themaZeigen = () => { themaKnopf.innerHTML = istDunkel() ? `${svg("sun")}<span>Hell</span>` : `${svg("moon")}<span>Dunkel</span>`; };
   themaZeigen();
-  /* Tablett: Vollbild an oder aus. Gemerkt wird es auf dem Gerät; nach dem Wechsel auf eine
-     andere Seite geht der Browser beim nächsten Antippen wieder ins Vollbild (siehe Tablett/schutz.js). */
+  /* Tablet: Vollbild an oder aus. Gemerkt wird es auf dem Gerät; nach dem Wechsel auf eine
+     andere Seite geht der Browser beim nächsten Antippen wieder ins Vollbild (siehe Tablet/schutz.js). */
   const vollKnopf = leiste.querySelector("[data-voll]");
   if (vollKnopf) {
     const vollAn = () => { try { return localStorage.getItem("hkh-tablett-vollbild") === "1"; } catch (e) { return false; } };

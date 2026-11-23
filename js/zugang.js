@@ -90,9 +90,9 @@ function ersterNutzer() {
   });
 }
 
-/* Pausenraum-Tablett: Seiten unter /Tablett/ laufen ohne Code und nur zum Ansehen.
+/* Pausenraum-Tablet: Seiten unter /Tablet/ laufen ohne Code und nur zum Ansehen.
    Ein Admin schaltet das Tablett einmal frei, dann steht es unter "tabletts". */
-export const TABLETT = /^\/Tablett(\/|$)/.test(location.pathname) || globalThis.HKH_TABLETT === true;
+export const TABLETT = /^\/Tablett?(\/|$)/.test(location.pathname) || globalThis.HKH_TABLETT === true;
 const NUR_ANSEHEN = { reinigung: true, arbeitsplan: true, dienstplan: true, reinigung_tun: {}, sportanlagen_tun: {}, arbeitsplan_tun: {}, dienstplan_tun: {} };
 async function tablettSitzung() {
   const user = await ersterNutzer();
@@ -105,7 +105,7 @@ async function tablettSitzung() {
     throw err;
   }
   if (!t) return null;
-  return { uid: user.uid, bid: "tablett", tablett: true, istAdmin: false, name: "Tablett", farbe: "#55635C", rechte: NUR_ANSEHEN };
+  return { uid: user.uid, bid: "tablett", tablett: true, istAdmin: false, name: "Tablet", farbe: "#55635C", rechte: NUR_ANSEHEN };
 }
 /* Schaltet dieses Gerät mit dem Admin-Code als Tablett frei. Der Admin-Code bleibt danach nicht auf dem Gerät. */
 export async function tablettFreischalten(code) {
@@ -113,7 +113,7 @@ export async function tablettFreischalten(code) {
   const jetzt = Date.now();
   await set(ref(db, `geraete/${user.uid}`), { code, seit: jetzt });   // wirft bei falschem Code
   try {
-    await set(ref(db, `tabletts/${user.uid}`), { seit: jetzt, name: "Tablett" });
+    await set(ref(db, `tabletts/${user.uid}`), { seit: jetzt, name: "Tablet" });
   } finally {
     await remove(ref(db, `geraete/${user.uid}`)).catch(() => {});
   }
