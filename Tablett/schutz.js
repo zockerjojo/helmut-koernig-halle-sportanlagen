@@ -35,6 +35,15 @@
     else location.href = "/Tablett/";
   }, true);
 
+  /* Vollbild: ist es in den Einstellungen eingeschaltet, geht die Seite beim ersten Antippen
+     wieder ins Vollbild (Browser erlauben das nur nach einer Berührung). */
+  function vollbildGewuenscht() { try { return localStorage.getItem("hkh-tablett-vollbild") === "1"; } catch (x) { return false; } }
+  document.addEventListener("pointerdown", function () {
+    if (!vollbildGewuenscht() || document.fullscreenElement || document.webkitFullscreenElement) return;
+    var el = document.documentElement, f = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (f) { try { var p = f.call(el); if (p && p.catch) p.catch(function () {}); } catch (x) {} }
+  }, true);
+
   /* Bildschirm wach halten, solange die Seite sichtbar ist */
   var sperre = null;
   function wach() {

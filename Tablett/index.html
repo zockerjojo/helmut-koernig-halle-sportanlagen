@@ -41,6 +41,13 @@ h1{margin:28px 0 6px; font-family:var(--display); font-weight:600; font-size:cla
 .karte{margin-top:28px; max-width:520px; padding:22px; border-radius:18px; border:1px solid var(--line); background:var(--panel)}
 label{display:block; font-weight:600; font-size:15px; margin:14px 0 6px}
 input{width:100%; font:inherit; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:var(--bg); color:var(--ink)}
+.code-feld{position:relative}
+.code-feld input{padding-right:52px}
+.auge{position:absolute; top:0; right:0; bottom:0; width:48px; display:flex; align-items:center; justify-content:center; border:0; background:none; color:var(--ink-2); cursor:pointer; border-radius:0 10px 10px 0}
+.auge svg{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+.auge .zu{display:none}
+.auge[aria-pressed="true"] .auf{display:none}
+.auge[aria-pressed="true"] .zu{display:block}
 .knopf{font:inherit; font-weight:600; min-height:46px; padding:8px 20px; border-radius:999px; border:1px solid var(--accent); background:var(--accent); color:var(--on-accent); cursor:pointer; margin-top:18px}
 .knopf:disabled{opacity:.6}
 .fehler{color:var(--fehler); font-weight:600; min-height:1.4em; margin:10px 0 0}
@@ -78,10 +85,11 @@ input{width:100%; font:inherit; padding:10px 12px; border-radius:10px; border:1p
     <h1>Tablett freischalten</h1>
     <p class="muted">Dieses Tablett ist noch nicht freigeschaltet. Ein Admin gibt hier einmal den Admin-Code ein. Danach zeigt das Tablett Dienstplan, Aufgaben und Reinigungsplan ohne Code an, nur zum Ansehen.</p>
     <form class="karte" id="form" autocomplete="off">
-      <label for="name">Name des Tabletts</label>
-      <input id="name" value="Pausenraum" maxlength="40">
       <label for="code">Admin-Code</label>
-      <input id="code" type="password" autocomplete="off" required>
+      <div class="code-feld">
+        <input id="code" type="password" autocomplete="off" required>
+        <button class="auge" id="auge" type="button" aria-pressed="false" aria-label="Code anzeigen" title="Code anzeigen"><svg class="auf" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="zu" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20C5 20 1 12 1 12a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg></button>
+      </div>
       <button class="knopf" id="los" type="submit">Freischalten</button>
       <p class="fehler" id="fehler" aria-live="polite"></p>
     </form>
@@ -92,6 +100,14 @@ import { sitzung, tablettFreischalten, istRechteFehler } from "./js/zugang.js";
 import { leisteStarten } from "./js/leiste.js";
 const $ = (id) => document.getElementById(id);
 try { const t = localStorage.getItem("hkh-thema"); document.documentElement.dataset.theme = (t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light"; } catch (e) {}
+/* Auge: Code zum Nachsehen sichtbar machen */
+$("auge").addEventListener("click", () => {
+  const sichtbar = $("code").type === "password";
+  $("code").type = sichtbar ? "text" : "password";
+  $("auge").setAttribute("aria-pressed", String(sichtbar));
+  const t = sichtbar ? "Code verbergen" : "Code anzeigen";
+  $("auge").setAttribute("aria-label", t); $("auge").title = t;
+});
 function zeigen(s) {
   $("pruefung").hidden = true;
   $("start").hidden = !s;
@@ -103,7 +119,7 @@ $("form").addEventListener("submit", async (e) => {
   $("los").disabled = true;
   $("fehler").textContent = "";
   try {
-    const s = await tablettFreischalten($("code").value.trim(), $("name").value.trim());
+    const s = await tablettFreischalten($("code").value.trim());
     $("code").value = "";
     if (!s) throw new Error("nicht freigeschaltet");
     zeigen(s);
