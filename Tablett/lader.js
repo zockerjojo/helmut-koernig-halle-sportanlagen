@@ -4,6 +4,8 @@
   var SEITEN = { Dienstplan: 1, Arbeitsplan: 1, Reinigungsplan: 1 };
   var name = location.pathname.replace(/\.html$/, "").split("/").filter(Boolean).pop() || "";
   if (!SEITEN[name]) { location.replace("/Tablett/"); return; }
+  /* Direkt aufgerufen: in die Tablett-Hülle, damit die Adresse gleich bleibt und das Vollbild hält */
+  if (window.top === window) { location.replace("/Tablett/#" + name); return; }
   try {
     var Z = await import("../js/zugang.js");
     var s = await Z.sitzung();
