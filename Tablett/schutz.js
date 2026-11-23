@@ -1,4 +1,4 @@
-/* Pausenraum-Tablet: wird in jede Seite eingebunden, die in der Tablet-Hülle (/Tablet/) läuft.
+/* Personal-Tablet: wird in jede Seite eingebunden, die in der Tablet-Hülle (/Tablet/) läuft.
    Blendet alles zum Bearbeiten aus, gibt Antippen an die Hülle weiter (Vollbild, Bildschirm wach)
    und hält Links innerhalb der Hülle. Die Datenbank erlaubt dem Tablet ohnehin nur das Lesen. */
 (function () {
@@ -19,12 +19,17 @@
     /* Aufgaben und Arbeitsplan: Plan links, Aufgaben rechts, beide über die ganze Höhe */
     "html.tablett body:has(#listen-tafel) { overflow:hidden }",
     "html.tablett .wrap:has(#listen-tafel) { max-width:none !important; padding:12px !important }",
-    "html.tablett .wrap:has(#listen-tafel) > .kopf, html.tablett #panel:has(#listen-tafel) > h1, html.tablett #live-text, html.tablett #karten-hinweis { display:none !important }",
-    "html.tablett #panel:has(#listen-tafel):not([hidden]) { display:grid !important; grid-template-columns:minmax(0,1fr) minmax(340px,32%); grid-template-rows:auto minmax(0,1fr); column-gap:12px; row-gap:12px; height:calc(100vh - 24px); padding-top:0 !important; margin:0 !important }",
+    "html.tablett .wrap:has(#listen-tafel) > .kopf, html.tablett #live-text, html.tablett #karten-hinweis { display:none !important }",
+    "html.tablett #panel:has(#listen-tafel):not([hidden]) { display:grid !important; grid-template-columns:minmax(0,1fr) minmax(340px,32%); grid-template-rows:auto auto minmax(0,1fr); column-gap:12px; row-gap:10px; height:calc(100vh - 24px); padding-top:0 !important; margin:0 !important }",
+    /* Überschriften auf dem Tablet wie beim Dienstplan ("Dienstplan HKH") */
+    "html.tablett #panel:has(#listen-tafel) > h1, html.tablett #app .top h1 { font-family:Barlow, system-ui, -apple-system, 'Segoe UI', sans-serif !important; font-weight:500 !important; font-size:28px !important; line-height:1.15 !important; text-transform:none !important; letter-spacing:0 !important }",
+    "html.tablett #panel:has(#listen-tafel) > h1 { grid-column:1 / -1; grid-row:1 }",
+    /* Reinigungsplan: Logo und Hallenname unter der Leiste weg */
+    "html.tablett #app .top .brand .hkh-kopf { display:none !important }",
     "html.tablett #panel:has(#listen-tafel) > * { margin:0 !important }",
-    "html.tablett #panel > #map { grid-column:1; grid-row:1 / span 2; position:relative !important; top:auto !important; height:100% !important; max-height:none !important; aspect-ratio:auto !important; min-height:0 }",
-    "html.tablett #panel > #tafel { grid-column:2; grid-row:1; max-height:45vh; overflow:auto }",
-    "html.tablett #panel > #listen-tafel { grid-column:2; grid-row:2; max-height:none !important; height:100%; overflow:auto !important }",
+    "html.tablett #panel > #map { grid-column:1; grid-row:2 / span 2; position:relative !important; top:auto !important; height:100% !important; max-height:none !important; aspect-ratio:auto !important; min-height:0 }",
+    "html.tablett #panel > #tafel { grid-column:2; grid-row:2; max-height:45vh; overflow:auto }",
+    "html.tablett #panel > #listen-tafel { grid-column:2; grid-row:3; max-height:none !important; height:100%; overflow:auto !important }",
     "html.tablett #panel > #filter-tafel { display:none !important }",
     /* Reinigungsplan */
     "html.tablett .ctl .who, html.tablett #art-sl, html.tablett #dir-sw, html.tablett .ctl .seg,",
