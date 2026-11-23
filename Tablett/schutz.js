@@ -12,14 +12,20 @@
     /* überall: keine Personal-Leiste, Logo ohne Link-Gefühl */
     "html.tablett .hkh-leiste { display:none !important }",
     "html.tablett body { padding-bottom:16px !important }",
+    "html.tablett body:has(#listen-tafel) { padding:0 !important }",
     /* Aufgaben und Arbeitsplan: nur ansehen, Karte groß, darunter alle Aufgaben */
     "html.tablett #w-aufgabe, html.tablett #w-pfeil, html.tablett #d-bearbeiten, html.tablett #d-erledigt,",
     "html.tablett #d-loeschen, html.tablett #d-rueckfrage, html.tablett .leiste[aria-label=\"Werkzeug\"], html.tablett .feld:has(#ich-wahl) { display:none !important }",
-    "html.tablett .wrap { max-width:none !important }",
-    "html.tablett #panel { display:block !important }",
-    "html.tablett #panel > #map { position:relative !important; top:auto !important; max-height:none !important; aspect-ratio:auto !important; height:calc(100vh - 110px) !important; min-height:420px }",
-    "html.tablett #panel > #listen-tafel { max-height:none !important; overflow:visible !important; margin-top:16px }",
-    "html.tablett #panel > #tafel, html.tablett #panel > #filter-tafel { margin-top:12px }",
+    /* Aufgaben und Arbeitsplan: Plan links, Aufgaben rechts, beide über die ganze Höhe */
+    "html.tablett body:has(#listen-tafel) { overflow:hidden }",
+    "html.tablett .wrap:has(#listen-tafel) { max-width:none !important; padding:12px !important }",
+    "html.tablett .wrap:has(#listen-tafel) > .kopf, html.tablett #panel:has(#listen-tafel) > h1, html.tablett #live-text, html.tablett #karten-hinweis { display:none !important }",
+    "html.tablett #panel:has(#listen-tafel):not([hidden]) { display:grid !important; grid-template-columns:minmax(0,1fr) minmax(340px,32%); grid-template-rows:auto minmax(0,1fr); column-gap:12px; row-gap:12px; height:calc(100vh - 24px); padding-top:0 !important; margin:0 !important }",
+    "html.tablett #panel:has(#listen-tafel) > * { margin:0 !important }",
+    "html.tablett #panel > #map { grid-column:1; grid-row:1 / span 2; position:relative !important; top:auto !important; height:100% !important; max-height:none !important; aspect-ratio:auto !important; min-height:0 }",
+    "html.tablett #panel > #tafel { grid-column:2; grid-row:1; max-height:45vh; overflow:auto }",
+    "html.tablett #panel > #listen-tafel { grid-column:2; grid-row:2; max-height:none !important; height:100%; overflow:auto !important }",
+    "html.tablett #panel > #filter-tafel { display:none !important }",
     /* Reinigungsplan */
     "html.tablett .ctl .who, html.tablett #art-sl, html.tablett #dir-sw, html.tablett .ctl .seg,",
     "html.tablett #open-reset, html.tablett #undo, html.tablett #redo, html.tablett #note-list button { display:none !important }",
