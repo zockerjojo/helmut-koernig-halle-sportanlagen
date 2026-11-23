@@ -253,6 +253,9 @@ a.ghost{display:flex;align-items:center;justify-content:center;gap:2px;color:var
 #app .top .brand{flex-direction:column; align-items:flex-start; gap:8px}
 #app .top h1{font-size:clamp(32px, 8vw, 44px); white-space:normal; flex:none; overflow:visible}
 @media (max-height:520px){ #app .top h1{font-size:22px} #app .top .brand{flex-direction:row; align-items:center; gap:12px} }
+/* Die Knöpfe zum Zoomen und Drehen liegen in einer Leiste unter dem Plan, nicht mehr darauf */
+#svg{top:0 !important;bottom:auto !important;height:calc(100% - 54px) !important}
+.zoom,.map.zrow .zoom{position:absolute;left:0 !important;right:0;bottom:0;top:auto;height:54px;flex-direction:row !important;justify-content:flex-end !important;align-items:center;gap:6px;padding:0 8px;border-top:1px solid var(--line);background:var(--panel)}
 </style>
 </head>
 <body>
@@ -862,7 +865,7 @@ function orient(){
   applyView();
 }
 function applyView(){
-  var r=map.getBoundingClientRect();if(r.width<2||r.height<2)return;
+  var r=svg.getBoundingClientRect();if(r.width<2||r.height<2)return;
   var ca=r.width/r.height,wa=OW/OH,bw,bh;
   if(ca>wa){bh=OH*1.03;bw=bh*ca}else{bw=OW*1.03;bh=bw/ca}
   V.z=clamp(V.z,1,10);
@@ -899,7 +902,7 @@ function zoomAt(x,y,z){
   var a=toOuter(x,y);V.z=z;applyView();
   var b=toOuter(x,y);V.cx+=a.x-b.x;V.cy+=a.y-b.y;applyView();
 }
-function zoomBtn(f){var r=map.getBoundingClientRect();zoomAt(r.left+r.width/2,r.top+r.height/2,V.z*f)}
+function zoomBtn(f){var r=svg.getBoundingClientRect();zoomAt(r.left+r.width/2,r.top+r.height/2,V.z*f)}
 $("z-in").addEventListener("click",function(){zoomBtn(1.5)});
 $("z-out").addEventListener("click",function(){zoomBtn(1/1.5)});
 $("z-fit").addEventListener("click",function(){V.z=1;V.cx=OW/2;V.cy=OH/2;applyView()});

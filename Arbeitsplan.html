@@ -191,6 +191,13 @@ textarea{resize:vertical; line-height:1.35}
 .bild-gross-flaeche img{max-width:100%; max-height:100%; object-fit:contain}
 .anhang-marke{display:inline-flex; vertical-align:-3px; margin-left:4px}
 .anhang-marke svg{width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+/* Ebene und Zoom liegen in einer Leiste unter dem Plan, nicht mehr darauf */
+#svg{top:0 !important; bottom:auto !important; height:calc(100% - 54px) !important}
+.zoom{left:0; right:0; bottom:0; top:auto; height:54px; flex-direction:row; justify-content:flex-end; align-items:center; gap:6px; padding:0 8px; border-top:1px solid var(--line); background:var(--panel)}
+.etagen{flex-direction:row; width:auto; margin:0 auto 0 0}
+.etagen-knauf{left:3px; right:auto; top:3px; bottom:3px; width:calc(50% - 3px); height:auto; transform:translateX(100%)}
+.etagen[data-etage="aussen"] .etagen-knauf{transform:translateX(0)}
+.eb{width:44px; height:34px}
 </style>
 </head>
 <body>
@@ -549,7 +556,7 @@ const klemm = (w, min, max) => Math.min(max, Math.max(min, w));
 const ZOOM_MIN = 0.5, ZOOM_MAX = 8, UMGEBUNG = 1;
 let sicht = { x: PLAN.x, y: PLAN.y, w: PLAN.w, h: PLAN.h };
 function ansichtSetzen() {
-  const r = map.getBoundingClientRect();
+  const r = svg.getBoundingClientRect();
   if (r.width < 2 || r.height < 2) return;
   const ca = r.width / r.height, wa = PLAN.w / PLAN.h;
   let bw, bh;
@@ -563,7 +570,7 @@ function ansichtSetzen() {
 }
 /* Wie viele Planeinheiten sind ein Bildschirmpixel? Daraus ergeben sich Trefferflächen und Schriftgrößen. */
 function proPixel() {
-  const r = map.getBoundingClientRect();
+  const r = svg.getBoundingClientRect();
   return r.width > 2 ? sicht.w / r.width : 1;
 }
 function zuWelt(klientX, klientY) {
@@ -584,7 +591,7 @@ function zoomAuf(klientX, klientY, z) {
   zeichnePlan();
 }
 function zoomKnopf(faktor) {
-  const r = map.getBoundingClientRect();
+  const r = svg.getBoundingClientRect();
   zoomAuf(r.left + r.width / 2, r.top + r.height / 2, V.z * faktor);
 }
 $("z-rein").addEventListener("click", () => zoomKnopf(1.6));

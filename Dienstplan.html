@@ -43,6 +43,8 @@ h1{margin:22px 0 4px; font-family:var(--display); font-weight:600; font-size:cla
 .knopf svg{width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
 button:focus-visible, a:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
 .leiste{display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:16px 0 12px}
+.titelzeile{display:flex; flex-wrap:wrap; align-items:center; gap:12px 20px; margin:22px 0 14px}
+.titelzeile h1{margin:0}
 .monat{display:flex; align-items:center; gap:6px; background:var(--panel); border:1px solid var(--line); border-radius:999px; padding:4px}
 .monat button{width:38px; height:38px; border-radius:50%; border:0; background:none; color:var(--ink); font-size:22px; line-height:1; cursor:pointer}
 .monat button:hover{background:color-mix(in srgb, var(--ink) 8%, transparent)}
@@ -80,10 +82,11 @@ table.plan{border-collapse:separate; border-spacing:0; width:100%; min-width:900
 .plan td.kz.kurz{font-weight:700}
 .plan td.kz.ftg{font-weight:700; letter-spacing:.02em}
 .plan input.feld::placeholder{color:var(--ink-2); opacity:.8; font-weight:700}
-.plan .zeit{width:100px; min-width:100px; max-width:100px}
+.plan .zeit{width:112px; min-width:112px; max-width:112px}
 /* Spalten mit "von / bis" (wie bei Pap): beide Hälften gleich breit, wie auf dem Papier */
 .plan .vb{width:64px; min-width:64px; max-width:64px}
-.plan .ver{min-width:320px}
+/* Veranstaltung nimmt den restlichen Platz; zu lange Texte enden mit … (im Druck vollständig) */
+.plan .ver{width:100%; max-width:1px}
 .plan th.ich,.plan td.ich{background:var(--ich)}
 .plan tr.we td.ich{background:color-mix(in srgb, var(--ich) 55%, var(--wochenende))}
 .plan th.ich{color:var(--accent)}
@@ -122,6 +125,7 @@ html.tablett .leiste{margin:8px 0 6px}
 html.tablett .druckkopf{display:flex; align-items:center; margin:8px 0 8px}
 html.tablett #druck-monat{display:none}
 html.tablett .leiste{display:none !important}
+html.tablett .titelzeile{display:none !important}
 html.tablett .druckkopf .monat strong{font-family:var(--body); font-weight:500; font-size:28px; text-transform:none; min-width:0; padding:0 6px}
 html.tablett .druckkopf .monat{padding:2px}
 html.tablett .rahmen{overflow:hidden}
@@ -135,7 +139,7 @@ html.tablett table.plan{min-width:0}
   body{background:#FFF; font-size:11px}
   /* Wochenenden und Feiertage auch im Druck grau: Hintergründe immer mitdrucken */
   *{-webkit-print-color-adjust:exact !important; print-color-adjust:exact !important}
-  .nicht-drucken,.kopf,.leiste,.hinweis,h1,.muted,.weg-sp,tfoot,.neu-spalte,.speicher-leiste,.hkh-leiste,.leer{display:none !important}
+  .nicht-drucken,.titelzeile,.kopf,.leiste,.hinweis,h1,.muted,.weg-sp,tfoot,.neu-spalte,.speicher-leiste,.hkh-leiste,.leer{display:none !important}
   body.mit-speichern,body.hkh-mit-leiste{padding:0 !important}
   .wrap{max-width:none; padding:0}
   .druckkopf{display:flex !important}
@@ -178,19 +182,12 @@ html.tablett table.plan{min-width:0}
 </section>
 
 <section id="panel" hidden>
-  <h1>Dienstplan</h1>
-  <p class="muted" id="unter"></p>
-
-  <div class="leiste nicht-drucken">
-    <div class="monat"><button type="button" id="monat-zurueck" aria-label="Vormonat" title="Vormonat">‹</button><strong id="monat-name">–</strong><button type="button" id="monat-vor" aria-label="Nächster Monat" title="Nächster Monat">›</button></div>
-    <div class="schalter" id="modus" role="group" aria-label="Ansicht" hidden>
-      <button type="button" data-modus="ansehen" aria-pressed="true">Ansehen</button>
-      <button type="button" data-modus="bearbeiten" aria-pressed="false">Bearbeiten</button>
-    </div>
-    <div class="zoom" role="group" aria-label="Tabelle vergrößern oder verkleinern"><button type="button" id="zoom-aus" aria-label="Verkleinern" title="Verkleinern">−</button><output id="zoom-wert" title="Zurück auf 100 %">100 %</output><button type="button" id="zoom-ein" aria-label="Vergrößern" title="Vergrößern">+</button></div>
-    <button class="knopf primaer" type="button" id="drucken"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 17h2a2 2 0 0 0 2 -2v-4a2 2 0 0 0 -2 -2h-14a2 2 0 0 0 -2 2v4a2 2 0 0 0 2 2h2" /><path d="M17 9v-4a2 2 0 0 0 -2 -2h-6a2 2 0 0 0 -2 2v4" /><path d="M7 15a2 2 0 0 1 2 -2h6a2 2 0 0 1 2 2v4a2 2 0 0 1 -2 2h-6a2 2 0 0 1 -2 -2l0 -4" /></svg>Drucken / PDF</button>
+  <div class="titelzeile">
+    <h1>Dienstplan</h1>
+    <div class="monat nicht-drucken"><button type="button" id="monat-zurueck" aria-label="Vormonat" title="Vormonat">‹</button><strong id="monat-name">–</strong><button type="button" id="monat-vor" aria-label="Nächster Monat" title="Nächster Monat">›</button></div>
   </div>
-  <p class="hinweis" id="hinweis"></p>
+  <p class="muted" id="unter" hidden></p>
+  <p class="hinweis" id="hinweis" hidden></p>
 
   <div class="druckkopf"><b id="druck-titel">Dienstplan HKH</b><b id="druck-monat"></b></div>
   <div class="leer" id="leer" hidden>
@@ -201,6 +198,16 @@ html.tablett table.plan{min-width:0}
   <div id="plan-bereich" hidden>
     <div class="rahmen" id="rahmen"><table class="plan" id="plan"></table></div>
     <p class="stand" id="stand"></p>
+  </div>
+
+  <!-- Ansehen/Bearbeiten, Tabellengröße und Drucken unter der Tabelle -->
+  <div class="leiste nicht-drucken">
+    <div class="schalter" id="modus" role="group" aria-label="Ansicht" hidden>
+      <button type="button" data-modus="ansehen" aria-pressed="true">Ansehen</button>
+      <button type="button" data-modus="bearbeiten" aria-pressed="false">Bearbeiten</button>
+    </div>
+    <div class="zoom" role="group" aria-label="Tabelle vergrößern oder verkleinern"><button type="button" id="zoom-aus" aria-label="Verkleinern" title="Verkleinern">−</button><output id="zoom-wert" title="Zurück auf 100 %">100 %</output><button type="button" id="zoom-ein" aria-label="Vergrößern" title="Vergrößern">+</button></div>
+    <button class="knopf primaer" type="button" id="drucken"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 17h2a2 2 0 0 0 2 -2v-4a2 2 0 0 0 -2 -2h-14a2 2 0 0 0 -2 2v4a2 2 0 0 0 2 2h2" /><path d="M17 9v-4a2 2 0 0 0 -2 -2h-6a2 2 0 0 0 -2 2v4" /><path d="M7 15a2 2 0 0 1 2 -2h6a2 2 0 0 1 2 2v4a2 2 0 0 1 -2 2h-6a2 2 0 0 1 -2 -2l0 -4" /></svg>Drucken / PDF</button>
   </div>
 </section>
 </div>
@@ -497,6 +504,31 @@ $("modus").addEventListener("click", (e) => {
 const uhr = (t) => { const z = t.replace(/[^0-9]/g, ""); if (!z) return ""; const s = z.length <= 2 ? z.padStart(2, "0") + "00" : z.padStart(4, "0").slice(0, 4); return String(Math.min(23, +s.slice(0, 2))).padStart(2, "0") + ":" + String(Math.min(59, +s.slice(2))).padStart(2, "0"); };
 const istZeit = (t) => /^\s*\d{1,2}([:.]?\d{2})?\s*(-|–|bis)\s*\d{1,2}([:.]?\d{2})?\s*$/.test(t) || /^\s*\d{1,2}[:.]\d{2}\s*$/.test(t);
 const plan = $("plan");
+/* Ein Schichtkürzel (z. B. F oder M) in einer F/M-Spalte gilt gleich für die ganze Woche:
+   Montag bis Freitag derselben Woche, ohne Wochenenden und Feiertage. Überschrieben werden
+   nur leere Felder und andere Kürzel, keine längeren Einträge. */
+function wocheFuellen(ri, sp, wert) {
+  if (!PLAN || !/^[A-Za-zÄÖÜäöü]{1,2}$/.test(wert)) return;
+  if (!/F\s*\/\s*M/i.test(PLAN.spalten[sp]?.a ?? "")) return;
+  const tagVon = (r) => { const m = /^\s*(\d{1,2})\.?\s*$/.exec(r?.nr ?? ""); return m ? +m[1] : 0; };
+  const t = tagVon(PLAN.zeilen[ri]);
+  if (!t) return;
+  const [j, mo] = MONAT.split("-").map(Number);
+  const montag = t - ((new Date(j, mo - 1, t).getDay() + 6) % 7);
+  let geaendertHier = false;
+  PLAN.zeilen.forEach((r, i) => {
+    const tg = tagVon(r);
+    if (i === ri || !tg || tg < montag || tg > montag + 4 || r.grau || feiertagVon(MONAT, r.nr)) return;
+    const alt = (r.z[sp]?.[0] ?? "").trim();
+    if (alt && !/^[A-Za-zÄÖÜäöü]{1,2}$/.test(alt)) return;
+    if (alt === wert) return;
+    r.z[sp][0] = wert;
+    geaendertHier = true;
+    const feld = plan.querySelector(`[data-z="${i}"][data-sp="${sp}"][data-teil="0"]`);
+    if (feld) { feld.value = wert; feld.classList.add("kurz"); }
+  });
+  if (geaendertHier && !GEAENDERT) geaendert();
+}
 plan.addEventListener("input", () => { if (!GEAENDERT) geaendert(); });
 plan.addEventListener("focusout", (e) => {
   const f = e.target; if (!f.classList?.contains("feld") || !PLAN) return;
@@ -510,6 +542,7 @@ plan.addEventListener("focusout", (e) => {
   else if (d.z !== undefined) PLAN.zeilen[+d.z][d.teil] = f.value;
   else if (d.sp !== undefined) PLAN.spalten[+d.sp][d.teil] = f.value;
   if (d.teil === "0") f.classList.toggle("kurz", f.value.trim().length <= 2);
+  if (d.teil === "0" && d.z !== undefined && d.sp !== undefined) wocheFuellen(+d.z, +d.sp, f.value.trim());
 });
 plan.addEventListener("click", (e) => {
   if (!PLAN) return;
