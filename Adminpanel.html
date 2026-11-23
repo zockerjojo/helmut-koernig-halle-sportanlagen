@@ -120,7 +120,7 @@ details.sicher > summary::-webkit-details-marker{display:none}
 .balken-strich{display:block; height:100%; min-width:3px; border-radius:999px; background:var(--accent)}
 .balken-zahl{text-align:right; font-variant-numeric:tabular-nums}
 .rueckfrage{border:1px solid var(--fehler); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; font-size:14px}
-/* Am PC: Besucher und Sicherungen links, Benutzer und Formular rechts daneben */
+/* Am PC: Besucher links, Benutzer und Formular rechts daneben, Sicherungen ganz unten */
 @media (min-width:1100px){
   .wrap{max-width:1280px}
   #panel{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.25fr); column-gap:24px; row-gap:20px; align-items:start}
@@ -185,32 +185,7 @@ details.sicher > summary::-webkit-details-marker{display:none}
       <div class="balken" id="besucher-tage"></div>
     </section>
 
-    <section class="karte" id="k-sicher">
-      <div class="kopfzeile">
-        <div>
-          <h2>Sicherungen</h2>
-          <p class="notfall">Nur für den Notfall. Jede Nacht um 0 Uhr, die sieben neuesten bleiben.</p>
-        </div>
-        <details class="sicher">
-          <summary class="knopf klein">Sicherungen öffnen</summary>
-          <div style="min-width:min(520px,78vw)">
-            <div class="sich" id="sicherungen"></div>
-            <p class="muted" id="sicherungen-leer" hidden>Noch keine Sicherung vorhanden.</p>
-            <p class="meldung" id="sicherung-meldung" aria-live="polite"></p>
-            <div class="aktionen" style="margin-top:10px">
-              <button class="knopf klein" id="jetzt-sichern" type="button">Jetzt sichern</button>
-            </div>
-          </div>
-        </details>
-      </div>
-    </section>
 
-    <section class="karte" id="k-tablett">
-      <h2>Pausenraum-Tablett</h2>
-      <p class="muted">Ein Tablett zeigt Dienstplan, Aufgaben und Reinigungsplan ohne Code, nur zum Ansehen. Zum Freischalten auf dem Tablett die Seite <strong>/Tablett</strong> öffnen und einmal den Admin-Code eingeben.</p>
-      <div class="sich" id="tabletts" style="margin-top:8px"></div>
-      <p class="muted" id="tabletts-leer">Noch kein Tablett freigeschaltet.</p>
-    </section>
     </div>
 
     <div class="spalte" id="spalte-rechts">
@@ -250,6 +225,26 @@ details.sicher > summary::-webkit-details-marker{display:none}
       </div>
     </form>
     </div>
+
+    <section class="karte" id="k-sicher" style="grid-column:1 / -1">
+      <div class="kopfzeile">
+        <div>
+          <h2>Sicherungen</h2>
+          <p class="notfall">Nur für den Notfall. Jede Nacht um 0 Uhr, die sieben neuesten bleiben.</p>
+        </div>
+        <details class="sicher">
+          <summary class="knopf klein">Sicherungen öffnen</summary>
+          <div style="min-width:min(520px,78vw)">
+            <div class="sich" id="sicherungen"></div>
+            <p class="muted" id="sicherungen-leer" hidden>Noch keine Sicherung vorhanden.</p>
+            <p class="meldung" id="sicherung-meldung" aria-live="polite"></p>
+            <div class="aktionen" style="margin-top:10px">
+              <button class="knopf klein" id="jetzt-sichern" type="button">Jetzt sichern</button>
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
   </section>
 </div>
 
@@ -341,7 +336,6 @@ function horchen() {
   onValue(ref(db, "geraete"), (s) => { geraete = s.val() ?? {}; zeichneListe(); }, fehlerAnzeigen);
   onValue(ref(db, "sicherungen"), (s) => { sicherungen = s.val() ?? {}; zeichneSicherungen(); }, () => {});
   onValue(ref(db, "besuche"), (s) => zeichneBesucher(s.val() ?? {}), () => {});
-  onValue(ref(db, "tabletts"), (s) => zeichneTabletts(s.val() ?? {}), () => {});
 }
 
 /* ---- Benutzerliste ---- */
@@ -612,25 +606,6 @@ function zeitText(ts) {
   return d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" }) + ", " +
          d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
 }
-/* Freigeschaltete Pausenraum-Tabletts: Entfernen sperrt das Tablett sofort aus. */
-function zeichneTabletts(liste) {
-  const reihe = Object.entries(liste).sort((a, b) => (a[1]?.seit ?? 0) - (b[1]?.seit ?? 0));
-  $("tabletts-leer").hidden = reihe.length > 0;
-  $("tabletts").innerHTML = reihe.map(([uid, t]) =>
-    `<div class="sz">
-      <span><strong>${esc(t?.name || "Tablett")}</strong></span>
-      <span class="wann">seit ${esc(zeitText(t?.seit))}</span>
-      <button class="knopf klein" type="button" data-tablett-weg="${esc(uid)}">Entfernen</button>
-    </div>`).join("");
-}
-$("tabletts").addEventListener("click", async (e) => {
-  const k = e.target.closest("[data-tablett-weg]");
-  if (!k) return;
-  if (!confirm("Dieses Tablett entfernen? Es zeigt dann nichts mehr an, bis es neu freigeschaltet wird.")) return;
-  try { await remove(ref(db, `tabletts/${k.dataset.tablettWeg}`)); }
-  catch (err) { console.error(err); alert("Das hat nicht geklappt."); }
-});
-
 function zeichneSicherungen() {
   const reihe = Object.entries(sicherungen).sort((a, b) => b[0].localeCompare(a[0]));
   $("sicherungen-leer").hidden = reihe.length > 0;

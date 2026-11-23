@@ -60,8 +60,9 @@ button:focus-visible, a:focus-visible{outline:3px solid var(--accent); outline-o
 
 /* Die Tabelle wie der Papierplan: alle Zeilen gleich hoch */
 .rahmen{background:var(--panel); border:1px solid var(--line); border-radius:14px; overflow:auto; -webkit-overflow-scrolling:touch}
-table.plan{border-collapse:separate; border-spacing:0; width:100%; min-width:900px; font-size:14px; font-variant-numeric:tabular-nums}
-.plan th,.plan td{border:0; border-right:1px solid var(--line); border-bottom:1px solid var(--line); padding:0 6px; text-align:center; white-space:nowrap; height:32px; line-height:31px; overflow:hidden; text-overflow:ellipsis}
+/* Zeilen im gleichen Verhältnis wie auf dem Papierplan: Zeilenhöhe etwa 1,7 x Schriftgröße */
+table.plan{border-collapse:separate; border-spacing:0; width:100%; min-width:900px; font-size:15px; font-variant-numeric:tabular-nums}
+.plan th,.plan td{border:0; border-right:1px solid var(--line); border-bottom:1px solid var(--line); padding:0 6px; text-align:center; white-space:nowrap; height:26px; line-height:25px; overflow:hidden; text-overflow:ellipsis}
 .plan thead th{background:var(--panel); font-weight:600}
 .plan thead tr:nth-child(2) th{font-weight:500; color:var(--ink-2); font-size:13px}
 .plan .nr{width:38px; min-width:38px; text-align:right; color:var(--ink-2)}
@@ -77,7 +78,11 @@ table.plan{border-collapse:separate; border-spacing:0; width:100%; min-width:900
 .plan tbody tr.heute td.nr,.plan tbody tr.heute td.tag{font-weight:700; color:var(--accent)}
 .plan .kz{width:58px; min-width:58px}
 .plan td.kz.kurz{font-weight:700}
+.plan td.kz.ftg{font-weight:700; letter-spacing:.02em}
+.plan input.feld::placeholder{color:var(--ink-2); opacity:.8; font-weight:700}
 .plan .zeit{min-width:110px}
+/* Spalten mit "von / bis" (wie bei Pap): beide Hälften gleich breit, wie auf dem Papier */
+.plan .vb{width:64px; min-width:64px; max-width:64px}
 .plan .ver{min-width:320px; max-width:560px}
 .plan th.ich,.plan td.ich{background:var(--ich)}
 .plan tr.we td.ich{background:color-mix(in srgb, var(--ich) 55%, var(--wochenende))}
@@ -86,7 +91,7 @@ table.plan{border-collapse:separate; border-spacing:0; width:100%; min-width:900
 .stand{text-align:right; font-size:13px; color:var(--ink-2); margin:6px 4px 0}
 
 /* Bearbeiten wie in Excel: jedes Feld ist direkt beschreibbar */
-.plan input.feld{width:100%; height:30px; border:0; border-radius:0; padding:0 4px; margin:0; background:transparent; text-align:center; font:inherit; color:var(--ink); outline:none}
+.plan input.feld{width:100%; height:25px; border:0; border-radius:0; padding:0 4px; margin:0; background:transparent; text-align:center; font:inherit; color:var(--ink); outline:none}
 .plan input.feld:focus{background:var(--fokus); box-shadow:inset 0 0 0 2px var(--accent)}
 .plan td:has(> input.feld),.plan th:has(> input.feld){padding:0}
 .plan input.feld.links{text-align:left}
@@ -111,6 +116,12 @@ table.plan{border-collapse:separate; border-spacing:0; width:100%; min-width:900
 body.mit-speichern{padding-bottom:calc(var(--hkh-leiste-h, 62px) + 90px + env(safe-area-inset-bottom))}
 
 .druckkopf{display:none; justify-content:space-between; align-items:baseline; margin:0 0 4px}
+html.tablett h1, html.tablett #unter, html.tablett #hinweis, html.tablett #drucken, html.tablett .zoom, html.tablett .kopf{display:none !important}
+html.tablett .wrap{max-width:none; padding:0 12px 12px}
+html.tablett .leiste{margin:8px 0 6px}
+html.tablett .druckkopf{display:flex}
+html.tablett .rahmen{overflow:hidden}
+html.tablett table.plan{min-width:0}
 .druckkopf b{font-size:28px; font-weight:500}
 
 /* Drucken: A4 quer, sieht aus wie der Aushang */
@@ -131,7 +142,8 @@ body.mit-speichern{padding-bottom:calc(var(--hkh-leiste-h, 62px) + 90px + env(sa
   .plan tbody tr:last-child > *{border-bottom:0}
   .plan th.nr,.plan td.nr,.plan th.tag,.plan td.tag{position:static; box-shadow:none}
   table.plan{zoom:1 !important}
-  .plan .ver{min-width:0; max-width:none}
+  .plan .ver{min-width:0; max-width:none; width:30%}
+  .plan thead tr:nth-child(2) th{font-size:inherit}
   .plan tbody tr.heute td.nr,.plan tbody tr.heute td.tag,.plan th.ich{color:#000; font-weight:inherit}
   .stand{color:#000}
   tr{break-inside:avoid}
@@ -327,7 +339,10 @@ function zeichne() {
   });
   h += `<th class="ver">${k(P.kopf.ver, "ver")}</th>${B ? `<th class="neu-spalte" rowspan="2"><button class="knopf klein" type="button" id="spalte-neu">+ Spalte</button></th>` : ""}</tr>`;
   h += `<tr>${B ? `<th class="weg-sp"></th>` : ""}<th class="nr"></th><th class="tag">${k(P.kopf.datum, "datum", "links")}</th>`;
-  S.forEach((sp, i) => { h += `<th class="kz${ich(i)}">${B ? feld(sp.a, `data-sp="${i}" data-teil="a"`) : esc(sp.a)}</th><th class="zeit${ich(i)}">${B ? feld(sp.b, `data-sp="${i}" data-teil="b"`) : esc(sp.b)}</th>`; });
+  /* Klassen der beiden Hälften: F/M schmal + Uhrzeit breit, sonst (von/bis) zwei gleich breite */
+  const fm = (sp) => /F\s*\/\s*M/i.test(sp.a) || !/von|bis/i.test(sp.a + sp.b);
+  const KA = S.map((sp) => (fm(sp) ? "kz" : "vb")), KB = S.map((sp) => (fm(sp) ? "zeit" : "vb"));
+  S.forEach((sp, i) => { h += `<th class="${KA[i]}${ich(i)}">${B ? feld(sp.a, `data-sp="${i}" data-teil="a"`) : esc(sp.a)}</th><th class="${KB[i]}${ich(i)}">${B ? feld(sp.b, `data-sp="${i}" data-teil="b"`) : esc(sp.b)}</th>`; });
   h += `<th class="ver"></th></tr></thead><tbody>`;
   P.zeilen.forEach((r, ri) => {
     const ft = feiertagVon(MONAT, r.nr);
@@ -338,8 +353,12 @@ function zeichne() {
     S.forEach((sp, i) => {
       const [a, b] = r.z[i] ?? ["", ""];
       const kurz = a.trim().length <= 2 ? "kurz" : "";
-      h += B ? `<td class="kz${ich(i)}">${feld(a, `data-z="${ri}" data-sp="${i}" data-teil="0"`, kurz)}</td><td class="zeit${ich(i)}">${feld(b, `data-z="${ri}" data-sp="${i}" data-teil="1"`)}</td>`
-             : `<td class="kz${ich(i)} ${kurz}">${esc(a)}</td><td class="zeit${ich(i)}">${esc(b)}</td>`;
+      /* Feiertag: in den F/M-Spalten steht FTG, solange dort nichts anderes eingetragen ist */
+      const ftg = ft && !a.trim() && /F\s*\/\s*M/i.test(sp.a);
+      if (ftg && !B) { h += `<td class="kz ftg${ich(i)}" title="${esc(ft)}">FTG</td><td class="zeit${ich(i)}">${esc(b)}</td>`; return; }
+      if (ftg && B) { h += `<td class="kz${ich(i)}">${feld(a, `data-z="${ri}" data-sp="${i}" data-teil="0" placeholder="FTG"`, kurz)}</td><td class="zeit${ich(i)}">${feld(b, `data-z="${ri}" data-sp="${i}" data-teil="1"`)}</td>`; return; }
+      h += B ? `<td class="${KA[i]}${ich(i)}">${feld(a, `data-z="${ri}" data-sp="${i}" data-teil="0"`, KA[i] === "kz" ? kurz : "")}</td><td class="${KB[i]}${ich(i)}">${feld(b, `data-z="${ri}" data-sp="${i}" data-teil="1"`)}</td>`
+             : `<td class="${KA[i]}${ich(i)} ${KA[i] === "kz" ? kurz : ""}">${esc(a)}</td><td class="${KB[i]}${ich(i)}">${esc(b)}</td>`;
     });
     h += B ? `<td class="ver">${feld(r.ver, `data-z="${ri}" data-teil="ver"`)}</td></tr>` : `<td class="ver" title="${esc(r.ver)}">${esc(r.ver)}</td></tr>`;
   });
@@ -347,6 +366,7 @@ function zeichne() {
   if (B) h += `<tfoot><tr><td colspan="${4 + S.length * 2}"><button class="knopf klein" type="button" id="zeile-neu">+ Zeile</button><label class="grau-wahl"><input type="checkbox" id="neu-grau"> grau (Wochenende)</label></td></tr></tfoot>`;
   $("plan").innerHTML = h;
   $("druck-titel").textContent = P.titel;
+  if (window.HKH_TABLETT) requestAnimationFrame(einpassen);
   $("stand").textContent = P.stand ? `Stand: ${P.stand}` : "";
 }
 function hinweisZeigen() {
@@ -523,6 +543,19 @@ plan.addEventListener("keydown", (e) => {
 });
 $("drucken").addEventListener("click", () => { document.activeElement?.blur?.(); window.print(); });
 
+/* ---- Tablett: die ganze Tabelle passt immer genau auf den Bildschirm, so groß wie möglich ---- */
+function einpassen() {
+  if (!window.HKH_TABLETT || !PLAN) return;
+  const t = $("plan"), r = $("rahmen");
+  t.style.zoom = "1"; t.style.width = "";
+  const breite = r.clientWidth;
+  const hoehe = window.innerHeight - r.getBoundingClientRect().top - 28;   // Platz für "Stand"
+  const z = Math.max(0.5, Math.min(2.5, hoehe / t.scrollHeight));
+  t.style.width = `${breite / z}px`;
+  t.style.zoom = String(z);
+}
+window.addEventListener("resize", () => requestAnimationFrame(einpassen));
+
 /* ---- Heraus- und hineinzoomen: Knöpfe, Strg + Mausrad, zwei Finger ---- */
 let ZOOM = 1;
 try { ZOOM = Number(localStorage.getItem("hkh-dienstplan-zoom")) || 1; } catch (e) {}
@@ -533,7 +566,7 @@ function zoomSetzen(z, merken = true) {
   $("zoom-aus").disabled = ZOOM <= 0.4; $("zoom-ein").disabled = ZOOM >= 2;
   if (merken) try { localStorage.setItem("hkh-dienstplan-zoom", String(ZOOM)); } catch (e) {}
 }
-zoomSetzen(ZOOM, false);
+if (!window.HKH_TABLETT) zoomSetzen(ZOOM, false);
 $("zoom-aus").addEventListener("click", () => zoomSetzen(ZOOM - 0.1));
 $("zoom-ein").addEventListener("click", () => zoomSetzen(ZOOM + 0.1));
 $("zoom-wert").addEventListener("click", () => zoomSetzen(1));
