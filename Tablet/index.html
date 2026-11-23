@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<base href="../">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Pausenraum · Helmut-Körnig-Halle</title>
+<link rel="icon" type="image/png" href="./bilder/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9EDEA; --panel:#F7F9F7; --ink:#14201B; --ink-2:#55635C; --line:#C3CCC6;
+  --accent:#17694B; --on-accent:#FFFFFF; --fehler:#B3261E;
+  --display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --body:Barlow,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#0F1512; --panel:#18211C; --ink:#E7EEE9; --ink-2:#9BAAA1; --line:#33413A;
+  --accent:#4CC38A; --on-accent:#06150E; --fehler:#F2766B; color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:17px; line-height:1.4}
+.wrap{max-width:1100px; margin:0 auto; padding:24px 20px 120px}
+.kopf{display:flex; align-items:center; gap:12px}
+.kopf img{height:40px; width:auto}
+.marke{display:flex; flex-direction:column; gap:2px; font-size:14px; font-weight:500; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2); line-height:1.15}
+h1{margin:28px 0 6px; font-family:var(--display); font-weight:600; font-size:clamp(36px, 7vw, 56px); line-height:1; text-transform:uppercase}
+.muted{margin:0; color:var(--ink-2)}
+.kacheln{display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:16px; margin-top:28px}
+.kachel{display:flex; flex-direction:column; gap:14px; padding:26px; min-height:180px; border-radius:20px; border:1px solid var(--line); background:var(--panel); color:var(--ink); text-decoration:none}
+.kachel:hover,.kachel:focus-visible{border-color:var(--accent); outline:none; box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent)}
+.kachel svg{width:44px; height:44px; fill:none; stroke:var(--accent); stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round}
+.kachel strong{font-family:var(--display); font-weight:600; font-size:30px; text-transform:uppercase; line-height:1.05}
+.kachel span{color:var(--ink-2); font-size:15px}
+.karte{margin-top:28px; max-width:520px; padding:22px; border-radius:18px; border:1px solid var(--line); background:var(--panel)}
+label{display:block; font-weight:600; font-size:15px; margin:14px 0 6px}
+input{width:100%; font:inherit; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:var(--bg); color:var(--ink)}
+.code-feld{position:relative}
+.code-feld input{padding-right:52px}
+.auge{position:absolute; top:0; right:0; bottom:0; width:48px; display:flex; align-items:center; justify-content:center; border:0; background:none; color:var(--ink-2); cursor:pointer; border-radius:0 10px 10px 0}
+.auge svg{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+.auge .zu{display:none}
+.auge[aria-pressed="true"] .auf{display:none}
+.auge[aria-pressed="true"] .zu{display:block}
+.knopf{font:inherit; font-weight:600; min-height:46px; padding:8px 20px; border-radius:999px; border:1px solid var(--accent); background:var(--accent); color:var(--on-accent); cursor:pointer; margin-top:18px}
+.knopf:disabled{opacity:.6}
+html,body{height:100%}
+body{overflow:hidden}
+#huelle{position:fixed; inset:0; display:flex; flex-direction:column}
+#huelle[hidden]{display:none}
+.oben{flex:none; display:flex; align-items:center; justify-content:space-between; gap:12px; height:56px; padding:0 10px 0 16px; background:var(--panel); border-bottom:1px solid var(--line)}
+.knoepfe{display:flex; align-items:center; gap:6px}
+.sym{width:46px; height:44px; border-radius:12px; border:0; background:none; color:var(--ink); display:inline-flex; align-items:center; justify-content:center; padding:0; cursor:pointer; -webkit-tap-highlight-color:transparent}
+.sym:hover{background:color-mix(in srgb, var(--ink) 8%, transparent)}
+.sym[aria-current="page"]{background:var(--accent); color:var(--on-accent)}
+.sym svg{width:24px; height:24px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round}
+.trenn{width:1px; height:28px; background:var(--line); margin:0 4px}
+#rahmen-box{position:relative; flex:1 1 auto; min-height:0}
+.rahmen{position:absolute; inset:0; width:100%; height:100%; border:0; background:var(--bg)}
+.rahmen.weg{visibility:hidden; pointer-events:none}
+.mitte{display:flex; align-items:center; justify-content:center; height:100%}
+#freischalten{height:100%; overflow:auto}
+.fehler{color:var(--fehler); font-weight:600; min-height:1.4em; margin:10px 0 0}
+</style>
+</head>
+<body>
+<div id="pruefung" class="mitte"><p class="muted">Einen Moment …</p></div>
+
+<div id="huelle" hidden>
+  <header class="oben">
+    <span class="marke"><span>Helmut-Körnig-Halle</span><span>Pausenraum</span></span>
+    <nav class="knoepfe" aria-label="Seiten">
+      <button type="button" class="sym" data-seite="Reinigungsplan" title="Hallenreinigung" aria-label="Hallenreinigung"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 16.5v-3.5a2 2 0 0 1 2 -2h10.5l3.8 2.6a2 2 0 0 1 .7 1.5v1.4z" /> <path d="M5 18.5a1.8 1.8 0 1 0 3.6 0a1.8 1.8 0 1 0 -3.6 0" /> <path d="M16 18.5a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0 -3 0" /> <path d="M10.5 20h4" /> <path d="M7.5 3.3a1.3 1.3 0 1 0 2.6 0a1.3 1.3 0 1 0 -2.6 0" /> <path d="M8.8 5.5v3.5h3" /> <path d="M8.8 6.5l3.7 1.2" /> <path d="M13 11l1.6 -4.5" /> <path d="M13.4 6.2h2.6" /> <path d="M6 11v-3.5" /></svg></button>
+      <button type="button" class="sym" data-seite="Arbeitsplan" title="Aufgaben und Arbeitsplan" aria-label="Aufgaben und Arbeitsplan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5l2 -2" /> <path d="M4 4l7 7" /> <path d="M10.5 12.5l2 -2" /> <path d="M13.77 11.23l6.5 6.5a1.8 1.8 0 0 1 -2.54 2.54l-6.5 -6.5a1.8 1.8 0 0 1 2.54 -2.54z" /> <path d="M7.4 16.6l9.2 -9.2" /> <path d="M15.2 14.8l2.4 2.4" /> <path d="M18.99 2.74l.21 2.06l2.06 .21a2.8 2.8 0 1 1 -2.27 -2.27z" /> <path d="M5.01 21.26l-.21 -2.06l-2.06 -.21a2.8 2.8 0 1 1 2.27 2.27z" /></svg></button>
+      <button type="button" class="sym" data-seite="Dienstplan" title="Dienstplan" aria-label="Dienstplan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14z" /> <path d="M3 10h18" /> <path d="M10 3v18" /></svg></button>
+      <span class="trenn" aria-hidden="true"></span>
+      <button type="button" class="sym" id="thema" title="Hell oder dunkel" aria-label="Hell oder dunkel"></button>
+    </nav>
+  </header>
+  <div id="rahmen-box"></div>
+</div>
+
+<section id="freischalten" class="wrap" hidden>
+  <header class="kopf">
+    <img src="./bilder/logo.png" alt="Dortmunder Sportstätten" width="480" height="241">
+    <span class="marke"><span>Helmut-Körnig-Halle</span><span>Pausenraum</span></span>
+  </header>
+  <h1>Tablet freischalten</h1>
+  <p class="muted">Dieses Tablet ist noch nicht freigeschaltet. Ein Admin gibt hier einmal den Admin-Code ein. Danach zeigt das Tablet Aufgaben, Reinigungsplan und Dienstplan ohne Code an, nur zum Ansehen.</p>
+  <form class="karte" id="form" autocomplete="off">
+    <label for="code">Admin-Code</label>
+    <div class="code-feld">
+      <input id="code" type="password" autocomplete="off" required>
+      <button class="auge" id="auge" type="button" aria-pressed="false" aria-label="Code anzeigen" title="Code anzeigen"><svg class="auf" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="zu" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20C5 20 1 12 1 12a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg></button>
+    </div>
+    <button class="knopf" id="los" type="submit">Freischalten</button>
+    <p class="fehler" id="fehler" aria-live="polite"></p>
+  </form>
+</section>
+<script type="module">
+import { sitzung, tablettFreischalten, istRechteFehler } from "./js/zugang.js?v=1795471124";
+const $ = (id) => document.getElementById(id);
+const SONNE = `<path d="M8 12a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /> <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" />`, MOND = `<path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008" />`;
+const SEITEN = ["Reinigungsplan", "Arbeitsplan", "Dienstplan"];
+
+/* Hell / dunkel: gilt für die Hülle und die angezeigte Seite */
+const dunkel = () => document.documentElement.dataset.theme === "dark";
+function themaSetzen(d, merken) {
+  document.documentElement.dataset.theme = d ? "dark" : "light";
+  if (merken) try { localStorage.setItem("hkh-thema", d ? "dark" : "light"); } catch (e) {}
+  $("thema").innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${d ? SONNE : MOND}</svg>`;
+  document.querySelectorAll(".rahmen").forEach((f) => {
+    try {
+      const w = f.contentWindow;
+      w.document.documentElement.setAttribute("data-theme", d ? "dark" : "light");
+      w.dispatchEvent(new w.CustomEvent("hkh-thema", { detail: { dunkel: d } }));
+    } catch (e) {}
+  });
+}
+let gemerkt = null;
+try { gemerkt = localStorage.getItem("hkh-thema"); } catch (e) {}
+themaSetzen(gemerkt ? gemerkt === "dark" : matchMedia("(prefers-color-scheme: dark)").matches, false);
+$("thema").addEventListener("click", () => themaSetzen(!dunkel(), true));
+
+/* Seiten wechseln, ohne die Adresse zu verlassen: so bleibt das Vollbild an.
+   Alle drei Seiten werden einmal geladen und bleiben offen, der Wechsel ist dann sofort da. */
+const RAHMEN = {};
+function rahmen(name) {
+  if (RAHMEN[name]) return RAHMEN[name];
+  const f = document.createElement("iframe");
+  f.className = "rahmen weg";
+  f.title = name;
+  f.setAttribute("allow", "fullscreen; screen-wake-lock");
+  f.src = `./Tablet/${name}.html?v=1795471124`;
+  f.addEventListener("load", () => themaSetzen(dunkel(), false));
+  $("rahmen-box").appendChild(f);
+  return (RAHMEN[name] = f);
+}
+function seite(name) {
+  if (!SEITEN.includes(name)) name = "Arbeitsplan";
+  document.querySelectorAll("[data-seite]").forEach((b) => b.setAttribute("aria-current", b.dataset.seite === name ? "page" : "false"));
+  rahmen(name);
+  Object.entries(RAHMEN).forEach(([n, f]) => f.classList.toggle("weg", n !== name));
+  history.replaceState(null, "", location.pathname + location.search + "#" + name);
+}
+function vorladen() { setTimeout(() => SEITEN.forEach(rahmen), 1500); }
+window.hkhSeite = seite;
+document.querySelectorAll("[data-seite]").forEach((b) => b.addEventListener("click", () => seite(b.dataset.seite)));
+
+/* Vollbild: beim ersten Antippen an, und nach dem Verlassen beim nächsten Antippen wieder */
+function vollbild() {
+  if (document.fullscreenElement || document.webkitFullscreenElement) return;
+  const el = document.documentElement, f = el.requestFullscreen || el.webkitRequestFullscreen;
+  if (f) { try { const p = f.call(el); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
+}
+window.hkhVollbild = vollbild;
+document.addEventListener("pointerdown", vollbild, true);
+
+/* Bildschirm wach halten */
+let sperre = null;
+function wach() {
+  if (!("wakeLock" in navigator) || document.visibilityState !== "visible") return;
+  navigator.wakeLock.request("screen").then((s) => { sperre = s; }).catch(() => {});
+}
+window.hkhWach = () => { if (!sperre || sperre.released) wach(); };
+document.addEventListener("visibilitychange", wach);
+document.addEventListener("pointerdown", window.hkhWach, true);
+
+/* Nachts um 3 Uhr einmal neu laden: neuer Monat, neue Seitenversion */
+const start = Date.now();
+setInterval(() => { if (new Date().getHours() === 3 && Date.now() - start > 2 * 3600 * 1000) location.reload(); }, 60000);
+
+function zeigen(s) {
+  $("pruefung").hidden = true;
+  $("huelle").hidden = !s;
+  $("freischalten").hidden = !!s;
+  if (s) { seite(decodeURIComponent(location.hash.slice(1))); vorladen(); wach(); }
+}
+$("auge").addEventListener("click", () => {
+  const sichtbar = $("code").type === "password";
+  $("code").type = sichtbar ? "text" : "password";
+  $("auge").setAttribute("aria-pressed", String(sichtbar));
+  const t = sichtbar ? "Code verbergen" : "Code anzeigen";
+  $("auge").setAttribute("aria-label", t); $("auge").title = t;
+});
+$("form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  $("los").disabled = true;
+  $("fehler").textContent = "";
+  try {
+    const s = await tablettFreischalten($("code").value.trim());
+    $("code").value = "";
+    if (!s) throw new Error("nicht freigeschaltet");
+    zeigen(s);
+  } catch (err) {
+    console.error(err);
+    $("fehler").textContent = istRechteFehler(err) ? "Der Admin-Code stimmt nicht." : "Das hat nicht geklappt. Bitte noch einmal versuchen.";
+  } finally {
+    $("los").disabled = false;
+  }
+});
+(async () => {
+  let s = null;
+  try { s = await sitzung(); } catch (err) { console.error(err); }
+  zeigen(s);
+})();
+</script>
+</body>
+</html>
