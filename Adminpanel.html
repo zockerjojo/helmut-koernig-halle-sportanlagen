@@ -341,10 +341,11 @@ const geraeteVon = (bid) => Object.values(geraete).filter((g) => g && g.benutzer
 const sortiert = () => Object.entries(benutzer).map(([bid, b]) => ({ bid, ...b })).sort((a, b) => (a.name || "").localeCompare(b.name || "", "de"));
 
 /* Kurze Namen für die Marken in der zugeklappten Zeile */
-const KURZ = { reinigung: "Reinigung", sportanlagen: "Sportanlagen", arbeitsplan: "Arbeitsplan", dienstplan: "Dienstplan", admin: "Admin" };
+const KURZ = { reinigung: "Reinigung", sportanlagen: "Sportanlagen", arbeitsplan: "Arbeitsplan", dienstplan: "Dienstplan bearbeiten", admin: "Admin" };
 function marken(b) {
   const bereiche = BEREICHE.map((f) => {
-    const an = b.rechte?.[f.id] === true;
+    /* Beim Dienstplan zeigt die Marke, ob jemand bearbeiten darf (ansehen darf jeder). */
+    const an = f.fuerAlle ? b.rechte?.[f.id + "_tun"]?.bearbeiten === true || b.rechte?.admin === true : b.rechte?.[f.id] === true;
     return `<span class="marke-klein ${an ? "an" : "aus"}">${esc(KURZ[f.id] ?? f.name)}</span>`;
   }).join("");
   return bereiche;
@@ -494,6 +495,11 @@ function rechteZeichnen(rechte, gesperrt) {
     } else {
       unter = (ZUSATZRECHTE[f.id] ?? []).map((z) => kreuz(`${f.id}:${z.id}`, z.name, z.zusatz, tun[z.id] === true, gesperrt)).join("");
     }
+    if (f.fuerAlle) {
+      /* Ansehen darf jeder mit Code, hier gibt es nur die Unterrechte. */
+      return `<div class="bereich-block"><h3 style="margin:4px 0 2px">${esc(f.name)}</h3><p class="muted" style="font-size:13px;margin:0 0 6px">${esc(f.zusatz)}</p>
+      <div class="unter" data-unter="${f.id}">${unter}</div></div>`;
+    }
     return `<div class="bereich-block">${kreuz(f.id, f.name, f.zusatz, an, gesperrt)}
       ${unter ? `<div class="unter" data-unter="${f.id}"${an ? "" : " hidden"}>${unter}</div>` : ""}</div>`;
   }).join("");
@@ -506,7 +512,7 @@ $("f-rechte").addEventListener("change", (e) => {
 });
 function rechteLesen() {
   const rechte = { reinigung_tun: {}, sportanlagen_tun: {}, arbeitsplan_tun: {}, dienstplan_tun: {} };
-  BEREICHE.forEach((f) => { rechte[f.id] = false; });
+  BEREICHE.forEach((f) => { rechte[f.id] = !!f.fuerAlle; });
   $("f-rechte").querySelectorAll("[data-recht]").forEach((k) => {
     const [bereich, recht] = k.dataset.recht.split(":");
     if (recht) (rechte[bereich + "_tun"] ??= {})[recht] = k.checked;

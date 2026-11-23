@@ -50,19 +50,26 @@ button:focus-visible, a:focus-visible{outline:3px solid var(--accent); outline-o
 .schalter{display:inline-flex; border:1px solid var(--line); border-radius:999px; background:var(--panel); padding:3px}
 .schalter button{border:0; background:none; font:inherit; font-size:14px; font-weight:600; padding:7px 14px; border-radius:999px; color:var(--ink-2); cursor:pointer}
 .schalter button[aria-pressed="true"]{background:var(--accent); color:var(--on-accent)}
+.zoom{display:inline-flex; align-items:center; gap:2px; background:var(--panel); border:1px solid var(--line); border-radius:999px; padding:3px}
+.zoom button{width:36px; height:36px; border-radius:50%; border:0; background:none; color:var(--ink); font-size:22px; line-height:1; cursor:pointer}
+.zoom button:hover{background:color-mix(in srgb, var(--ink) 8%, transparent)}
+.zoom output{min-width:52px; text-align:center; font-size:14px; font-weight:600; font-variant-numeric:tabular-nums; cursor:pointer}
+.rahmen{touch-action:pan-x pan-y}
 .hinweis{font-size:14px; color:var(--ink-2); margin:0 0 10px}
 .leer{background:var(--panel); border:1px dashed var(--line); border-radius:14px; padding:24px; display:flex; flex-direction:column; gap:12px; align-items:flex-start}
 
 /* Die Tabelle wie der Papierplan: alle Zeilen gleich hoch */
 .rahmen{background:var(--panel); border:1px solid var(--line); border-radius:14px; overflow:auto; -webkit-overflow-scrolling:touch}
-table.plan{border-collapse:collapse; width:100%; min-width:900px; font-size:14px; font-variant-numeric:tabular-nums}
-.plan th,.plan td{border:1px solid var(--line); padding:0 6px; text-align:center; white-space:nowrap; height:32px; line-height:31px; overflow:hidden; text-overflow:ellipsis}
+table.plan{border-collapse:separate; border-spacing:0; width:100%; min-width:900px; font-size:14px; font-variant-numeric:tabular-nums}
+.plan th,.plan td{border:0; border-right:1px solid var(--line); border-bottom:1px solid var(--line); padding:0 6px; text-align:center; white-space:nowrap; height:32px; line-height:31px; overflow:hidden; text-overflow:ellipsis}
 .plan thead th{background:var(--panel); font-weight:600}
 .plan thead tr:nth-child(2) th{font-weight:500; color:var(--ink-2); font-size:13px}
 .plan .nr{width:38px; min-width:38px; text-align:right; color:var(--ink-2)}
 .plan .tag{text-align:left; width:108px; min-width:108px}
-.plan th.nr,.plan td.nr{position:sticky; left:0; z-index:1; background:inherit}
-.plan th.tag,.plan td.tag{position:sticky; left:38px; z-index:1; background:inherit}
+/* Datum und Wochentag bleiben beim Wischen stehen und decken den Rest ab */
+.plan th.nr,.plan td.nr{position:sticky; left:0; z-index:2; background:var(--panel); }
+.plan th.tag,.plan td.tag{position:sticky; left:38px; z-index:2; background:var(--panel); box-shadow:inset -1px 0 0 var(--line), 3px 0 6px -3px rgba(0,0,0,.25)}
+.plan tbody tr.we td.nr,.plan tbody tr.we td.tag{background:var(--wochenende)}
 .bearbeiten .plan th.nr,.bearbeiten .plan td.nr{left:30px}
 .bearbeiten .plan th.tag,.bearbeiten .plan td.tag{left:68px}
 .plan tbody tr{background:var(--panel)}
@@ -91,16 +98,17 @@ table.plan{border-collapse:collapse; width:100%; min-width:900px; font-size:14px
 .x-knopf{flex:none; width:28px; height:28px; border:0; background:none; color:var(--ink-2); cursor:pointer; display:flex; align-items:center; justify-content:center; border-radius:6px; margin:auto}
 .x-knopf:hover{background:color-mix(in srgb, #B3261E 14%, transparent); color:#B3261E}
 .x-knopf svg{width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round}
-.plan .weg-sp{width:30px; min-width:30px; padding:0; background:var(--panel); position:sticky; left:0; z-index:1}
+.plan .weg-sp{width:30px; min-width:30px; padding:0; background:var(--panel); position:sticky; left:0; z-index:2}
+.plan tbody tr.we td.weg-sp{background:var(--wochenende)}
 .plan th.neu-spalte{vertical-align:top; padding:6px; background:var(--panel); border-style:dashed; width:110px; height:auto}
-.plan tfoot td{height:auto; padding:8px; text-align:left; background:var(--panel); border-style:dashed; position:static}
+.plan tfoot td{height:auto; padding:8px; text-align:left; background:var(--panel); border-bottom:0; position:static}
 .grau-wahl{font-size:14px; color:var(--ink-2); margin-left:10px; display:inline-flex; gap:6px; align-items:center}
 
 /* Speichern-Leiste wie bei den Sportanlagen */
-.speicher-leiste{position:fixed; z-index:58; left:max(12px, env(safe-area-inset-left)); right:max(12px, env(safe-area-inset-right)); bottom:calc(max(12px, env(safe-area-inset-bottom)) + 62px); max-width:640px; margin:0 auto; display:flex; align-items:center; gap:10px; padding:8px 8px 8px 16px; border-radius:16px; border:1px solid var(--accent); background:var(--panel); box-shadow:0 6px 24px rgba(20,32,27,.22)}
+.speicher-leiste{position:fixed; z-index:58; left:max(12px, env(safe-area-inset-left)); right:max(12px, env(safe-area-inset-right)); bottom:calc(max(12px, env(safe-area-inset-bottom)) + var(--hkh-leiste-h, 62px)); max-width:640px; margin:0 auto; display:flex; align-items:center; gap:10px; padding:8px 8px 8px 16px; border-radius:16px; border:1px solid var(--accent); background:var(--panel); box-shadow:0 6px 24px rgba(20,32,27,.22)}
 .speicher-text{flex:1 1 auto; min-width:0; font-size:14px; font-weight:600; color:var(--ink)}
 .speicher-text.fehler{color:var(--fehler)}
-body.mit-speichern{padding-bottom:calc(150px + env(safe-area-inset-bottom))}
+body.mit-speichern{padding-bottom:calc(var(--hkh-leiste-h, 62px) + 90px + env(safe-area-inset-bottom))}
 
 .druckkopf{display:none; justify-content:space-between; align-items:baseline; margin:0 0 4px}
 .druckkopf b{font-size:28px; font-weight:500}
@@ -117,7 +125,10 @@ body.mit-speichern{padding-bottom:calc(150px + env(safe-area-inset-bottom))}
   .rahmen{border:0; border-radius:0; overflow:visible}
   table.plan{min-width:0; font-size:10.5px; border:2px solid #000}
   .plan th,.plan td{height:19.5px; line-height:18.5px; padding:0 4px; border-color:#000}
-  .plan th.nr,.plan td.nr,.plan th.tag,.plan td.tag{position:static}
+  .plan tr > :last-child{border-right:0}
+  .plan tbody tr:last-child > *{border-bottom:0}
+  .plan th.nr,.plan td.nr,.plan th.tag,.plan td.tag{position:static; box-shadow:none}
+  table.plan{zoom:1 !important}
   .plan .ver{min-width:0; max-width:none}
   .plan tbody tr.heute td.nr,.plan tbody tr.heute td.tag,.plan th.ich{color:#000; font-weight:inherit}
   .stand{color:#000}
@@ -153,6 +164,7 @@ body.mit-speichern{padding-bottom:calc(150px + env(safe-area-inset-bottom))}
       <button type="button" data-modus="ansehen" aria-pressed="true">Ansehen</button>
       <button type="button" data-modus="bearbeiten" aria-pressed="false">Bearbeiten</button>
     </div>
+    <div class="zoom" role="group" aria-label="Tabelle vergrößern oder verkleinern"><button type="button" id="zoom-aus" aria-label="Verkleinern" title="Verkleinern">−</button><output id="zoom-wert" title="Zurück auf 100 %">100 %</output><button type="button" id="zoom-ein" aria-label="Vergrößern" title="Vergrößern">+</button></div>
     <button class="knopf primaer" type="button" id="drucken"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 17h2a2 2 0 0 0 2 -2v-4a2 2 0 0 0 -2 -2h-14a2 2 0 0 0 -2 2v4a2 2 0 0 0 2 2h2" /><path d="M17 9v-4a2 2 0 0 0 -2 -2h-6a2 2 0 0 0 -2 2v4" /><path d="M7 15a2 2 0 0 1 2 -2h6a2 2 0 0 1 2 2v4a2 2 0 0 1 -2 2h-6a2 2 0 0 1 -2 -2l0 -4" /></svg>Drucken / PDF</button>
   </div>
   <p class="hinweis" id="hinweis"></p>
@@ -207,6 +219,29 @@ const monatPlus = (m, d) => { const [j, mo] = m.split("-").map(Number); const x 
 const tageIm = (m) => { const [j, mo] = m.split("-").map(Number); return new Date(j, mo, 0).getDate(); };
 const datumText = () => { const [j, m, t] = heuteKey().split("-"); return `${t}.${m}.${j}`; };
 
+/* ---- Feiertage in NRW ---- */
+function ostersonntag(j) {
+  const a = j % 19, b = Math.floor(j / 100), c = j % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451);
+  return new Date(j, Math.floor((h + l - 7 * m + 114) / 31) - 1, ((h + l - 7 * m + 114) % 31) + 1);
+}
+const FEIERTAGE = {};
+function feiertage(j) {
+  if (FEIERTAGE[j]) return FEIERTAGE[j];
+  const liste = {}, k = (d) => `${d.getMonth() + 1}-${d.getDate()}`;
+  const ostern = ostersonntag(j), plus = (n) => new Date(j, ostern.getMonth(), ostern.getDate() + n);
+  [["1-1", "Neujahr"], ["5-1", "Tag der Arbeit"], ["10-3", "Tag der Deutschen Einheit"], ["11-1", "Allerheiligen"], ["12-25", "1. Weihnachtstag"], ["12-26", "2. Weihnachtstag"]].forEach(([d, n]) => { liste[d] = n; });
+  [[-2, "Karfreitag"], [1, "Ostermontag"], [39, "Christi Himmelfahrt"], [50, "Pfingstmontag"], [60, "Fronleichnam"]].forEach(([n, name]) => { liste[k(plus(n))] = name; });
+  return (FEIERTAGE[j] = liste);
+}
+/* Feiertag zu einer Zeile des angezeigten Monats ("1." -> Allerheiligen im November) */
+function feiertagVon(m, nr) {
+  const t = parseInt(String(nr), 10);
+  if (!t || !/^\s*\d{1,2}\.?\s*$/.test(String(nr))) return "";
+  const [j, mo] = m.split("-").map(Number);
+  return feiertage(j)[`${mo}-${t}`] ?? "";
+}
+
 /* ---- Zeilen und Spalten für einen neuen Monat ---- */
 const leereZeile = (n, grau = false, nr = "", tag = "") => ({ nr, tag, grau, z: Array.from({ length: n }, () => ["", ""]), ver: "" });
 function tagesZeilen(m, n) {
@@ -214,7 +249,10 @@ function tagesZeilen(m, n) {
   const zeilen = [];
   for (let t = 1; t <= tageIm(m); t++) {
     const wt = new Date(j, mo - 1, t).getDay();
-    zeilen.push(leereZeile(n, wt === 0 || wt === 6, t + ".", TAGE[wt]));
+    const ft = feiertage(j)[`${mo}-${t}`] ?? "";
+    const z = leereZeile(n, wt === 0 || wt === 6 || !!ft, t + ".", TAGE[wt]);
+    z.ver = ft;   // der Name des Feiertags steht schon bei Veranstaltung und kann überschrieben werden
+    zeilen.push(z);
   }
   zeilen.push(leereZeile(n));   // unten eine leere Zeile wie auf dem Papier
   return zeilen;
@@ -228,6 +266,7 @@ const STANDARD_SPALTEN = () => [
 /* Der Papierplan November 2026, so wie er im Aushang hing. */
 function originalNovember(plan) {
   const Z = (t) => plan.zeilen[t - 1];
+  plan.zeilen.forEach((r) => { r.ver = ""; });   // auf dem Papier stand bei Allerheiligen nichts
   const setz = (tage, sp, a, b = "") => tage.forEach((t) => { Z(t).z[sp] = [a, b]; });
   setz([2,3,4,5,6,23,24,25], 0, "M"); setz([9,10,11,12,13,16,17,18,19,20,30], 0, "F"); setz([26,27], 0, "N", "23:00-07:00");
   setz([2,3,4,5,6,9,10,11,12,13,23,24,25,30], 1, "F"); setz([16,17,18,19,20], 1, "M"); setz([26,27], 1, "M", "15:00-23:00");
@@ -289,7 +328,8 @@ function zeichne() {
   S.forEach((sp, i) => { h += `<th class="kz${ich(i)}">${B ? feld(sp.a, `data-sp="${i}" data-teil="a"`) : esc(sp.a)}</th><th class="zeit${ich(i)}">${B ? feld(sp.b, `data-sp="${i}" data-teil="b"`) : esc(sp.b)}</th>`; });
   h += `<th class="ver"></th></tr></thead><tbody>`;
   P.zeilen.forEach((r, ri) => {
-    h += `<tr class="${r.grau ? "we" : ""}${heute && r.nr === heute ? " heute" : ""}">`;
+    const ft = feiertagVon(MONAT, r.nr);
+    h += `<tr class="${r.grau || ft ? "we" : ""}${heute && r.nr === heute ? " heute" : ""}"${ft ? ` title="${esc(ft)}"` : ""}>`;
     if (B) h += `<td class="weg-sp"><button class="x-knopf" type="button" data-weg-z="${ri}" title="Zeile löschen" aria-label="Zeile löschen">${X_SVG}</button></td>`;
     h += B ? `<td class="nr">${feld(r.nr, `data-z="${ri}" data-teil="nr"`)}</td><td class="tag">${feld(r.tag, `data-z="${ri}" data-teil="tag"`, "links")}</td>`
            : `<td class="nr">${esc(r.nr)}</td><td class="tag">${esc(r.tag)}</td>`;
@@ -310,7 +350,7 @@ function zeichne() {
 function hinweisZeigen() {
   $("hinweis").textContent = BEARBEITEN
     ? "Alles ist frei beschreibbar wie in Excel. Mit Tab oder Pfeiltasten zum nächsten Feld, Enter eine Zeile tiefer. „+ Spalte“ fügt rechts einen Mitarbeiter an, „+ Zeile“ unten eine Zeile, ✕ löscht. Uhrzeiten wie 2300-0700 werden zu 23:00-07:00. Zum Schluss unten auf „Speichern“."
-    : "Auf dem Handy lässt sich die Tabelle seitlich wischen. Datum und Wochentag bleiben dabei stehen.";
+    : "Die Tabelle lässt sich seitlich wischen, Datum und Wochentag bleiben dabei stehen. Mit − und + oder mit zwei Fingern wird sie kleiner oder größer.";
 }
 
 /* ---- Speichern ---- */
@@ -480,6 +520,36 @@ plan.addEventListener("keydown", (e) => {
   if (ziel) { e.preventDefault(); ziel.focus(); ziel.select(); }
 });
 $("drucken").addEventListener("click", () => { document.activeElement?.blur?.(); window.print(); });
+
+/* ---- Heraus- und hineinzoomen: Knöpfe, Strg + Mausrad, zwei Finger ---- */
+let ZOOM = 1;
+try { ZOOM = Number(localStorage.getItem("hkh-dienstplan-zoom")) || 1; } catch (e) {}
+function zoomSetzen(z, merken = true) {
+  ZOOM = Math.min(2, Math.max(0.4, Math.round(z * 100) / 100));
+  plan.style.zoom = String(ZOOM);
+  $("zoom-wert").textContent = `${Math.round(ZOOM * 100)} %`;
+  $("zoom-aus").disabled = ZOOM <= 0.4; $("zoom-ein").disabled = ZOOM >= 2;
+  if (merken) try { localStorage.setItem("hkh-dienstplan-zoom", String(ZOOM)); } catch (e) {}
+}
+zoomSetzen(ZOOM, false);
+$("zoom-aus").addEventListener("click", () => zoomSetzen(ZOOM - 0.1));
+$("zoom-ein").addEventListener("click", () => zoomSetzen(ZOOM + 0.1));
+$("zoom-wert").addEventListener("click", () => zoomSetzen(1));
+const rahmen = $("rahmen");
+rahmen.addEventListener("wheel", (e) => {
+  if (!e.ctrlKey) return;
+  e.preventDefault();
+  zoomSetzen(ZOOM * (e.deltaY < 0 ? 1.08 : 1 / 1.08));
+}, { passive: false });
+let finger = null;
+const abstand = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+rahmen.addEventListener("touchstart", (e) => { if (e.touches.length === 2) finger = { d: abstand(e.touches), z: ZOOM }; }, { passive: true });
+rahmen.addEventListener("touchmove", (e) => {
+  if (!finger || e.touches.length !== 2) return;
+  e.preventDefault();
+  zoomSetzen(finger.z * abstand(e.touches) / finger.d, false);
+}, { passive: false });
+rahmen.addEventListener("touchend", (e) => { if (finger && e.touches.length < 2) { finger = null; zoomSetzen(ZOOM); } });
 
 /* ---- Start ---- */
 (async () => {

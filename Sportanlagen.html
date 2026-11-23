@@ -107,11 +107,11 @@ legend{font-size:14px; color:var(--ink-2); padding:0 0 6px}
 .hkh-marke{display:flex; flex-direction:column; gap:2px; margin:0; font-family:Barlow, system-ui, -apple-system, "Segoe UI", sans-serif; font-size:13px; font-weight:500; line-height:1.15; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2)}
 #panel{margin-top:22px}
 /* Speichern-Leiste: erscheint, sobald etwas geändert wurde, immer unten sichtbar (über der Personal-Leiste) */
-.speicher-leiste{position:fixed; z-index:58; left:max(12px, env(safe-area-inset-left)); right:max(12px, env(safe-area-inset-right)); bottom:calc(max(12px, env(safe-area-inset-bottom)) + 62px); max-width:640px; margin:0 auto; display:flex; align-items:center; gap:10px; padding:8px 8px 8px 16px; border-radius:16px; border:1px solid var(--accent); background:var(--panel); box-shadow:0 6px 24px rgba(20,32,27,.22)}
+.speicher-leiste{position:fixed; z-index:58; left:max(12px, env(safe-area-inset-left)); right:max(12px, env(safe-area-inset-right)); bottom:calc(max(12px, env(safe-area-inset-bottom)) + var(--hkh-leiste-h, 62px)); max-width:640px; margin:0 auto; display:flex; align-items:center; gap:10px; padding:8px 8px 8px 16px; border-radius:16px; border:1px solid var(--accent); background:var(--panel); box-shadow:0 6px 24px rgba(20,32,27,.22)}
 .speicher-leiste[hidden]{display:none}
 .speicher-text{flex:1 1 auto; min-width:0; font-size:14px; font-weight:600; color:var(--ink)}
 .speicher-text.fehler{color:var(--fehler)}
-body.mit-speichern{padding-bottom:calc(150px + env(safe-area-inset-bottom))}
+body.mit-speichern{padding-bottom:calc(var(--hkh-leiste-h, 62px) + 90px + env(safe-area-inset-bottom))}
 .karte.geaendert{border-color:var(--accent); box-shadow:inset 4px 0 0 var(--accent)}
 </style>
 </head>
