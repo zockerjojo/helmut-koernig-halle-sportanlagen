@@ -253,6 +253,9 @@
           "arbeitsplan": {
             ".validate": "newData.isBoolean()"
           },
+          "dienstplan": {
+            ".validate": "newData.isBoolean()"
+          },
           "admin": {
             ".validate": "newData.isBoolean()"
           },
@@ -269,6 +272,14 @@
           },
           "sportanlagen_tun": {
             "aushang": {
+              ".validate": "newData.isBoolean()"
+            },
+            "$anderes": {
+              ".validate": false
+            }
+          },
+          "dienstplan_tun": {
+            "bearbeiten": {
               ".validate": "newData.isBoolean()"
             },
             "$anderes": {
@@ -429,6 +440,27 @@
         },
         "$anderes": {
           ".validate": false
+        }
+      }
+    },
+    "dienstplan": {
+      ".read": "(auth != null && root.child('geraete').child(auth.uid).child('code').val() === root.child('zugang').child('admin').val()) || ((auth != null && root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('code').val() === root.child('geraete').child(auth.uid).child('code').val() && root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('gesperrt').val() !== true && (!root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('stand').exists() || root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('stand').val() <= root.child('geraete').child(auth.uid).child('seit').val())) && (root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('dienstplan').val() === true || root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('admin').val() === true))",
+      "monate": {
+        "$monat": {
+          ".write": "(auth != null && root.child('geraete').child(auth.uid).child('code').val() === root.child('zugang').child('admin').val()) || (((auth != null && root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('code').val() === root.child('geraete').child(auth.uid).child('code').val() && root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('gesperrt').val() !== true && (!root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('stand').exists() || root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('stand').val() <= root.child('geraete').child(auth.uid).child('seit').val())) && (root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('dienstplan').val() === true || root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('admin').val() === true)) && (root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('admin').val() === true || (root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('dienstplan').val() === true && root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('dienstplan_tun').child('bearbeiten').val() === true)))",
+          ".validate": "$monat.matches(/^[0-9][0-9][0-9][0-9]-[0-9][0-9]$/) && newData.hasChildren(['daten', 'ts'])",
+          "daten": {
+            ".validate": "newData.isString() && newData.val().length <= 300000"
+          },
+          "ts": {
+            ".validate": "newData.isNumber()"
+          },
+          "von": {
+            ".validate": "newData.isString() && newData.val().length <= 60"
+          },
+          "$anderes": {
+            ".validate": false
+          }
         }
       }
     }

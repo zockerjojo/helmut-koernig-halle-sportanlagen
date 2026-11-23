@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="apple-mobile-web-app-title" content="helmut-körnig-halle-sportanlagen/Dienstplan">
+<title>helmut-körnig-halle-sportanlagen/Dienstplan</title>
+<link rel="icon" type="image/png" href="./bilder/favicon.png">
+<link rel="apple-touch-icon" href="./bilder/symbol.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9EDEA; --panel:#F7F9F7; --ink:#14201B; --ink-2:#55635C; --line:#C3CCC6;
+  --accent:#17694B; --on-accent:#FFFFFF; --fehler:#B3261E;
+  --wochenende:#DDE3DF; --ich:#E3F2EA; --fokus:#FFF7D6;
+  --display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --body:Barlow,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#0F1512; --panel:#18211C; --ink:#E7EEE9; --ink-2:#9BAAA1; --line:#33413A;
+  --accent:#4CC38A; --on-accent:#06150E; --fehler:#F2766B;
+  --wochenende:#222D27; --ich:#1D3529; --fokus:#2C3A22;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:16px; line-height:1.4}
+.wrap{max-width:1400px; margin:0 auto; padding:0 16px 40px}
+.kopf{display:flex; align-items:center; gap:12px; padding-top:24px}
+.hkh-kopf{display:inline-flex; align-items:center; gap:10px; min-width:0; flex:none; text-decoration:none; color:inherit; border-radius:6px}
+.hkh-kopf img{flex:none; display:block; height:34px; width:auto}
+.hkh-marke{display:flex; flex-direction:column; gap:2px; margin:0; font-family:var(--body); font-size:13px; font-weight:500; line-height:1.15; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2)}
+h1{margin:22px 0 4px; font-family:var(--display); font-weight:600; font-size:clamp(32px, 8vw, 44px); line-height:1; text-transform:uppercase}
+.muted{margin:0; font-size:15px; color:var(--ink-2)}
+.knopf{font:inherit; font-size:15px; font-weight:600; min-height:42px; padding:8px 16px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer; display:inline-flex; align-items:center; gap:8px; text-decoration:none}
+.knopf.primaer{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
+.knopf.klein{min-height:34px; padding:4px 12px; font-size:14px}
+.knopf:disabled{opacity:.5; cursor:not-allowed}
+.knopf svg{width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+button:focus-visible, a:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.leiste{display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:16px 0 12px}
+.monat{display:flex; align-items:center; gap:6px; background:var(--panel); border:1px solid var(--line); border-radius:999px; padding:4px}
+.monat button{width:38px; height:38px; border-radius:50%; border:0; background:none; color:var(--ink); font-size:22px; line-height:1; cursor:pointer}
+.monat button:hover{background:color-mix(in srgb, var(--ink) 8%, transparent)}
+.monat strong{min-width:160px; text-align:center; font-family:var(--display); font-weight:600; font-size:22px; text-transform:uppercase}
+.schalter{display:inline-flex; border:1px solid var(--line); border-radius:999px; background:var(--panel); padding:3px}
+.schalter button{border:0; background:none; font:inherit; font-size:14px; font-weight:600; padding:7px 14px; border-radius:999px; color:var(--ink-2); cursor:pointer}
+.schalter button[aria-pressed="true"]{background:var(--accent); color:var(--on-accent)}
+.hinweis{font-size:14px; color:var(--ink-2); margin:0 0 10px}
+.leer{background:var(--panel); border:1px dashed var(--line); border-radius:14px; padding:24px; display:flex; flex-direction:column; gap:12px; align-items:flex-start}
+
+/* Die Tabelle wie der Papierplan: alle Zeilen gleich hoch */
+.rahmen{background:var(--panel); border:1px solid var(--line); border-radius:14px; overflow:auto; -webkit-overflow-scrolling:touch}
+table.plan{border-collapse:collapse; width:100%; min-width:900px; font-size:14px; font-variant-numeric:tabular-nums}
+.plan th,.plan td{border:1px solid var(--line); padding:0 6px; text-align:center; white-space:nowrap; height:32px; line-height:31px; overflow:hidden; text-overflow:ellipsis}
+.plan thead th{background:var(--panel); font-weight:600}
+.plan thead tr:nth-child(2) th{font-weight:500; color:var(--ink-2); font-size:13px}
+.plan .nr{width:38px; min-width:38px; text-align:right; color:var(--ink-2)}
+.plan .tag{text-align:left; width:108px; min-width:108px}
+.plan th.nr,.plan td.nr{position:sticky; left:0; z-index:1; background:inherit}
+.plan th.tag,.plan td.tag{position:sticky; left:38px; z-index:1; background:inherit}
+.bearbeiten .plan th.nr,.bearbeiten .plan td.nr{left:30px}
+.bearbeiten .plan th.tag,.bearbeiten .plan td.tag{left:68px}
+.plan tbody tr{background:var(--panel)}
+.plan tbody tr.we{background:var(--wochenende)}
+.plan tbody tr.heute td.nr,.plan tbody tr.heute td.tag{font-weight:700; color:var(--accent)}
+.plan .kz{width:58px; min-width:58px}
+.plan td.kz.kurz{font-weight:700}
+.plan .zeit{min-width:110px}
+.plan .ver{min-width:320px; max-width:560px}
+.plan th.ich,.plan td.ich{background:var(--ich)}
+.plan tr.we td.ich{background:color-mix(in srgb, var(--ich) 55%, var(--wochenende))}
+.plan th.ich{color:var(--accent)}
+.plan th.kopf-feld{min-width:170px}
+.stand{text-align:right; font-size:13px; color:var(--ink-2); margin:6px 4px 0}
+
+/* Bearbeiten wie in Excel: jedes Feld ist direkt beschreibbar */
+.plan input.feld{width:100%; height:30px; border:0; border-radius:0; padding:0 4px; margin:0; background:transparent; text-align:center; font:inherit; color:var(--ink); outline:none}
+.plan input.feld:focus{background:var(--fokus); box-shadow:inset 0 0 0 2px var(--accent)}
+.plan td:has(> input.feld),.plan th:has(> input.feld){padding:0}
+.plan input.feld.links{text-align:left}
+.plan td.nr input.feld{text-align:right}
+.plan input.feld.kurz{font-weight:700}
+.plan thead input.feld{font-weight:600}
+.kopf-zelle{display:flex; align-items:center}
+.kopf-zelle input{flex:1 1 auto}
+.x-knopf{flex:none; width:28px; height:28px; border:0; background:none; color:var(--ink-2); cursor:pointer; display:flex; align-items:center; justify-content:center; border-radius:6px; margin:auto}
+.x-knopf:hover{background:color-mix(in srgb, #B3261E 14%, transparent); color:#B3261E}
+.x-knopf svg{width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round}
+.plan .weg-sp{width:30px; min-width:30px; padding:0; background:var(--panel); position:sticky; left:0; z-index:1}
+.plan th.neu-spalte{vertical-align:top; padding:6px; background:var(--panel); border-style:dashed; width:110px; height:auto}
+.plan tfoot td{height:auto; padding:8px; text-align:left; background:var(--panel); border-style:dashed; position:static}
+.grau-wahl{font-size:14px; color:var(--ink-2); margin-left:10px; display:inline-flex; gap:6px; align-items:center}
+
+/* Speichern-Leiste wie bei den Sportanlagen */
+.speicher-leiste{position:fixed; z-index:58; left:max(12px, env(safe-area-inset-left)); right:max(12px, env(safe-area-inset-right)); bottom:calc(max(12px, env(safe-area-inset-bottom)) + 62px); max-width:640px; margin:0 auto; display:flex; align-items:center; gap:10px; padding:8px 8px 8px 16px; border-radius:16px; border:1px solid var(--accent); background:var(--panel); box-shadow:0 6px 24px rgba(20,32,27,.22)}
+.speicher-text{flex:1 1 auto; min-width:0; font-size:14px; font-weight:600; color:var(--ink)}
+.speicher-text.fehler{color:var(--fehler)}
+body.mit-speichern{padding-bottom:calc(150px + env(safe-area-inset-bottom))}
+
+.druckkopf{display:none; justify-content:space-between; align-items:baseline; margin:0 0 4px}
+.druckkopf b{font-size:28px; font-weight:500}
+
+/* Drucken: A4 quer, sieht aus wie der Aushang */
+@media print{
+  @page{size:A4 landscape; margin:8mm}
+  :root,:root[data-theme="dark"]{--panel:#FFFFFF; --bg:#FFFFFF; --ink:#000; --ink-2:#000; --line:#000; --wochenende:#D6D6D6; --ich:#FFFFFF; --accent:#000}
+  body{background:#FFF; font-size:11px}
+  .nicht-drucken,.kopf,.leiste,.hinweis,h1,.muted,.weg-sp,tfoot,.neu-spalte,.speicher-leiste,.hkh-leiste,.leer{display:none !important}
+  body.mit-speichern,body.hkh-mit-leiste{padding:0 !important}
+  .wrap{max-width:none; padding:0}
+  .druckkopf{display:flex !important}
+  .rahmen{border:0; border-radius:0; overflow:visible}
+  table.plan{min-width:0; font-size:10.5px; border:2px solid #000}
+  .plan th,.plan td{height:19.5px; line-height:18.5px; padding:0 4px; border-color:#000}
+  .plan th.nr,.plan td.nr,.plan th.tag,.plan td.tag{position:static}
+  .plan .ver{min-width:0; max-width:none}
+  .plan tbody tr.heute td.nr,.plan tbody tr.heute td.tag,.plan th.ich{color:#000; font-weight:inherit}
+  .stand{color:#000}
+  tr{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="wrap" id="seite">
+
+<header class="kopf">
+  <a class="logo-link hkh-kopf" href="./" aria-label="Zur Startseite">
+    <img src="./bilder/logo.png" alt="Dortmunder Sportstätten" width="480" height="241">
+    <span class="hkh-marke"><span>Helmut-Körnig-Halle</span><span>Personal</span></span>
+  </a>
+</header>
+
+<p class="muted" id="pruefung" style="margin-top:48px">Einen Moment …</p>
+
+<section id="kein-zugang" hidden>
+  <h1>Dienstplan</h1>
+  <p class="muted" id="kein-zugang-text" style="margin-top:12px">Bitte zuerst anmelden: Auf der Startseite den Hell/Dunkel-Knopf gedrückt halten und den Zugangscode eingeben.</p>
+  <p style="margin-top:16px"><a class="knopf" href="./">Zur Startseite</a></p>
+</section>
+
+<section id="panel" hidden>
+  <h1>Dienstplan</h1>
+  <p class="muted" id="unter"></p>
+
+  <div class="leiste nicht-drucken">
+    <div class="monat"><button type="button" id="monat-zurueck" aria-label="Vormonat" title="Vormonat">‹</button><strong id="monat-name">–</strong><button type="button" id="monat-vor" aria-label="Nächster Monat" title="Nächster Monat">›</button></div>
+    <div class="schalter" id="modus" role="group" aria-label="Ansicht" hidden>
+      <button type="button" data-modus="ansehen" aria-pressed="true">Ansehen</button>
+      <button type="button" data-modus="bearbeiten" aria-pressed="false">Bearbeiten</button>
+    </div>
+    <button class="knopf primaer" type="button" id="drucken"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 17h2a2 2 0 0 0 2 -2v-4a2 2 0 0 0 -2 -2h-14a2 2 0 0 0 -2 2v4a2 2 0 0 0 2 2h2" /><path d="M17 9v-4a2 2 0 0 0 -2 -2h-6a2 2 0 0 0 -2 2v4" /><path d="M7 15a2 2 0 0 1 2 -2h6a2 2 0 0 1 2 2v4a2 2 0 0 1 -2 2h-6a2 2 0 0 1 -2 -2l0 -4" /></svg>Drucken / PDF</button>
+  </div>
+  <p class="hinweis" id="hinweis"></p>
+
+  <div class="leer" id="leer" hidden>
+    <p class="muted" id="leer-text">Für diesen Monat gibt es noch keinen Dienstplan.</p>
+    <button class="knopf primaer" type="button" id="anlegen" hidden>Dienstplan für diesen Monat anlegen</button>
+  </div>
+
+  <div id="plan-bereich" hidden>
+    <div class="druckkopf"><b id="druck-titel">Dienstplan HKH</b><b id="druck-monat"></b></div>
+    <div class="rahmen" id="rahmen"><table class="plan" id="plan"></table></div>
+    <p class="stand" id="stand"></p>
+  </div>
+</section>
+</div>
+
+<div class="speicher-leiste" id="speicher-leiste" role="region" aria-label="Nicht gespeicherte Änderungen" hidden>
+  <span class="speicher-text" id="speicher-text" aria-live="polite">Nicht gespeichert</span>
+  <button class="knopf" id="speicher-verwerfen" type="button">Verwerfen</button>
+  <button class="knopf primaer" id="speicher-knopf" type="button">Speichern</button>
+</div>
+
+<script type="module">
+import { db, ref, get, set, onValue, sitzung, darf, darfZusatz, istRechteFehler } from "./js/zugang.js";
+import { leisteStarten } from "./js/leiste.js";
+
+const $ = (id) => document.getElementById(id);
+const esc = (x) => String(x ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
+/* Farbschema wie überall. Umgeschaltet wird in der Personal-Leiste. */
+const wurzel = document.documentElement;
+let gemerkt = null;
+try { gemerkt = localStorage.getItem("hkh-thema"); } catch (e) {}
+wurzel.dataset.theme = (gemerkt ? gemerkt === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+
+const TAGE = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+const MONATE = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+const X_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>`;
+const BERLIN = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Berlin" });
+const heuteKey = () => BERLIN.format(new Date());   // "2026-11-23"
+
+let ICH = null, DARF_BEARBEITEN = false;
+let MONAT = heuteKey().slice(0, 7);                 // "2026-11"
+let PLAN = null;           // was gerade angezeigt bzw. bearbeitet wird
+let GESPEICHERT = null;    // letzter Stand aus der Datenbank (Text)
+let BEARBEITEN = false, GEAENDERT = false;
+let stopp = null;
+
+const monatName = (m) => { const [j, mo] = m.split("-").map(Number); return `${MONATE[mo - 1]} ${j}`; };
+const monatPlus = (m, d) => { const [j, mo] = m.split("-").map(Number); const x = new Date(j, mo - 1 + d, 1); return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}`; };
+const tageIm = (m) => { const [j, mo] = m.split("-").map(Number); return new Date(j, mo, 0).getDate(); };
+const datumText = () => { const [j, m, t] = heuteKey().split("-"); return `${t}.${m}.${j}`; };
+
+/* ---- Zeilen und Spalten für einen neuen Monat ---- */
+const leereZeile = (n, grau = false, nr = "", tag = "") => ({ nr, tag, grau, z: Array.from({ length: n }, () => ["", ""]), ver: "" });
+function tagesZeilen(m, n) {
+  const [j, mo] = m.split("-").map(Number);
+  const zeilen = [];
+  for (let t = 1; t <= tageIm(m); t++) {
+    const wt = new Date(j, mo - 1, t).getDay();
+    zeilen.push(leereZeile(n, wt === 0 || wt === 6, t + ".", TAGE[wt]));
+  }
+  zeilen.push(leereZeile(n));   // unten eine leere Zeile wie auf dem Papier
+  return zeilen;
+}
+const STANDARD_SPALTEN = () => [
+  { name: "Walther", a: "F/M", b: "Uhrzeit" },
+  { name: "Hülsmann", a: "F/M", b: "Uhrzeit" },
+  { name: "Augustin", a: "F/M", b: "Uhrzeit" },
+  { name: "Pap", a: "von", b: "bis" },
+];
+/* Der Papierplan November 2026, so wie er im Aushang hing. */
+function originalNovember(plan) {
+  const Z = (t) => plan.zeilen[t - 1];
+  const setz = (tage, sp, a, b = "") => tage.forEach((t) => { Z(t).z[sp] = [a, b]; });
+  setz([2,3,4,5,6,23,24,25], 0, "M"); setz([9,10,11,12,13,16,17,18,19,20,30], 0, "F"); setz([26,27], 0, "N", "23:00-07:00");
+  setz([2,3,4,5,6,9,10,11,12,13,23,24,25,30], 1, "F"); setz([16,17,18,19,20], 1, "M"); setz([26,27], 1, "M", "15:00-23:00");
+  setz([2,3,4,5,6,9,10,11,12,13,16,17,18,19,20,23,24,25,30], 2, "F"); setz([26,27], 2, "F", "7:00-15:00");
+  [[7,"08:00","17:00"],[9,"16:00","22:00"],[10,"16:00","22:00"],[11,"16:00","22:00"],[12,"16:00","22:00"],[13,"16:00","20:30"],[14,"09:00","17:00"],[21,"09:00","18:00"],[28,"09:00","17:00"],[30,"16:00","22:00"]]
+    .forEach(([t, a, b]) => { Z(t).z[3] = [a, b]; });
+  Object.entries({
+    7: "FLVW Kadereröffnung mit Landeskadertest 08:00-17:00 Uhr", 10: "Feuerwehr Einstellungstest 7:00-13:00 Uhr",
+    12: "Landesmeisterschaft der Förderschulen 08:00-15:30 Uhr", 14: "Trainerfortbildung (Speed Summit 2026) Kreis Dortmund",
+    15: "Trainerfortbildung (Speed Summit 2026) Kreis Dortmund", 19: "Staffelmeisterschaften 08:00-16:00 (eine LED-Wand und Wartung Elmerhaus bestellt)",
+    21: "SSB Sportabzeichen (Halle), Kamprichter Grundausbildung 09:00-18:00 (Saal)", 26: "Aufbau Tamilen ab spät. 18:00 Uhr", 27: "Tamilen Veranstaltung",
+  }).forEach(([t, v]) => { Z(+t).ver = v; });
+  plan.stand = "01.10.2026";
+}
+
+/* Daten aus der Datenbank prüfen: nur Text, nichts anderes. */
+function lesen(roh) {
+  let p = null;
+  try { p = JSON.parse(roh); } catch (e) { return null; }
+  if (!p || !Array.isArray(p.spalten) || !Array.isArray(p.zeilen)) return null;
+  const t = (x, max = 300) => (typeof x === "string" ? x.slice(0, max) : "");
+  const spalten = p.spalten.slice(0, 40).map((s) => ({ name: t(s?.name, 80), a: t(s?.a, 30), b: t(s?.b, 30) }));
+  const zeilen = p.zeilen.slice(0, 80).map((r) => ({
+    nr: t(r?.nr, 10), tag: t(r?.tag, 30), grau: r?.grau === true, ver: t(r?.ver, 300),
+    z: spalten.map((_, i) => [t(r?.z?.[i]?.[0], 40), t(r?.z?.[i]?.[1], 40)]),
+  }));
+  return { titel: t(p.titel, 80) || "Dienstplan HKH", kopf: { name: t(p.kopf?.name, 30), datum: t(p.kopf?.datum, 30), ver: t(p.kopf?.ver, 60) }, stand: t(p.stand, 20), spalten, zeilen };
+}
+
+/* ---- Anzeige ---- */
+const feld = (wert, daten, cls = "") => `<input class="feld ${cls}" size="1" value="${esc(wert)}" ${daten} autocomplete="off" spellcheck="false">`;
+function istIch(name) {
+  const a = String(name || "").trim().toLowerCase(), b = String(ICH?.name || "").trim().toLowerCase();
+  if (!a || !b) return false;
+  return a === b || a.split(/\s+/).includes(b) || b.split(/\s+/).includes(a);
+}
+function zeichne() {
+  const P = PLAN;
+  $("leer").hidden = !!P;
+  $("plan-bereich").hidden = !P;
+  $("monat-name").textContent = monatName(MONAT);
+  $("druck-monat").textContent = monatName(MONAT);
+  if (!P) {
+    $("anlegen").hidden = !DARF_BEARBEITEN;
+    $("leer-text").textContent = DARF_BEARBEITEN ? "Für diesen Monat gibt es noch keinen Dienstplan. Beim Anlegen werden die Spalten vom Vormonat übernommen, die Tage stehen schon drin." : "Für diesen Monat gibt es noch keinen Dienstplan.";
+    return;
+  }
+  const B = BEARBEITEN, S = P.spalten;
+  const ich = (i) => (istIch(S[i].name) ? " ich" : "");
+  const k = (wert, f, cls = "") => (B ? feld(wert, `data-k="${f}"`, cls) : esc(wert));
+  const heute = MONAT === heuteKey().slice(0, 7) ? Number(heuteKey().slice(8)) + "." : "";
+  let h = `<thead><tr>${B ? `<th class="weg-sp"></th>` : ""}<th class="nr"></th><th class="tag">${k(P.kopf.name, "name", "links")}</th>`;
+  S.forEach((sp, i) => {
+    h += B ? `<th colspan="2" class="kopf-feld${ich(i)}"><div class="kopf-zelle">${feld(sp.name, `data-sp="${i}" data-teil="name"`)}<button class="x-knopf" type="button" data-weg-sp="${i}" title="Spalte löschen" aria-label="Spalte löschen">${X_SVG}</button></div></th>`
+           : `<th colspan="2" class="${ich(i).trim()}">${esc(sp.name)}</th>`;
+  });
+  h += `<th class="ver">${k(P.kopf.ver, "ver")}</th>${B ? `<th class="neu-spalte" rowspan="2"><button class="knopf klein" type="button" id="spalte-neu">+ Spalte</button></th>` : ""}</tr>`;
+  h += `<tr>${B ? `<th class="weg-sp"></th>` : ""}<th class="nr"></th><th class="tag">${k(P.kopf.datum, "datum", "links")}</th>`;
+  S.forEach((sp, i) => { h += `<th class="kz${ich(i)}">${B ? feld(sp.a, `data-sp="${i}" data-teil="a"`) : esc(sp.a)}</th><th class="zeit${ich(i)}">${B ? feld(sp.b, `data-sp="${i}" data-teil="b"`) : esc(sp.b)}</th>`; });
+  h += `<th class="ver"></th></tr></thead><tbody>`;
+  P.zeilen.forEach((r, ri) => {
+    h += `<tr class="${r.grau ? "we" : ""}${heute && r.nr === heute ? " heute" : ""}">`;
+    if (B) h += `<td class="weg-sp"><button class="x-knopf" type="button" data-weg-z="${ri}" title="Zeile löschen" aria-label="Zeile löschen">${X_SVG}</button></td>`;
+    h += B ? `<td class="nr">${feld(r.nr, `data-z="${ri}" data-teil="nr"`)}</td><td class="tag">${feld(r.tag, `data-z="${ri}" data-teil="tag"`, "links")}</td>`
+           : `<td class="nr">${esc(r.nr)}</td><td class="tag">${esc(r.tag)}</td>`;
+    S.forEach((sp, i) => {
+      const [a, b] = r.z[i] ?? ["", ""];
+      const kurz = a.trim().length <= 2 ? "kurz" : "";
+      h += B ? `<td class="kz${ich(i)}">${feld(a, `data-z="${ri}" data-sp="${i}" data-teil="0"`, kurz)}</td><td class="zeit${ich(i)}">${feld(b, `data-z="${ri}" data-sp="${i}" data-teil="1"`)}</td>`
+             : `<td class="kz${ich(i)} ${kurz}">${esc(a)}</td><td class="zeit${ich(i)}">${esc(b)}</td>`;
+    });
+    h += B ? `<td class="ver">${feld(r.ver, `data-z="${ri}" data-teil="ver"`)}</td></tr>` : `<td class="ver" title="${esc(r.ver)}">${esc(r.ver)}</td></tr>`;
+  });
+  h += "</tbody>";
+  if (B) h += `<tfoot><tr><td colspan="${4 + S.length * 2}"><button class="knopf klein" type="button" id="zeile-neu">+ Zeile</button><label class="grau-wahl"><input type="checkbox" id="neu-grau"> grau (Wochenende)</label></td></tr></tfoot>`;
+  $("plan").innerHTML = h;
+  $("druck-titel").textContent = P.titel;
+  $("stand").textContent = P.stand ? `Stand: ${P.stand}` : "";
+}
+function hinweisZeigen() {
+  $("hinweis").textContent = BEARBEITEN
+    ? "Alles ist frei beschreibbar wie in Excel. Mit Tab oder Pfeiltasten zum nächsten Feld, Enter eine Zeile tiefer. „+ Spalte“ fügt rechts einen Mitarbeiter an, „+ Zeile“ unten eine Zeile, ✕ löscht. Uhrzeiten wie 2300-0700 werden zu 23:00-07:00. Zum Schluss unten auf „Speichern“."
+    : "Auf dem Handy lässt sich die Tabelle seitlich wischen. Datum und Wochentag bleiben dabei stehen.";
+}
+
+/* ---- Speichern ---- */
+function geaendert() {
+  GEAENDERT = true;
+  $("speicher-leiste").hidden = false;
+  $("speicher-text").textContent = "Nicht gespeichert";
+  $("speicher-text").classList.remove("fehler");
+  $("speicher-knopf").disabled = false;
+  $("speicher-verwerfen").hidden = false;
+  document.body.classList.add("mit-speichern");
+}
+function leisteZu() {
+  GEAENDERT = false;
+  $("speicher-leiste").hidden = true;
+  document.body.classList.remove("mit-speichern");
+}
+async function speichern(standLassen = false) {
+  document.activeElement?.blur?.();
+  if (!PLAN) return;
+  if (!standLassen || !PLAN.stand) PLAN.stand = datumText();
+  const daten = JSON.stringify(PLAN);
+  if (daten.length > 300000) { $("speicher-text").textContent = "Der Plan ist zu groß."; $("speicher-text").classList.add("fehler"); return; }
+  $("speicher-knopf").disabled = true;
+  $("speicher-text").textContent = "Speichere …";
+  try {
+    await set(ref(db, `dienstplan/monate/${MONAT}`), { daten, ts: Date.now(), von: String(ICH?.name ?? "").slice(0, 60) });
+    GESPEICHERT = daten;
+    zeichne();
+    $("speicher-text").textContent = "Gespeichert.";
+    $("speicher-verwerfen").hidden = true;
+    GEAENDERT = false;
+    setTimeout(() => { if (!GEAENDERT) leisteZu(); }, 2000);
+  } catch (err) {
+    console.error(err);
+    $("speicher-text").textContent = istRechteFehler(err) ? "Keine Berechtigung zum Speichern." : "Speichern hat nicht geklappt. Bitte noch einmal drücken.";
+    $("speicher-text").classList.add("fehler");
+    $("speicher-knopf").disabled = false;
+  }
+}
+$("speicher-knopf").addEventListener("click", () => speichern());
+$("speicher-verwerfen").addEventListener("click", () => {
+  PLAN = GESPEICHERT ? lesen(GESPEICHERT) : null;
+  leisteZu();
+  zeichne();
+});
+window.addEventListener("beforeunload", (e) => { if (GEAENDERT) { e.preventDefault(); e.returnValue = ""; } });
+
+/* ---- Monat laden ---- */
+function monatLaden() {
+  if (stopp) { stopp(); stopp = null; }
+  PLAN = null; GESPEICHERT = null; leisteZu();
+  zeichne();
+  stopp = onValue(ref(db, `dienstplan/monate/${MONAT}`), (snap) => {
+    const v = snap.val();
+    const roh = typeof v?.daten === "string" ? v.daten : null;
+    if (GEAENDERT) { GESPEICHERT = roh; return; }   // eigene Eingaben nicht überschreiben
+    GESPEICHERT = roh;
+    PLAN = roh ? lesen(roh) : null;
+    zeichne();
+  }, (err) => {
+    console.error(err);
+    $("leer").hidden = false;
+    $("leer-text").textContent = istRechteFehler(err) ? "Dieser Zugang darf den Dienstplan nicht sehen." : "Keine Verbindung zum Server.";
+  });
+}
+function monatWechseln(d) {
+  if (GEAENDERT && !confirm("Die Änderungen sind noch nicht gespeichert. Trotzdem den Monat wechseln?")) return;
+  MONAT = monatPlus(MONAT, d);
+  monatLaden();
+}
+$("monat-zurueck").addEventListener("click", () => monatWechseln(-1));
+$("monat-vor").addEventListener("click", () => monatWechseln(1));
+
+/* Neuer Monat: Spalten und Überschriften vom Vormonat, die Tage des Monats, Wochenenden grau. */
+$("anlegen").addEventListener("click", async () => {
+  $("anlegen").disabled = true;
+  try {
+    let vorlage = null;
+    try {
+      const v = (await get(ref(db, `dienstplan/monate/${monatPlus(MONAT, -1)}`))).val();
+      if (typeof v?.daten === "string") vorlage = lesen(v.daten);
+    } catch (err) { console.error(err); }
+    const spalten = vorlage ? vorlage.spalten.map((s) => ({ ...s })) : STANDARD_SPALTEN();
+    PLAN = {
+      titel: vorlage?.titel || "Dienstplan HKH",
+      kopf: vorlage?.kopf ?? { name: "Name:", datum: "Datum", ver: "Veranstaltung" },
+      stand: "", spalten, zeilen: tagesZeilen(MONAT, spalten.length),
+    };
+    if (MONAT === "2026-11" && !vorlage) originalNovember(PLAN);
+    BEARBEITEN = true;
+    modusZeigen();
+    zeichne();
+    await speichern(true);
+  } finally {
+    $("anlegen").disabled = false;
+  }
+});
+
+/* ---- Bearbeiten ---- */
+function modusZeigen() {
+  document.querySelectorAll("#modus button").forEach((x) => x.setAttribute("aria-pressed", String((x.dataset.modus === "bearbeiten") === BEARBEITEN)));
+  $("seite").classList.toggle("bearbeiten", BEARBEITEN);
+  hinweisZeigen();
+}
+$("modus").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-modus]"); if (!b) return;
+  document.activeElement?.blur?.();
+  BEARBEITEN = b.dataset.modus === "bearbeiten";
+  modusZeigen();
+  zeichne();
+});
+const uhr = (t) => { const z = t.replace(/[^0-9]/g, ""); if (!z) return ""; const s = z.length <= 2 ? z.padStart(2, "0") + "00" : z.padStart(4, "0").slice(0, 4); return String(Math.min(23, +s.slice(0, 2))).padStart(2, "0") + ":" + String(Math.min(59, +s.slice(2))).padStart(2, "0"); };
+const istZeit = (t) => /^\s*\d{1,2}([:.]?\d{2})?\s*(-|–|bis)\s*\d{1,2}([:.]?\d{2})?\s*$/.test(t) || /^\s*\d{1,2}[:.]\d{2}\s*$/.test(t);
+const plan = $("plan");
+plan.addEventListener("input", () => { if (!GEAENDERT) geaendert(); });
+plan.addEventListener("focusout", (e) => {
+  const f = e.target; if (!f.classList?.contains("feld") || !PLAN) return;
+  const d = f.dataset;
+  if (d.z !== undefined && d.sp !== undefined && istZeit(f.value)) {
+    const neu = f.value.split(/\s*(?:-|–|bis)\s*/).map(uhr).join("-");
+    if (neu !== f.value) { f.value = neu; if (!GEAENDERT) geaendert(); }
+  }
+  if (d.k) PLAN.kopf[d.k] = f.value;
+  else if (d.z !== undefined && d.sp !== undefined) PLAN.zeilen[+d.z].z[+d.sp][+d.teil] = f.value;
+  else if (d.z !== undefined) PLAN.zeilen[+d.z][d.teil] = f.value;
+  else if (d.sp !== undefined) PLAN.spalten[+d.sp][d.teil] = f.value;
+  if (d.teil === "0") f.classList.toggle("kurz", f.value.trim().length <= 2);
+});
+plan.addEventListener("click", (e) => {
+  if (!PLAN) return;
+  const sp = e.target.closest("[data-weg-sp]");
+  if (sp) {
+    const i = +sp.dataset.wegSp;
+    if (!confirm(`Spalte „${PLAN.spalten[i].name || "ohne Namen"}“ mit allen Einträgen löschen?`)) return;
+    PLAN.spalten.splice(i, 1); PLAN.zeilen.forEach((r) => r.z.splice(i, 1));
+    geaendert(); zeichne(); return;
+  }
+  const zl = e.target.closest("[data-weg-z]");
+  if (zl) {
+    const r = PLAN.zeilen[+zl.dataset.wegZ];
+    if (!confirm(`Zeile „${(r.nr + " " + r.tag).trim() || "leer"}“ löschen?`)) return;
+    PLAN.zeilen.splice(+zl.dataset.wegZ, 1);
+    geaendert(); zeichne(); return;
+  }
+  if (e.target.closest("#spalte-neu")) {
+    PLAN.spalten.push({ name: "", a: "F/M", b: "Uhrzeit" }); PLAN.zeilen.forEach((r) => r.z.push(["", ""]));
+    geaendert(); zeichne();
+    plan.querySelector(`[data-sp="${PLAN.spalten.length - 1}"][data-teil="name"]`)?.focus();
+    return;
+  }
+  if (e.target.closest("#zeile-neu")) {
+    PLAN.zeilen.push(leereZeile(PLAN.spalten.length, $("neu-grau").checked));
+    geaendert(); zeichne();
+    plan.querySelector(`[data-z="${PLAN.zeilen.length - 1}"][data-teil="nr"]`)?.focus();
+  }
+});
+plan.addEventListener("keydown", (e) => {
+  const f = e.target; if (!f.classList?.contains("feld")) return;
+  const td = f.closest("th,td"), tr = td.parentElement, i = [...tr.children].indexOf(td);
+  const nach = (r) => r?.children[i]?.querySelector("input");
+  let ziel = null;
+  if (e.key === "Enter" || e.key === "ArrowDown") ziel = nach(tr.nextElementSibling);
+  else if (e.key === "ArrowUp") ziel = nach(tr.previousElementSibling);
+  else if (e.key === "ArrowRight" && f.selectionStart === f.value.length) ziel = td.nextElementSibling?.querySelector("input");
+  else if (e.key === "ArrowLeft" && f.selectionStart === 0) ziel = td.previousElementSibling?.querySelector("input");
+  if (ziel) { e.preventDefault(); ziel.focus(); ziel.select(); }
+});
+$("drucken").addEventListener("click", () => { document.activeElement?.blur?.(); window.print(); });
+
+/* ---- Start ---- */
+(async () => {
+  let s = null;
+  try { s = await sitzung(); } catch (err) { console.error(err); }
+  $("pruefung").hidden = true;
+  if (!s || !darf(s, "dienstplan")) {
+    $("kein-zugang").hidden = false;
+    if (s) $("kein-zugang-text").textContent = "Dieser Zugang darf den Dienstplan nicht sehen. Ein Admin kann das im Admin Panel freischalten.";
+    if (s) leisteStarten(s, "dienstplan");
+    return;
+  }
+  ICH = s;
+  DARF_BEARBEITEN = darfZusatz(s, "dienstplan", "bearbeiten");
+  leisteStarten(s, "dienstplan");
+  $("modus").hidden = !DARF_BEARBEITEN;
+  $("unter").textContent = `Angemeldet als ${s.name}. Steht dein Name oben in der Tabelle, ist deine Spalte grün hinterlegt.`;
+  $("panel").hidden = false;
+  hinweisZeigen();
+  monatLaden();
+})();
+</script>
+</body>
+</html>

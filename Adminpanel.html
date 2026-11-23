@@ -341,7 +341,7 @@ const geraeteVon = (bid) => Object.values(geraete).filter((g) => g && g.benutzer
 const sortiert = () => Object.entries(benutzer).map(([bid, b]) => ({ bid, ...b })).sort((a, b) => (a.name || "").localeCompare(b.name || "", "de"));
 
 /* Kurze Namen für die Marken in der zugeklappten Zeile */
-const KURZ = { reinigung: "Reinigung", sportanlagen: "Sportanlagen", arbeitsplan: "Arbeitsplan", admin: "Admin" };
+const KURZ = { reinigung: "Reinigung", sportanlagen: "Sportanlagen", arbeitsplan: "Arbeitsplan", dienstplan: "Dienstplan", admin: "Admin" };
 function marken(b) {
   const bereiche = BEREICHE.map((f) => {
     const an = b.rechte?.[f.id] === true;
@@ -505,7 +505,7 @@ $("f-rechte").addEventListener("change", (e) => {
   if (unter) unter.hidden = !k.checked;
 });
 function rechteLesen() {
-  const rechte = { reinigung_tun: {}, sportanlagen_tun: {}, arbeitsplan_tun: {} };
+  const rechte = { reinigung_tun: {}, sportanlagen_tun: {}, arbeitsplan_tun: {}, dienstplan_tun: {} };
   BEREICHE.forEach((f) => { rechte[f.id] = false; });
   $("f-rechte").querySelectorAll("[data-recht]").forEach((k) => {
     const [bereich, recht] = k.dataset.recht.split(":");
@@ -590,7 +590,7 @@ $("formular").addEventListener("submit", async (e) => {
 });
 
 /* ---- Sicherungen ---- */
-const BEREICHE_SICHERUNG = ["putzplan", "arbeitsplan", "matten"];
+const BEREICHE_SICHERUNG = ["putzplan", "arbeitsplan", "matten", "dienstplan"];
 const datumSchluessel = (d) => new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Berlin" }).format(d);
 function zeitText(ts) {
   if (!ts) return "";
@@ -649,7 +649,11 @@ $("sicherungen").addEventListener("click", async (e) => {
   try {
     const daten = (await get(ref(db, `sicherungen/${tag}/daten`))).val() ?? {};
     const werte = {};
-    for (const b of BEREICHE_SICHERUNG) werte[b] = daten[b] ?? null;
+    for (const b of BEREICHE_SICHERUNG) {
+      /* Ältere Sicherungen kennen den Dienstplan noch nicht: dann bleibt er, wie er ist. */
+      if (b === "dienstplan" && !(b in daten)) continue;
+      werte[b] = daten[b] ?? null;
+    }
     await update(ref(db), werte);
     $("sicherung-meldung").textContent = `Stand vom ${tag} wiederhergestellt.`;
   } catch (err) {
