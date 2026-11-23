@@ -27,7 +27,7 @@ export const BEREICHE = [
   { id: "reinigung", name: "Hallenreinigung", seite: "./Reinigungsplan", zusatz: "Gereinigte Bereiche eintragen und einsehen" },
   { id: "sportanlagen", name: "Einstellungen Sportanlagen", seite: "./Sportanlagen", zusatz: "Status der Anlagen und der Tribüne einstellen" },
   { id: "arbeitsplan", name: "Aufgaben und Arbeitsplan", seite: "./Arbeitsplan", zusatz: "Aufgaben und Pfeile auf dem Hallenplan" },
-  { id: "dienstplan", name: "Dienstplan", seite: "./Dienstplan", zusatz: "Dienstplan des Monats ansehen und drucken" },
+  { id: "dienstplan", name: "Dienstplan", seite: "./Dienstplan", zusatz: "Ansehen und drucken kann jeder mit Code.", fuerAlle: true },
   { id: "admin", name: "Admin Panel", seite: "./Adminpanel", zusatz: "Benutzer, Codes, Rechte und Sicherungen" },
 ];
 
@@ -129,15 +129,16 @@ export async function sitzung() {
 }
 
 /* Darf die angemeldete Person diesen Bereich sehen? */
+const istFuerAlle = (bereich) => BEREICHE.some((f) => f.id === bereich && f.fuerAlle);   // sieht jeder mit Code
 export function darf(s, bereich) {
-  return !!s && (s.istAdmin || s.rechte?.[bereich] === true);
+  return !!s && (s.istAdmin || istFuerAlle(bereich) || s.rechte?.[bereich] === true);
 }
 
 /* Ein feineres Recht innerhalb eines Bereichs, z. B. darfZusatz(s, "reinigung", "uebermalen"). */
 export function darfZusatz(s, bereich, recht) {
   if (!s) return false;
   if (s.istAdmin) return true;
-  return s.rechte?.[bereich] === true && s.rechte?.[bereich + "_tun"]?.[recht] === true;
+  return (istFuerAlle(bereich) || s.rechte?.[bereich] === true) && s.rechte?.[bereich + "_tun"]?.[recht] === true;
 }
 
 /* Darf sie in diesem Bereich einstellen, für wen eingetragen wird? Ändert keine Rechte. */

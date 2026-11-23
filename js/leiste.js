@@ -27,12 +27,18 @@ const CSS = `
 .hkh-wer{flex:1 1 auto; min-width:0; display:flex; align-items:center; gap:8px; padding:0 6px; font:600 15px/1.1 Barlow, system-ui, -apple-system, "Segoe UI", sans-serif; color:var(--l-ink)}
 .hkh-wer span:last-child{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .hkh-punkt{flex:none; width:14px; height:14px; border-radius:50%; border:1px solid var(--l-ink)}
-.hkh-einst{position:fixed; z-index:61; right:calc(max(12px, env(safe-area-inset-right)) + 60px); bottom:calc(max(12px, env(safe-area-inset-bottom)) + 60px); min-width:200px; padding:6px; border-radius:14px; border:1px solid var(--l-line); background:var(--l-panel); color:var(--l-ink); box-shadow:var(--l-schatten); display:flex; flex-direction:column; gap:2px}
+.hkh-einst{position:fixed; z-index:61; right:calc(max(12px, env(safe-area-inset-right)) + 60px); bottom:calc(max(12px, env(safe-area-inset-bottom)) + var(--hkh-leiste-h, 62px)); min-width:200px; padding:6px; border-radius:14px; border:1px solid var(--l-line); background:var(--l-panel); color:var(--l-ink); box-shadow:var(--l-schatten); display:flex; flex-direction:column; gap:2px}
 .hkh-einst[hidden]{display:none}
 .hkh-einst button{display:flex; align-items:center; gap:10px; min-height:44px; padding:0 12px; border:0; border-radius:10px; background:none; color:var(--l-ink); font:500 15px Barlow, system-ui, -apple-system, "Segoe UI", sans-serif; text-align:left; cursor:pointer}
 .hkh-einst button:hover{background:color-mix(in srgb, var(--l-ink) 8%, transparent)}
 .hkh-leiste :focus-visible{outline:3px solid var(--l-akzent); outline-offset:2px}
-body.hkh-mit-leiste{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+body.hkh-mit-leiste{padding-bottom:calc(var(--hkh-leiste-h, 62px) + 14px + env(safe-area-inset-bottom))}
+/* Schmale Bildschirme: die Leiste wird zweizeilig, damit nichts abgeschnitten ist und nichts gescrollt werden muss. */
+@media (max-width:899px){
+  .hkh-band{height:auto; min-height:52px; flex-wrap:wrap; row-gap:2px}
+  .hkh-trenn{display:none}
+  .hkh-wer{flex:1 1 130px; min-height:42px}
+}
 `;
 
 const istDunkel = () => {
@@ -92,7 +98,16 @@ export function leisteStarten(sitz, aktiv = "") {
     schalter.setAttribute("aria-expanded", String(auf));
     try { localStorage.setItem("hkh-leiste", auf ? "auf" : "zu"); } catch (e) {}
     if (!auf) einstZu();
+    hoeheMelden();
   };
+  /* Wie hoch die Leiste gerade ist: danach richten sich Speichern-Leiste und Seitenabstand. */
+  const band = leiste.querySelector(".hkh-band");
+  const hoeheMelden = () => {
+    const h = leiste.dataset.offen === "true" ? Math.max(band.offsetHeight, 52) : 52;
+    document.documentElement.style.setProperty("--hkh-leiste-h", `${h + 10}px`);
+  };
+  hoeheMelden();
+  try { new ResizeObserver(hoeheMelden).observe(band); } catch (e) { window.addEventListener("resize", hoeheMelden); }
   schalter.addEventListener("click", () => setzeOffen(leiste.dataset.offen !== "true"));
   einstKnopf.addEventListener("click", (e) => {
     e.stopPropagation();
