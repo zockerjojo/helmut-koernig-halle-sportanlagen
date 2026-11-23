@@ -80,10 +80,10 @@ table.plan{border-collapse:separate; border-spacing:0; width:100%; min-width:900
 .plan td.kz.kurz{font-weight:700}
 .plan td.kz.ftg{font-weight:700; letter-spacing:.02em}
 .plan input.feld::placeholder{color:var(--ink-2); opacity:.8; font-weight:700}
-.plan .zeit{min-width:110px}
+.plan .zeit{width:100px; min-width:100px; max-width:100px}
 /* Spalten mit "von / bis" (wie bei Pap): beide Hälften gleich breit, wie auf dem Papier */
 .plan .vb{width:64px; min-width:64px; max-width:64px}
-.plan .ver{min-width:320px; max-width:560px}
+.plan .ver{min-width:320px}
 .plan th.ich,.plan td.ich{background:var(--ich)}
 .plan tr.we td.ich{background:color-mix(in srgb, var(--ich) 55%, var(--wochenende))}
 .plan th.ich{color:var(--accent)}
@@ -119,7 +119,11 @@ body.mit-speichern{padding-bottom:calc(var(--hkh-leiste-h, 62px) + 90px + env(sa
 html.tablett h1, html.tablett #unter, html.tablett #hinweis, html.tablett #drucken, html.tablett .zoom, html.tablett .kopf{display:none !important}
 html.tablett .wrap{max-width:none; padding:0 12px 12px}
 html.tablett .leiste{margin:8px 0 6px}
-html.tablett .druckkopf{display:flex}
+html.tablett .druckkopf{display:flex; align-items:center; margin:8px 0 8px}
+html.tablett #druck-monat{display:none}
+html.tablett .leiste{display:none !important}
+html.tablett .druckkopf .monat strong{font-family:var(--body); font-weight:500; font-size:28px; text-transform:none; min-width:0; padding:0 6px}
+html.tablett .druckkopf .monat{padding:2px}
 html.tablett .rahmen{overflow:hidden}
 html.tablett table.plan{min-width:0}
 .druckkopf b{font-size:28px; font-weight:500}
@@ -142,7 +146,12 @@ html.tablett table.plan{min-width:0}
   .plan tbody tr:last-child > *{border-bottom:0}
   .plan th.nr,.plan td.nr,.plan th.tag,.plan td.tag{position:static; box-shadow:none}
   table.plan{zoom:1 !important}
-  .plan .ver{min-width:0; max-width:none; width:30%}
+  .plan .ver{min-width:0; max-width:none; width:auto}
+  .plan .zeit{width:86px; min-width:86px; max-width:86px}
+  .plan .vb{width:46px; min-width:46px; max-width:46px}
+  /* Auf dem Tablet sitzen die Monatspfeile im Kopf: im Druck nur der Monat als Überschrift */
+  .druckkopf .monat{display:none !important}
+  #druck-monat{display:inline !important}
   .plan thead tr:nth-child(2) th{font-size:inherit}
   .plan tbody tr.heute td.nr,.plan tbody tr.heute td.tag,.plan th.ich{color:#000; font-weight:inherit}
   .stand{color:#000}
@@ -183,13 +192,13 @@ html.tablett table.plan{min-width:0}
   </div>
   <p class="hinweis" id="hinweis"></p>
 
+  <div class="druckkopf"><b id="druck-titel">Dienstplan HKH</b><b id="druck-monat"></b></div>
   <div class="leer" id="leer" hidden>
     <p class="muted" id="leer-text">Für diesen Monat gibt es noch keinen Dienstplan.</p>
     <button class="knopf primaer" type="button" id="anlegen" hidden>Dienstplan für diesen Monat anlegen</button>
   </div>
 
   <div id="plan-bereich" hidden>
-    <div class="druckkopf"><b id="druck-titel">Dienstplan HKH</b><b id="druck-monat"></b></div>
     <div class="rahmen" id="rahmen"><table class="plan" id="plan"></table></div>
     <p class="stand" id="stand"></p>
   </div>
@@ -604,6 +613,8 @@ rahmen.addEventListener("touchend", (e) => { if (finger && e.touches.length < 2)
   $("unter").textContent = `Angemeldet als ${s.name}. Steht dein Name oben in der Tabelle, ist deine Spalte grün hinterlegt.`;
   $("panel").hidden = false;
   hinweisZeigen();
+  /* Tablet: die Monatstaste steht rechts im Kopf, genau da, wo sonst der Monat steht */
+  if (window.HKH_TABLETT) document.querySelector(".druckkopf").appendChild(document.querySelector(".monat"));
   monatLaden();
 })();
 </script>

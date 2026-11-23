@@ -391,6 +391,18 @@ a.ghost{display:flex;align-items:center;justify-content:center;gap:2px;color:var
     </div>
   </div>
 
+  <div class="shade" id="sh-note1">
+    <div class="sheet" role="dialog" aria-labelledby="h-note1">
+      <h2 id="h-note1">Notiz</h2>
+      <p id="note1-text" style="margin:0;color:var(--ink);font-size:17px;line-height:1.4;white-space:pre-wrap;overflow-wrap:anywhere"></p>
+      <p id="note1-meta" style="margin:0;font-size:14px;color:var(--ink-2)"></p>
+      <div class="acts">
+        <button class="ghost" id="note1-alle" type="button">Alle Notizen</button>
+        <button class="primary" id="note1-zu" type="button">Schließen</button>
+      </div>
+    </div>
+  </div>
+
   <div class="shade" id="sh-notes">
     <div class="sheet" role="dialog" aria-labelledby="h-notes">
       <h2 id="h-notes">Notizen</h2>
@@ -948,9 +960,26 @@ function midDist(){
   var a=Array.from(ptrs.values());
   return{x:(a[0].x+a[1].x)/2,y:(a[0].y+a[1].y)/2,d:Math.max(1,Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y))};
 }
+/* Eine Notiz antippen öffnet sie. Der Trefferbereich ist auf dem Bildschirm
+   mindestens so groß wie eine Fingerkuppe, auch wenn der Plan klein gezoomt ist. */
+function pinRadius(x,y){
+  var a=toWorld(x,y),b=toWorld(x+24,y);
+  return Math.max(13,Math.hypot(b.x-a.x,b.y-a.y));
+}
+function openNote(i){
+  var n=notes[i];if(!n)return;
+  $("h-note1").textContent="Notiz "+(i+1);
+  $("note1-text").textContent=n.t;
+  $("note1-meta").textContent=n.by+", "+n.d;
+  show("sh-note1",true);
+}
+$("note1-zu").addEventListener("click",function(){show("sh-note1",false)});
+$("note1-alle").addEventListener("click",function(){show("sh-note1",false);openNotes(-1)});
+$("sh-note1").addEventListener("click",function(e){if(e.target===this)show("sh-note1",false)});
 function tap(x,y){
-  var p=toWorld(x,y);
-  for(var i=notes.length-1;i>=0;i--){if(Math.hypot(notes[i].x-p.x,notes[i].y-p.y)<13){openNotes(i);return}}
+  var p=toWorld(x,y),r=pinRadius(x,y),best=-1,bd=1e9;
+  for(var i=notes.length-1;i>=0;i--){var d=Math.hypot(notes[i].x-p.x,notes[i].y-p.y);if(d<r&&d<bd){bd=d;best=i}}
+  if(best>=0){openNote(best);return}
   if(S.mode==="note"){
     p={x:clamp(p.x,0,W0),y:clamp(p.y,0,H0)};
     openEdit(p);return;
@@ -978,8 +1007,8 @@ svg.addEventListener("pointerdown",function(e){
     gesture="stroke";act={sx:e.clientX,sy:e.clientY,moved:false,items:null,changed:false};
     lockStroke(toWorld(e.clientX,e.clientY));
   }else{
-    var w0=toWorld(e.clientX,e.clientY),ni=-1;
-    for(var i=notes.length-1;i>=0;i--){if(Math.hypot(notes[i].x-w0.x,notes[i].y-w0.y)<13){ni=i;break}}
+    var w0=toWorld(e.clientX,e.clientY),ni=-1,r0=pinRadius(e.clientX,e.clientY);
+    for(var i=notes.length-1;i>=0;i--){if(Math.hypot(notes[i].x-w0.x,notes[i].y-w0.y)<r0){ni=i;break}}
     if(ni>=0){gesture="note";nd={id:notes[ni].id,sx:e.clientX,sy:e.clientY,moved:false,x:notes[ni].x,y:notes[ni].y,x0:notes[ni].x,y0:notes[ni].y}}
     else{gesture="pan";pan={sx:e.clientX,sy:e.clientY,moved:false,A:toOuter(e.clientX,e.clientY)}}
   }
@@ -1069,6 +1098,9 @@ function openNotes(hot){
     var meta=document.createElement("span");meta.className="meta";meta.textContent=n.by+", "+n.d;tx.appendChild(meta);
     var del=document.createElement("button");del.textContent="Löschen";del.setAttribute("aria-label","Notiz "+(i+1)+" löschen");
     del.addEventListener("click",function(){var gone=notes.splice(i,1)[0];drawPins();save();if(gone){putNoteDel(gone.id);pushOp({k:"note-del",n:JSON.parse(JSON.stringify(gone))})}openNotes(-1)});
+    tx.style.cursor="pointer";tx.setAttribute("role","button");tx.tabIndex=0;
+    tx.addEventListener("click",function(){show("sh-notes",false);openNote(i)});
+    tx.addEventListener("keydown",function(ev){if(ev.key==="Enter"){show("sh-notes",false);openNote(i)}});
     row.appendChild(num);row.appendChild(tx);row.appendChild(del);box.appendChild(row);
     if(i===hot)setTimeout(function(){try{row.scrollIntoView({block:"nearest"})}catch(e){}},30);
   });
