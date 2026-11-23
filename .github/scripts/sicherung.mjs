@@ -10,7 +10,7 @@
  */
 import { readFileSync } from "node:fs";
 
-const BEREICHE = ["putzplan", "arbeitsplan", "matten"];
+const BEREICHE = ["putzplan", "arbeitsplan", "matten", "dienstplan"];
 const BEHALTEN = 7;
 
 const code = process.env.ADMIN_CODE;
