@@ -7,11 +7,11 @@
   /* Direkt aufgerufen: in die Tablett-Hülle, damit die Adresse gleich bleibt und das Vollbild hält */
   if (window.top === window) { location.replace("/Tablett/#" + name); return; }
   try {
-    var Z = await import("../js/zugang.js");
+    var Z = await import("../js/zugang.js?v=1795469423");
     var s = await Z.sitzung();
     if (!s) { location.replace("/Tablett/"); return; }
     var html = await (await fetch("../" + name + ".html", { cache: "no-cache" })).text();
-    var kopf = '<base href="../"><script src="/Tablett/schutz.js"><\/script>';
+    var kopf = '<base href="../"><script src="/Tablett/schutz.js?v=1795469423"><\/script>';
     html = html.replace(/<head>/i, "<head>" + kopf);
     document.open();
     document.write(html);
