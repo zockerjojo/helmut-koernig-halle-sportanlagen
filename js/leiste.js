@@ -70,8 +70,9 @@ export function leisteStarten(sitz, aktiv = "") {
   const bereiche = BEREICHE.filter((f) => darf(sitz, f.id)).sort((x, y) => rang(x.id) - rang(y.id));
   leiste = document.createElement("div");
   leiste.className = "hkh-leiste";
-  /* Auf dem Pausenraum-Tablett zeigen alle Links auf die Tablett-Seiten, und es gibt kein Abmelden. */
-  const tab = !!sitz.tablett;
+  /* Auf dem Pausenraum-Tablett gibt es keine Leiste: die Knöpfe stehen oben in der Tablett-Hülle. */
+  if (sitz?.tablett) return;
+  const tab = false;
   const ziel = (seite) => (tab ? seite.replace(/^\.\//, "./Tablett/") : seite);
   let offen = tab;
   if (!tab) try { offen = localStorage.getItem("hkh-leiste") === "auf"; } catch (e) {}
