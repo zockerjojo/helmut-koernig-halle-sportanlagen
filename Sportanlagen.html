@@ -20,9 +20,6 @@
   --body:Barlow,system-ui,-apple-system,"Segoe UI",sans-serif;
   color-scheme:light;
 }
-:root[data-theme="light"]:not(.tablett){--schrift-plus:4px}
-@media not (prefers-color-scheme: dark){:root:not([data-theme="dark"]):not(.tablett){--schrift-plus:4px}}
-@media print{:root{--schrift-plus:0px !important}}
 :root[data-theme="dark"]{
   --bg:#0F1512; --panel:#18211C; --ink:#E7EEE9; --ink-2:#9BAAA1; --line:#33413A;
   --accent:#4CC38A; --on-accent:#06150E; --fehler:#F2766B;
@@ -30,10 +27,10 @@
 }
 *{box-sizing:border-box}
 [hidden]{display:none !important}
-body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:calc(16px + var(--schrift-plus,0px)); line-height:1.4}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:16px; line-height:1.4}
 .wrap{max-width:900px; margin:0 auto; padding:0 20px 40px}
 .kopf{display:flex; justify-content:space-between; align-items:center; gap:12px 16px; flex-wrap:wrap; padding-top:24px}
-.marke{font-family:var(--display); font-weight:600; font-size:calc(24px + var(--schrift-plus,0px)); line-height:1; letter-spacing:.04em; text-transform:uppercase}
+.marke{font-family:var(--display); font-weight:600; font-size:24px; line-height:1; letter-spacing:.04em; text-transform:uppercase}
 .werkzeuge{display:flex; align-items:center; gap:10px 12px; flex-wrap:wrap}
 .thema-knopf{display:inline-flex; align-items:center; justify-content:center; flex:none; width:44px; height:44px; padding:0; border-radius:50%; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; touch-action:manipulation}
 .thema-knopf:hover{border-color:var(--ink)}
@@ -41,22 +38,22 @@ body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); 
 .thema-knopf .sonne{display:none}
 :root[data-theme="dark"] .thema-knopf .sonne{display:block}
 :root[data-theme="dark"] .thema-knopf .mond{display:none}
-.knopf{font:inherit; font-size:calc(15px + var(--schrift-plus,0px)); font-weight:600; min-height:44px; padding:8px 18px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer}
+.knopf{font:inherit; font-size:15px; font-weight:600; min-height:44px; padding:8px 18px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer}
 .knopf.primaer{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
 .knopf[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
 a.knopf{display:inline-flex; align-items:center; justify-content:center; gap:4px; text-decoration:none}
 #auswahl{padding-left:12px}
 a.knopf svg{flex:none; width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
 button:focus-visible, input:focus-visible, a:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
-h1{margin:0; font-family:var(--display); font-weight:600; font-size:calc(clamp(32px, 8vw, 44px) + var(--schrift-plus,0px)); line-height:1; text-wrap:balance}
-.muted{margin:0; font-size:calc(15px + var(--schrift-plus,0px)); color:var(--ink-2)}
-.meldung{margin:0; min-height:20px; font-size:calc(14px + var(--schrift-plus,0px)); color:var(--ink-2)}
+h1{margin:0; font-family:var(--display); font-weight:600; font-size:clamp(32px, 8vw, 44px); line-height:1; text-wrap:balance}
+.muted{margin:0; font-size:15px; color:var(--ink-2)}
+.meldung{margin:0; min-height:20px; font-size:14px; color:var(--ink-2)}
 .meldung.fehler{color:var(--fehler)}
 .stapel{display:flex; flex-direction:column; gap:16px}
 .anmeldung{max-width:420px; margin:48px auto 0; display:flex; flex-direction:column; gap:16px}
-.feld{display:flex; flex-direction:column; gap:6px; font-size:calc(15px + var(--schrift-plus,0px)); color:var(--ink-2)}
-.feld textarea{font:inherit; font-size:calc(16px + var(--schrift-plus,0px)); line-height:1.4; color:var(--ink); background:var(--bg); padding:10px 12px; border:1px solid var(--line); border-radius:10px; width:100%; resize:vertical; min-height:96px}
-input[type="password"], input[type="text"], input[type="date"], input[type="time"]{font:inherit; font-size:calc(16px + var(--schrift-plus,0px)); color:var(--ink); background:var(--panel); min-height:44px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; width:100%; min-width:0}
+.feld{display:flex; flex-direction:column; gap:6px; font-size:15px; color:var(--ink-2)}
+.feld textarea{font:inherit; font-size:16px; line-height:1.4; color:var(--ink); background:var(--bg); padding:10px 12px; border:1px solid var(--line); border-radius:10px; width:100%; resize:vertical; min-height:96px}
+input[type="password"], input[type="text"], input[type="date"], input[type="time"]{font:inherit; font-size:16px; color:var(--ink); background:var(--panel); min-height:44px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; width:100%; min-width:0}
 /* Augen-Taste: blendet den eingegebenen Code ein und aus */
 .feld-eingabe{position:relative; display:flex}
 .feld-eingabe input{padding-right:52px}
@@ -78,25 +75,25 @@ input[type="password"], input[type="text"], input[type="date"], input[type="time
 /* Besucherzahlen der öffentlichen Anzeige */
 .zahlen{display:flex; flex-wrap:wrap; gap:14px 28px}
 .zahl{display:flex; flex-direction:column; gap:2px}
-.zahl b{font-family:var(--display); font-weight:600; font-size:calc(30px + var(--schrift-plus,0px)); line-height:1}
-.zahl span{font-size:calc(14px + var(--schrift-plus,0px)); color:var(--ink-2)}
+.zahl b{font-family:var(--display); font-weight:600; font-size:30px; line-height:1}
+.zahl span{font-size:14px; color:var(--ink-2)}
 .balken{display:flex; flex-direction:column; gap:5px}
-.balken-zeile{display:grid; grid-template-columns:72px minmax(0,1fr) 36px; align-items:center; gap:10px; font-size:calc(14px + var(--schrift-plus,0px))}
+.balken-zeile{display:grid; grid-template-columns:72px minmax(0,1fr) 36px; align-items:center; gap:10px; font-size:14px}
 .balken-tag{color:var(--ink-2); font-variant-numeric:tabular-nums}
 .balken-feld{display:block; width:100%; height:10px; border-radius:999px; background:var(--line)}
 .balken-strich{display:block; height:100%; min-width:3px; border-radius:999px; background:var(--accent)}
 .balken-zahl{text-align:right; font-variant-numeric:tabular-nums}
 .karte-kopf{display:flex; flex-direction:column; gap:4px}
-.karte h2{margin:0; font-family:var(--display); font-weight:600; font-size:calc(30px + var(--schrift-plus,0px)); line-height:1.05; text-wrap:balance; overflow-wrap:anywhere}
+.karte h2{margin:0; font-family:var(--display); font-weight:600; font-size:30px; line-height:1.05; text-wrap:balance; overflow-wrap:anywhere}
 fieldset{border:0; margin:0; padding:0; min-width:0; display:flex; flex-direction:column; gap:8px}
-legend{font-size:calc(14px + var(--schrift-plus,0px)); color:var(--ink-2); padding:0 0 6px}
+legend{font-size:14px; color:var(--ink-2); padding:0 0 6px}
 .wahl label{display:flex; align-items:center; gap:12px; min-height:44px; padding:8px 12px; border:1px solid var(--line); border-radius:10px; cursor:pointer; color:var(--ink)}
 .wahl input{width:20px; height:20px; margin:0; accent-color:var(--accent); flex:none}
 .zeit{display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); gap:12px}
 .punkt{display:inline-block; flex:none; width:12px; height:12px; border-radius:50%}
 .punkt.gruen{background:var(--gruen)}
 .punkt.rot{background:var(--rot)}
-.kasten{margin:6px 0 0; padding:8px 10px; border-radius:10px; color:var(--weiss); font-family:var(--display); font-weight:600; font-size:calc(18px + var(--schrift-plus,0px)); line-height:1.15}
+.kasten{margin:6px 0 0; padding:8px 10px; border-radius:10px; color:var(--weiss); font-family:var(--display); font-weight:600; font-size:18px; line-height:1.15}
 .kasten.gruen{background:var(--gruen)}
 .kasten.rot{background:var(--rot)}
 /* Am PC: breiter, drei Anlagen nebeneinander */
@@ -107,12 +104,12 @@ legend{font-size:calc(14px + var(--schrift-plus,0px)); color:var(--ink-2); paddi
 /* Einheitlicher Kopf auf allen Personalseiten: Logo, darunter-/daneben "Helmut-Körnig-Halle" und "Personal" wie auf der Startseite */
 .hkh-kopf{display:inline-flex !important; align-items:center; gap:10px; min-width:0; flex:none; text-decoration:none; color:inherit; border-radius:6px}
 .hkh-kopf img{flex:none; display:block; height:34px !important; width:auto}
-.hkh-marke{display:flex; flex-direction:column; gap:2px; margin:0; font-family:Barlow, system-ui, -apple-system, "Segoe UI", sans-serif; font-size:calc(13px + var(--schrift-plus,0px)); font-weight:500; line-height:1.15; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2)}
+.hkh-marke{display:flex; flex-direction:column; gap:2px; margin:0; font-family:Barlow, system-ui, -apple-system, "Segoe UI", sans-serif; font-size:13px; font-weight:500; line-height:1.15; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2)}
 #panel{margin-top:22px}
 /* Speichern-Leiste: erscheint, sobald etwas geändert wurde, immer unten sichtbar (über der Personal-Leiste) */
 .speicher-leiste{position:fixed; z-index:58; left:max(12px, env(safe-area-inset-left)); right:max(12px, env(safe-area-inset-right)); bottom:calc(max(12px, env(safe-area-inset-bottom)) + var(--hkh-leiste-h, 62px)); max-width:640px; margin:0 auto; display:flex; align-items:center; gap:10px; padding:8px 8px 8px 16px; border-radius:16px; border:1px solid var(--accent); background:var(--panel); box-shadow:0 6px 24px rgba(20,32,27,.22)}
 .speicher-leiste[hidden]{display:none}
-.speicher-text{flex:1 1 auto; min-width:0; font-size:calc(14px + var(--schrift-plus,0px)); font-weight:600; color:var(--ink)}
+.speicher-text{flex:1 1 auto; min-width:0; font-size:14px; font-weight:600; color:var(--ink)}
 .speicher-text.fehler{color:var(--fehler)}
 body.mit-speichern{padding-bottom:calc(var(--hkh-leiste-h, 62px) + 90px + env(safe-area-inset-bottom))}
 .karte.geaendert{border-color:var(--accent); box-shadow:inset 4px 0 0 var(--accent)}
@@ -155,7 +152,7 @@ body.mit-speichern{padding-bottom:calc(var(--hkh-leiste-h, 62px) + 90px + env(sa
 
   <section class="karte" id="aushang-karte" hidden>
     <div class="karte-kopf">
-      <h2 style="margin:0; font-family:var(--display); font-weight:600; font-size:calc(26px + var(--schrift-plus,0px)); line-height:1">Aushang am Sportlereingang</h2>
+      <h2 style="margin:0; font-family:var(--display); font-weight:600; font-size:26px; line-height:1">Aushang am Sportlereingang</h2>
       <p class="muted">Steht hier nichts, zeigt die Startseite „Infos folgen.“</p>
     </div>
     <label class="feld">Text
@@ -166,7 +163,7 @@ body.mit-speichern{padding-bottom:calc(var(--hkh-leiste-h, 62px) + 90px + env(sa
       <button class="knopf" id="aushang-leeren" type="button">Leeren</button>
       <span class="meldung" id="aushang-meldung" aria-live="polite"></span>
     </div>
-    <p class="muted" id="aushang-stand" style="font-size:calc(14px + var(--schrift-plus,0px))"></p>
+    <p class="muted" id="aushang-stand" style="font-size:14px"></p>
   </section>
 
   <div class="liste" id="liste"></div>

@@ -20,9 +20,6 @@
   --body:Barlow,system-ui,-apple-system,"Segoe UI",sans-serif;
   color-scheme:light;
 }
-:root[data-theme="light"]:not(.tablett){--schrift-plus:4px}
-@media not (prefers-color-scheme: dark){:root:not([data-theme="dark"]):not(.tablett){--schrift-plus:4px}}
-@media print{:root{--schrift-plus:0px !important}}
 :root[data-theme="dark"]{
   --bg:#0F1512; --panel:#18211C; --ink:#E7EEE9; --ink-2:#9BAAA1; --line:#33413A;
   --accent:#4CC38A; --on-accent:#06150E; --fehler:#F2766B;
@@ -97,19 +94,6 @@ table.plan{border-collapse:separate; border-spacing:0; width:100%; min-width:138
 .plan .vb{width:64px; min-width:64px; max-width:64px}
 /* Veranstaltung nimmt den restlichen Platz; zu lange Texte enden mit … (im Druck vollständig) */
 .plan .ver{width:100%; max-width:1px}
-/* Hell: Zeilen wachsen mit der größeren Schrift (nur auf dem Bildschirm, nicht im Druck und nicht auf dem Tablet) */
-@media screen{
-:root[data-theme="light"]:not(.tablett) .plan th,:root[data-theme="light"]:not(.tablett) .plan td{height:auto; line-height:1.3; padding-top:3px; padding-bottom:3px}
-:root[data-theme="light"]:not(.tablett) .plan td.ver{white-space:normal; overflow:visible}
-:root[data-theme="light"]:not(.tablett) .plan input.feld{height:auto; min-height:25px; line-height:1.3; padding-top:3px; padding-bottom:3px}
-:root[data-theme="light"] .plan input.feld::placeholder{opacity:1}
-:root[data-theme="light"] .plan tbody tr.heute td.nr,:root[data-theme="light"] .plan tbody tr.heute td.tag,:root[data-theme="light"] .plan th.ich{color:var(--ink)}
-:root[data-theme="light"]:not(.tablett) .plan tbody td{font-weight:600}
-:root[data-theme="light"]:not(.tablett) .plan tbody td.zeit{white-space:normal; overflow-wrap:anywhere}
-:root[data-theme="light"]:not(.tablett) .plan tbody input.feld{font-weight:600}
-:root[data-theme="light"]:not(.tablett) .plan thead tr:nth-child(2) th{font-weight:600}
-:root[data-theme="light"]:not(.tablett) .plan tbody td.kz.kurz,:root[data-theme="light"]:not(.tablett) .plan tbody td.kz.ftg,:root[data-theme="light"]:not(.tablett) .plan tbody tr.heute td.nr,:root[data-theme="light"]:not(.tablett) .plan tbody tr.heute td.tag,:root[data-theme="light"]:not(.tablett) .plan tbody input.feld.kurz{font-weight:700}
-}
 /* Zu lange Veranstaltung: antippen zeigt den ganzen Text, noch einmal antippen klappt ihn wieder zu */
 .plan td.ver.offen{white-space:normal; overflow:visible; line-height:1.3; height:auto; padding:4px 6px}
 @media (max-width:899px){ .plan td.ver{text-align:left} }
