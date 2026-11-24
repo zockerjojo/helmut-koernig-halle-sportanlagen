@@ -35,8 +35,6 @@ body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); 
 .kopf-knoepfe{display:flex; gap:10px; flex:none}
 .rund-knopf{display:inline-flex; align-items:center; justify-content:center; flex:none; width:44px; height:44px; padding:0; border-radius:50%; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; touch-action:manipulation}
 .rund-knopf:hover{border-color:var(--ink)}
-/* Filter aktiv: gelber Ring um das Filter-Symbol */
-#filter-knopf[aria-pressed="true"]{border:2px solid #F5C400; box-shadow:0 0 0 2px #F5C400}
 .rund-knopf svg{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
 #verlauf-knopf[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
 .rund-knopf .sonne{display:none}
@@ -145,6 +143,9 @@ textarea{resize:vertical; line-height:1.35}
 .verlauf .zeile{display:flex; flex-direction:column; gap:2px; min-width:0}
 .verlauf .wann{font-size:calc(13px + var(--schrift-plus,0px)); color:var(--ink-2)}
 #alle-liste li{align-items:center}
+.listen-kopf{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 12px}
+html.tablett #alle-zeigen{display:none !important}
+@media print{#alle-zeigen{display:none !important}}
 #alle-liste .zeile{flex:1 1 auto}
 .hin-knopf{flex:none; width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center; padding:0; border:1px solid var(--line); border-radius:10px; background:var(--panel); color:var(--ink); cursor:pointer}
 .hin-knopf:hover{border-color:var(--ink)}
@@ -355,7 +356,10 @@ textarea{resize:vertical; line-height:1.35}
   </section>
 
   <section class="tafel" id="listen-tafel">
-    <h2>Alle Aufgaben</h2>
+    <div class="listen-kopf">
+      <h2 id="listen-titel">Alle Aufgaben</h2>
+      <button class="knopf klein" id="alle-zeigen" type="button" disabled>Alle anzeigen</button>
+    </div>
     <p class="muted" id="alle-hinweis">Oben steht die höchste Priorität (Prio 1). Neue Aufgaben kommen unten dazu. Die Aufgabe am Griff nach oben oder unten ziehen.</p>
     <ul class="verlauf" id="alle-liste" style="max-height:none"></ul>
     <p class="muted" id="alle-leer" hidden>Noch nichts eingetragen. Tippe oben auf „Aufgabe“ und dann auf den Plan.</p>
@@ -457,8 +461,10 @@ async function seiteStarten() {
   if (!PERSONEN.some((x) => x.n === si.name)) PERSONEN.unshift({ bid: si.bid, n: si.name, c: si.farbe });
   zeigeBereich(true);
   rechteAnwenden();
-  /* Von Anfang an gefiltert: die eigenen Aufgaben und die für alle. "Alle zeigen" hebt das auf. */
-  if (!si.tablett) { S.nurPersonen = [si.name, OHNE]; filterPersonenZeichnen(); }
+  /* Von Anfang an gefiltert: die eigenen Aufgaben und die für alle. "Alle zeigen" hebt das auf.
+     Der Admin sieht von Anfang an alle Aufgaben. */
+  if (!si.tablett && !si.istAdmin) S.nurPersonen = [si.name, OHNE];
+  filterPersonenZeichnen();
   starteSync();
 }
 /* Blendet aus, was dieser Zugang nicht darf. Die Datenbank prüft es zusätzlich. */
@@ -1623,6 +1629,9 @@ function filterPersonenZeichnen() {
     ? "Es werden alle Einträge gezeigt."
     : `Gezeigt werden nur: ${gewaehlt.join(", ")}.`;
   $("filter-knopf").setAttribute("aria-pressed", String(S.nurPersonen.length > 0));
+  /* Überschrift der Liste und der Knopf "Alle anzeigen" folgen dem Filter. */
+  $("listen-titel").textContent = listenTitel();
+  $("alle-zeigen").disabled = S.nurPersonen.length === 0;
 }
 function filterAnwenden() {
   filterPersonenZeichnen();
@@ -1647,6 +1656,21 @@ $("filter-personen").addEventListener("click", (e) => {
 });
 $("filter-alle").addEventListener("click", () => { S.nurPersonen = []; filterAnwenden(); });
 $("filter-zu").addEventListener("click", () => { $("filter-tafel").hidden = true; });
+/* Die Überschrift der Liste zeigt, was gerade zu sehen ist. */
+function listenTitel() {
+  if (S.nurPersonen.length === 0) return "Alle Aufgaben";
+  const namen = S.nurPersonen.filter((x) => x !== OHNE);
+  const ohne = S.nurPersonen.includes(OHNE);
+  if (namen.length === 0) return "Aufgaben für alle";
+  if (ICH && ohne && namen.length === 1 && namen[0] === ICH.name) return "Meine Aufgaben";
+  return "Aufgaben von " + namen.join(", ") + (ohne ? " und für alle" : "");
+}
+/* "Alle anzeigen" wirkt nur, solange ein Filter aktiv ist. */
+$("alle-zeigen").addEventListener("click", () => {
+  if (S.nurPersonen.length === 0) return;
+  S.nurPersonen = [];
+  filterAnwenden();
+});
 
 /* ---- Liste aller Aufgaben: offene nach Prio, erledigte darunter ---- */
 function alleZeichnen() {

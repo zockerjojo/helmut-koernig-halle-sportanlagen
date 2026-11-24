@@ -111,6 +111,13 @@ table.plan{border-collapse:separate; border-spacing:0; width:100%; min-width:138
 .plan td.nr input.feld{text-align:right}
 .plan input.feld.kurz{font-weight:700}
 .plan thead input.feld{font-weight:600}
+/* Hell: Tabelleninhalt und die zweite Kopfzeile (Datum, F/M, Uhrzeit) sind halbfett und schwarz, damit die Schrift links so gut lesbar ist wie das F. Nur auf dem Bildschirm. */
+@media screen{
+:root[data-theme="light"] .plan tbody td{font-weight:600; color:var(--ink)}
+:root[data-theme="light"] .plan thead tr:nth-child(2) th{font-weight:600; color:var(--ink)}
+:root[data-theme="light"] .plan tbody input.feld{font-weight:600; color:var(--ink)}
+@media not (prefers-color-scheme: dark){:root:not([data-theme="dark"]) .plan tbody td{font-weight:600; color:var(--ink)} :root:not([data-theme="dark"]) .plan thead tr:nth-child(2) th{font-weight:600; color:var(--ink)} :root:not([data-theme="dark"]) .plan tbody input.feld{font-weight:600; color:var(--ink)}}
+}
 .kopf-zelle{display:flex; align-items:center}
 .kopf-zelle input{flex:1 1 auto}
 .x-knopf{flex:none; width:28px; height:28px; border:0; background:none; color:var(--ink-2); cursor:pointer; display:flex; align-items:center; justify-content:center; border-radius:6px; margin:auto}
