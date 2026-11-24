@@ -9,6 +9,8 @@
 
   var stil = document.createElement("style");
   stil.textContent = [
+    /* Schrift auf dem Tablet zwei Stufen größer (alle Seiten) */
+    "html.tablett{--schrift-plus:2px}",
     /* überall: keine Personal-Leiste, Logo ohne Link-Gefühl */
     "html.tablett .hkh-leiste { display:none !important }",
     "html.tablett body { padding-bottom:16px !important }",
@@ -22,7 +24,7 @@
     "html.tablett .wrap:has(#listen-tafel) > .kopf, html.tablett #live-text, html.tablett #karten-hinweis { display:none !important }",
     "html.tablett #panel:has(#listen-tafel):not([hidden]) { display:grid !important; grid-template-columns:minmax(0,1fr) minmax(340px,32%); grid-template-rows:auto auto minmax(0,1fr); column-gap:12px; row-gap:10px; height:calc(100vh - 24px); padding-top:0 !important; margin:0 !important }",
     /* Überschriften auf dem Tablet wie beim Dienstplan ("Dienstplan HKH") */
-    "html.tablett #panel:has(#listen-tafel) > h1, html.tablett #app .top h1 { font-family:Barlow, system-ui, -apple-system, 'Segoe UI', sans-serif !important; font-weight:500 !important; font-size:28px !important; line-height:1.15 !important; text-transform:none !important; letter-spacing:0 !important }",
+    "html.tablett #panel:has(#listen-tafel) > h1, html.tablett #app .top h1 { font-family:Barlow, system-ui, -apple-system, 'Segoe UI', sans-serif !important; font-weight:500 !important; font-size:calc(28px + var(--schrift-plus,0px)) !important; line-height:1.15 !important; text-transform:none !important; letter-spacing:0 !important }",
     "html.tablett #panel:has(#listen-tafel) > h1 { grid-column:1 / -1; grid-row:1 }",
     /* Reinigungsplan: Logo und Hallenname unter der Leiste weg */
     "html.tablett #app .top .brand .hkh-kopf { display:none !important }",
