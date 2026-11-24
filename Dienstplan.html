@@ -34,7 +34,7 @@ body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); 
 .hkh-kopf{display:inline-flex; align-items:center; gap:10px; min-width:0; flex:none; text-decoration:none; color:inherit; border-radius:6px}
 .hkh-kopf img{flex:none; display:block; height:34px; width:auto}
 .hkh-marke{display:flex; flex-direction:column; gap:2px; margin:0; font-family:var(--body); font-size:13px; font-weight:500; line-height:1.15; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2)}
-h1{margin:22px 0 4px; font-family:var(--display); font-weight:600; font-size:clamp(32px, 8vw, 44px); line-height:1; text-transform:uppercase}
+h1{margin:22px 0 4px; font-family:var(--display); font-weight:600; font-size:clamp(32px, 8vw, 44px); line-height:1}
 .muted{margin:0; font-size:15px; color:var(--ink-2)}
 .knopf{font:inherit; font-size:15px; font-weight:600; min-height:42px; padding:8px 16px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer; display:inline-flex; align-items:center; gap:8px; text-decoration:none}
 .knopf.primaer{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
@@ -45,10 +45,17 @@ button:focus-visible, a:focus-visible{outline:3px solid var(--accent); outline-o
 .leiste{display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:16px 0 12px}
 .titelzeile{display:flex; flex-wrap:wrap; align-items:center; gap:12px 20px; margin:22px 0 14px}
 .titelzeile h1{margin:0}
+@media (max-width:560px){
+  .titelzeile{flex-wrap:nowrap; gap:10px; justify-content:space-between}
+  .titelzeile h1{font-size:28px; min-width:0}
+  .titelzeile .monat{flex:none; gap:0; padding:2px}
+  .titelzeile .monat button{width:34px; height:34px; font-size:20px}
+  .titelzeile .monat strong{min-width:0; font-size:17px; padding:0 2px; white-space:nowrap}
+}
 .monat{display:flex; align-items:center; gap:6px; background:var(--panel); border:1px solid var(--line); border-radius:999px; padding:4px}
 .monat button{width:38px; height:38px; border-radius:50%; border:0; background:none; color:var(--ink); font-size:22px; line-height:1; cursor:pointer}
 .monat button:hover{background:color-mix(in srgb, var(--ink) 8%, transparent)}
-.monat strong{min-width:160px; text-align:center; font-family:var(--display); font-weight:600; font-size:22px; text-transform:uppercase}
+.monat strong{min-width:160px; text-align:center; font-family:var(--display); font-weight:600; font-size:22px}
 .schalter{display:inline-flex; border:1px solid var(--line); border-radius:999px; background:var(--panel); padding:3px}
 .schalter button{border:0; background:none; font:inherit; font-size:14px; font-weight:600; padding:7px 14px; border-radius:999px; color:var(--ink-2); cursor:pointer}
 .schalter button[aria-pressed="true"]{background:var(--accent); color:var(--on-accent)}
@@ -362,7 +369,9 @@ function zeichne() {
   h += `<th class="ver"></th></tr></thead><tbody>`;
   P.zeilen.forEach((r, ri) => {
     const ft = feiertagVon(MONAT, r.nr);
-    h += `<tr class="${r.grau || ft ? "we" : ""}${heute && r.nr === heute ? " heute" : ""}"${ft ? ` title="${esc(ft)}"` : ""}>`;
+    /* grau: Wochenende und Feiertag ergeben sich von selbst, auch bei selbst angelegten Zeilen */
+    const we = r.grau || !!ft || /^\s*(samstag|sonntag|sa|so)\.?\s*$/i.test(r.tag);
+    h += `<tr class="${we ? "we" : ""}${heute && r.nr === heute ? " heute" : ""}"${ft ? ` title="${esc(ft)}"` : ""}>`;
     if (B) h += `<td class="weg-sp"><button class="x-knopf" type="button" data-weg-z="${ri}" title="Zeile löschen" aria-label="Zeile löschen">${X_SVG}</button></td>`;
     h += B ? `<td class="nr">${feld(r.nr, `data-z="${ri}" data-teil="nr"`)}</td><td class="tag">${feld(r.tag, `data-z="${ri}" data-teil="tag"`, "links")}</td>`
            : `<td class="nr">${esc(r.nr)}</td><td class="tag">${esc(r.tag)}</td>`;
@@ -379,7 +388,7 @@ function zeichne() {
     h += B ? `<td class="ver">${feld(r.ver, `data-z="${ri}" data-teil="ver"`)}</td></tr>` : `<td class="ver" title="${esc(r.ver)}">${esc(r.ver)}</td></tr>`;
   });
   h += "</tbody>";
-  if (B) h += `<tfoot><tr><td colspan="${4 + S.length * 2}"><button class="knopf klein" type="button" id="zeile-neu">+ Zeile</button><label class="grau-wahl"><input type="checkbox" id="neu-grau"> grau (Wochenende)</label></td></tr></tfoot>`;
+  if (B) h += `<tfoot><tr><td colspan="${4 + S.length * 2}"><button class="knopf klein" type="button" id="zeile-neu">+ Zeile</button></td></tr></tfoot>`;
   $("plan").innerHTML = h;
   $("druck-titel").textContent = P.titel;
   if (window.HKH_TABLETT) requestAnimationFrame(einpassen);
@@ -567,7 +576,7 @@ plan.addEventListener("click", (e) => {
     return;
   }
   if (e.target.closest("#zeile-neu")) {
-    PLAN.zeilen.push(leereZeile(PLAN.spalten.length, $("neu-grau").checked));
+    PLAN.zeilen.push(leereZeile(PLAN.spalten.length));
     geaendert(); zeichne();
     plan.querySelector(`[data-z="${PLAN.zeilen.length - 1}"][data-teil="nr"]`)?.focus();
   }
