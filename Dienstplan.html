@@ -13,7 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#E9EDEA; --panel:#F7F9F7; --ink:#14201B; --ink-2:#55635C; --line:#C3CCC6;
+  --bg:#E9EDEA; --panel:#F7F9F7; --ink:#000; --ink-2:#000; --line:#C3CCC6;
   --accent:#17694B; --on-accent:#FFFFFF; --fehler:#B3261E;
   --wochenende:#DDE3DF; --ich:#E3F2EA; --fokus:#FFF7D6;
   --display:"Barlow Condensed","Arial Narrow",sans-serif;
@@ -28,17 +28,17 @@
 }
 *{box-sizing:border-box}
 [hidden]{display:none !important}
-body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:16px; line-height:1.4}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:calc(16px + var(--schrift-plus,0px)); line-height:1.4}
 .wrap{max-width:1400px; margin:0 auto; padding:0 16px 40px}
 .kopf{display:flex; align-items:center; gap:12px; padding-top:24px}
 .hkh-kopf{display:inline-flex; align-items:center; gap:10px; min-width:0; flex:none; text-decoration:none; color:inherit; border-radius:6px}
 .hkh-kopf img{flex:none; display:block; height:34px; width:auto}
-.hkh-marke{display:flex; flex-direction:column; gap:2px; margin:0; font-family:var(--body); font-size:13px; font-weight:500; line-height:1.15; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2)}
-h1{margin:22px 0 4px; font-family:var(--display); font-weight:600; font-size:clamp(32px, 8vw, 44px); line-height:1}
-.muted{margin:0; font-size:15px; color:var(--ink-2)}
-.knopf{font:inherit; font-size:15px; font-weight:600; min-height:42px; padding:8px 16px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer; display:inline-flex; align-items:center; gap:8px; text-decoration:none}
+.hkh-marke{display:flex; flex-direction:column; gap:2px; margin:0; font-family:var(--body); font-size:calc(13px + var(--schrift-plus,0px)); font-weight:500; line-height:1.15; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2)}
+h1{margin:22px 0 4px; font-family:var(--display); font-weight:600; font-size:calc(clamp(32px, 8vw, 44px) + var(--schrift-plus,0px)); line-height:1}
+.muted{margin:0; font-size:calc(15px + var(--schrift-plus,0px)); color:var(--ink-2)}
+.knopf{font:inherit; font-size:calc(15px + var(--schrift-plus,0px)); font-weight:600; min-height:42px; padding:8px 16px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer; display:inline-flex; align-items:center; gap:8px; text-decoration:none}
 .knopf.primaer{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
-.knopf.klein{min-height:34px; padding:4px 12px; font-size:14px}
+.knopf.klein{min-height:34px; padding:4px 12px; font-size:calc(14px + var(--schrift-plus,0px))}
 .knopf:disabled{opacity:.5; cursor:not-allowed}
 .knopf svg{width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
 button:focus-visible, a:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
@@ -47,33 +47,33 @@ button:focus-visible, a:focus-visible{outline:3px solid var(--accent); outline-o
 .titelzeile h1{margin:0}
 @media (max-width:560px){
   .titelzeile{flex-wrap:nowrap; gap:10px; justify-content:space-between}
-  .titelzeile h1{font-size:28px; min-width:0}
+  .titelzeile h1{font-size:calc(28px + var(--schrift-plus,0px)); min-width:0}
   .titelzeile .monat{flex:none; gap:0; padding:2px}
-  .titelzeile .monat button{width:34px; height:34px; font-size:20px}
-  .titelzeile .monat strong{min-width:0; font-size:17px; padding:0 2px; white-space:nowrap}
+  .titelzeile .monat button{width:34px; height:34px; font-size:calc(20px + var(--schrift-plus,0px))}
+  .titelzeile .monat strong{min-width:0; font-size:calc(17px + var(--schrift-plus,0px)); padding:0 2px; white-space:nowrap}
 }
 .monat{display:flex; align-items:center; gap:6px; background:var(--panel); border:1px solid var(--line); border-radius:999px; padding:4px}
-.monat button{width:38px; height:38px; border-radius:50%; border:0; background:none; color:var(--ink); font-size:22px; line-height:1; cursor:pointer}
+.monat button{width:38px; height:38px; border-radius:50%; border:0; background:none; color:var(--ink); font-size:calc(22px + var(--schrift-plus,0px)); line-height:1; cursor:pointer}
 .monat button:hover{background:color-mix(in srgb, var(--ink) 8%, transparent)}
-.monat strong{min-width:160px; text-align:center; font-family:var(--display); font-weight:600; font-size:22px}
+.monat strong{min-width:160px; text-align:center; font-family:var(--display); font-weight:600; font-size:calc(22px + var(--schrift-plus,0px))}
 .schalter{display:inline-flex; border:1px solid var(--line); border-radius:999px; background:var(--panel); padding:3px}
-.schalter button{border:0; background:none; font:inherit; font-size:14px; font-weight:600; padding:7px 14px; border-radius:999px; color:var(--ink-2); cursor:pointer}
+.schalter button{border:0; background:none; font:inherit; font-size:calc(14px + var(--schrift-plus,0px)); font-weight:600; padding:7px 14px; border-radius:999px; color:var(--ink-2); cursor:pointer}
 .schalter button[aria-pressed="true"]{background:var(--accent); color:var(--on-accent)}
 .zoom{display:inline-flex; align-items:center; gap:2px; background:var(--panel); border:1px solid var(--line); border-radius:999px; padding:3px}
-.zoom button{width:36px; height:36px; border-radius:50%; border:0; background:none; color:var(--ink); font-size:22px; line-height:1; cursor:pointer}
+.zoom button{width:36px; height:36px; border-radius:50%; border:0; background:none; color:var(--ink); font-size:calc(22px + var(--schrift-plus,0px)); line-height:1; cursor:pointer}
 .zoom button:hover{background:color-mix(in srgb, var(--ink) 8%, transparent)}
-.zoom output{min-width:52px; text-align:center; font-size:14px; font-weight:600; font-variant-numeric:tabular-nums; cursor:pointer}
+.zoom output{min-width:52px; text-align:center; font-size:calc(14px + var(--schrift-plus,0px)); font-weight:600; font-variant-numeric:tabular-nums; cursor:pointer}
 .rahmen{touch-action:pan-x pan-y}
-.hinweis{font-size:14px; color:var(--ink-2); margin:0 0 10px}
+.hinweis{font-size:calc(14px + var(--schrift-plus,0px)); color:var(--ink-2); margin:0 0 10px}
 .leer{background:var(--panel); border:1px dashed var(--line); border-radius:14px; padding:24px; display:flex; flex-direction:column; gap:12px; align-items:flex-start}
 
 /* Die Tabelle wie der Papierplan: alle Zeilen gleich hoch */
 .rahmen{background:var(--panel); border:1px solid var(--line); border-radius:14px; overflow:auto; -webkit-overflow-scrolling:touch}
 /* Zeilen im gleichen Verhältnis wie auf dem Papierplan: Zeilenhöhe etwa 1,7 x Schriftgröße */
-table.plan{border-collapse:separate; border-spacing:0; width:100%; min-width:900px; font-size:15px; font-variant-numeric:tabular-nums}
+table.plan{border-collapse:separate; border-spacing:0; width:100%; min-width:1380px; font-size:calc(15px + var(--schrift-plus,0px)); font-variant-numeric:tabular-nums}
 .plan th,.plan td{border:0; border-right:1px solid var(--line); border-bottom:1px solid var(--line); padding:0 6px; text-align:center; white-space:nowrap; height:26px; line-height:25px; overflow:hidden; text-overflow:ellipsis}
 .plan thead th{background:var(--panel); font-weight:600}
-.plan thead tr:nth-child(2) th{font-weight:500; color:var(--ink-2); font-size:13px}
+.plan thead tr:nth-child(2) th{font-weight:500; color:var(--ink-2); font-size:calc(13px + var(--schrift-plus,0px))}
 .plan .nr{width:38px; min-width:38px; text-align:right; color:var(--ink-2)}
 .plan .tag{text-align:left; width:108px; min-width:108px}
 /* Datum und Wochentag bleiben beim Wischen stehen und decken den Rest ab */
@@ -94,11 +94,14 @@ table.plan{border-collapse:separate; border-spacing:0; width:100%; min-width:900
 .plan .vb{width:64px; min-width:64px; max-width:64px}
 /* Veranstaltung nimmt den restlichen Platz; zu lange Texte enden mit … (im Druck vollständig) */
 .plan .ver{width:100%; max-width:1px}
+/* Zu lange Veranstaltung: antippen zeigt den ganzen Text, noch einmal antippen klappt ihn wieder zu */
+.plan td.ver.offen{white-space:normal; overflow:visible; line-height:1.3; height:auto; padding:4px 6px}
+@media (max-width:899px){ .plan td.ver{text-align:left} }
 .plan th.ich,.plan td.ich{background:var(--ich)}
 .plan tr.we td.ich{background:color-mix(in srgb, var(--ich) 55%, var(--wochenende))}
 .plan th.ich{color:var(--accent)}
 .plan th.kopf-feld{min-width:170px}
-.stand{text-align:right; font-size:13px; color:var(--ink-2); margin:6px 4px 0}
+.stand{text-align:right; font-size:calc(13px + var(--schrift-plus,0px)); color:var(--ink-2); margin:6px 4px 0}
 
 /* Bearbeiten wie in Excel: jedes Feld ist direkt beschreibbar */
 .plan input.feld{width:100%; height:25px; border:0; border-radius:0; padding:0 4px; margin:0; background:transparent; text-align:center; font:inherit; color:var(--ink); outline:none}
@@ -117,11 +120,11 @@ table.plan{border-collapse:separate; border-spacing:0; width:100%; min-width:900
 .plan tbody tr.we td.weg-sp{background:var(--wochenende)}
 .plan th.neu-spalte{vertical-align:top; padding:6px; background:var(--panel); border-style:dashed; width:110px; height:auto}
 .plan tfoot td{height:auto; padding:8px; text-align:left; background:var(--panel); border-bottom:0; position:static}
-.grau-wahl{font-size:14px; color:var(--ink-2); margin-left:10px; display:inline-flex; gap:6px; align-items:center}
+.grau-wahl{font-size:calc(14px + var(--schrift-plus,0px)); color:var(--ink-2); margin-left:10px; display:inline-flex; gap:6px; align-items:center}
 
 /* Speichern-Leiste wie bei den Sportanlagen */
 .speicher-leiste{position:fixed; z-index:58; left:max(12px, env(safe-area-inset-left)); right:max(12px, env(safe-area-inset-right)); bottom:calc(max(12px, env(safe-area-inset-bottom)) + var(--hkh-leiste-h, 62px)); max-width:640px; margin:0 auto; display:flex; align-items:center; gap:10px; padding:8px 8px 8px 16px; border-radius:16px; border:1px solid var(--accent); background:var(--panel); box-shadow:0 6px 24px rgba(20,32,27,.22)}
-.speicher-text{flex:1 1 auto; min-width:0; font-size:14px; font-weight:600; color:var(--ink)}
+.speicher-text{flex:1 1 auto; min-width:0; font-size:calc(14px + var(--schrift-plus,0px)); font-weight:600; color:var(--ink)}
 .speicher-text.fehler{color:var(--fehler)}
 body.mit-speichern{padding-bottom:calc(var(--hkh-leiste-h, 62px) + 90px + env(safe-area-inset-bottom))}
 
@@ -133,17 +136,17 @@ html.tablett .druckkopf{display:flex; align-items:center; margin:8px 0 8px}
 html.tablett #druck-monat{display:none}
 html.tablett .leiste{display:none !important}
 html.tablett .titelzeile{display:none !important}
-html.tablett .druckkopf .monat strong{font-family:var(--body); font-weight:500; font-size:28px; text-transform:none; min-width:0; padding:0 6px}
+html.tablett .druckkopf .monat strong{font-family:var(--body); font-weight:500; font-size:calc(28px + var(--schrift-plus,0px)); text-transform:none; min-width:0; padding:0 6px}
 html.tablett .druckkopf .monat{padding:2px}
 html.tablett .rahmen{overflow:hidden}
 html.tablett table.plan{min-width:0}
-.druckkopf b{font-size:28px; font-weight:500}
+.druckkopf b{font-size:calc(28px + var(--schrift-plus,0px)); font-weight:500}
 
 /* Drucken: A4 quer, sieht aus wie der Aushang */
 @media print{
   @page{size:A4 landscape; margin:8mm}
   :root,:root[data-theme="dark"]{--panel:#FFFFFF; --bg:#FFFFFF; --ink:#000; --ink-2:#000; --line:#000; --wochenende:#D6D6D6; --ich:#FFFFFF; --accent:#000}
-  body{background:#FFF; font-size:11px}
+  body{background:#FFF; font-size:calc(11px + var(--schrift-plus,0px))}
   /* Wochenenden und Feiertage auch im Druck grau: Hintergründe immer mitdrucken */
   *{-webkit-print-color-adjust:exact !important; print-color-adjust:exact !important}
   .nicht-drucken,.titelzeile,.kopf,.leiste,.hinweis,h1,.muted,.weg-sp,tfoot,.neu-spalte,.speicher-leiste,.hkh-leiste,.leer{display:none !important}
@@ -151,7 +154,7 @@ html.tablett table.plan{min-width:0}
   .wrap{max-width:none; padding:0}
   .druckkopf{display:flex !important}
   .rahmen{border:0; border-radius:0; overflow:visible}
-  table.plan{min-width:0; font-size:10.5px; border:2px solid #000}
+  table.plan{min-width:0; font-size:calc(10.5px + var(--schrift-plus,0px)); border:2px solid #000}
   .plan th,.plan td{height:19.5px; line-height:18.5px; padding:0 4px; border-color:#000}
   .plan tr > :last-child{border-right:0}
   .plan tbody tr:last-child > *{border-bottom:0}
@@ -580,6 +583,10 @@ plan.addEventListener("click", (e) => {
     geaendert(); zeichne();
     plan.querySelector(`[data-z="${PLAN.zeilen.length - 1}"][data-teil="nr"]`)?.focus();
   }
+});
+plan.addEventListener("click", (e) => {
+  const z = !BEARBEITEN && e.target.closest("td.ver");
+  if (z && (z.scrollWidth > z.clientWidth || z.classList.contains("offen"))) z.classList.toggle("offen");
 });
 plan.addEventListener("keydown", (e) => {
   const f = e.target; if (!f.classList?.contains("feld")) return;

@@ -13,7 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#E9EDEA; --panel:#F7F9F7; --ink:#14201B; --ink-2:#55635C; --line:#C3CCC6;
+  --bg:#E9EDEA; --panel:#F7F9F7; --ink:#000; --ink-2:#000; --line:#C3CCC6;
   --accent:#17694B; --on-accent:#FFFFFF; --fehler:#B3261E; --erledigt:#6B7770;
   --plan-track:#DCE3DE; --weiss:#FFFFFF;
   --display:"Barlow Condensed","Arial Narrow",sans-serif;
@@ -28,31 +28,33 @@
 }
 *{box-sizing:border-box}
 [hidden]{display:none !important}
-body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:16px; line-height:1.4}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:calc(16px + var(--schrift-plus,0px)); line-height:1.4}
 .wrap{max-width:900px; margin:0 auto; padding:0 20px 40px}
 .kopf{display:flex; justify-content:space-between; align-items:center; gap:12px 16px; flex-wrap:wrap; padding-top:24px}
-.marke{font-family:var(--display); font-weight:600; font-size:24px; line-height:1; letter-spacing:.04em; text-transform:uppercase}
+.marke{font-family:var(--display); font-weight:600; font-size:calc(24px + var(--schrift-plus,0px)); line-height:1; letter-spacing:.04em; text-transform:uppercase}
 .kopf-knoepfe{display:flex; gap:10px; flex:none}
 .rund-knopf{display:inline-flex; align-items:center; justify-content:center; flex:none; width:44px; height:44px; padding:0; border-radius:50%; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; touch-action:manipulation}
 .rund-knopf:hover{border-color:var(--ink)}
+/* Filter aktiv: gelber Ring um das Filter-Symbol */
+#filter-knopf[aria-pressed="true"]{border:2px solid #F5C400; box-shadow:0 0 0 2px #F5C400}
 .rund-knopf svg{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
 #verlauf-knopf[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
 .rund-knopf .sonne{display:none}
-.knopf{font:inherit; font-size:15px; font-weight:600; min-height:44px; padding:8px 18px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer}
+.knopf{font:inherit; font-size:calc(15px + var(--schrift-plus,0px)); font-weight:600; min-height:44px; padding:8px 18px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer}
 .knopf.primaer{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
 .knopf.gefahr{border-color:var(--fehler); color:var(--fehler); background:var(--panel)}
-.knopf.klein{min-height:36px; padding:6px 14px; font-size:14px}
+.knopf.klein{min-height:36px; padding:6px 14px; font-size:calc(14px + var(--schrift-plus,0px))}
 .knopf:disabled{opacity:.5; cursor:not-allowed}
 button:focus-visible, input:focus-visible, a:focus-visible, textarea:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
-h1{margin:0; font-family:var(--display); font-weight:600; font-size:clamp(32px, 8vw, 44px); line-height:1; text-wrap:balance}
-h2{margin:0; font-family:var(--display); font-weight:600; font-size:26px; line-height:1.05; text-wrap:balance; overflow-wrap:anywhere}
-.muted{margin:0; font-size:15px; color:var(--ink-2)}
-.meldung{margin:0; min-height:20px; font-size:14px; color:var(--ink-2)}
+h1{margin:0; font-family:var(--display); font-weight:600; font-size:calc(clamp(32px, 8vw, 44px) + var(--schrift-plus,0px)); line-height:1; text-wrap:balance}
+h2{margin:0; font-family:var(--display); font-weight:600; font-size:calc(26px + var(--schrift-plus,0px)); line-height:1.05; text-wrap:balance; overflow-wrap:anywhere}
+.muted{margin:0; font-size:calc(15px + var(--schrift-plus,0px)); color:var(--ink-2)}
+.meldung{margin:0; min-height:20px; font-size:calc(14px + var(--schrift-plus,0px)); color:var(--ink-2)}
 .meldung.fehler{color:var(--fehler)}
 .stapel{display:flex; flex-direction:column; gap:16px}
 .anmeldung{max-width:420px; margin:48px auto 0; display:flex; flex-direction:column; gap:16px}
-.feld{display:flex; flex-direction:column; gap:6px; font-size:15px; color:var(--ink-2)}
-input[type="password"], input[type="text"], textarea{font:inherit; font-size:16px; color:var(--ink); background:var(--panel); min-height:44px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; width:100%; min-width:0}
+.feld{display:flex; flex-direction:column; gap:6px; font-size:calc(15px + var(--schrift-plus,0px)); color:var(--ink-2)}
+input[type="password"], input[type="text"], textarea{font:inherit; font-size:calc(16px + var(--schrift-plus,0px)); color:var(--ink); background:var(--panel); min-height:44px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; width:100%; min-width:0}
 textarea{resize:vertical; line-height:1.35}
 .feld-eingabe{position:relative; display:flex}
 .feld-eingabe input{padding-right:52px}
@@ -68,14 +70,14 @@ textarea{resize:vertical; line-height:1.35}
 
 /* Werkzeuge: Ansehen, Aufgabe, Pfeil */
 .leiste{display:flex; gap:4px; padding:4px; border-radius:999px; background:var(--panel); border:1px solid var(--line)}
-.leiste button{flex:1; min-height:40px; padding:0 6px; border:0; border-radius:999px; background:transparent; color:var(--ink); font:inherit; font-size:15px; font-weight:600; cursor:pointer}
+.leiste button{flex:1; min-height:40px; padding:0 6px; border:0; border-radius:999px; background:transparent; color:var(--ink); font:inherit; font-size:calc(15px + var(--schrift-plus,0px)); font-weight:600; cursor:pointer}
 .leiste button[aria-pressed="true"]{background:var(--accent); color:var(--on-accent)}
 .leiste button svg, .sym-knopf svg{width:24px; height:24px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; vertical-align:middle}
 .leiste button{display:inline-flex; align-items:center; justify-content:center}
 .sym-knopf{width:48px; padding:0 !important; display:inline-flex; align-items:center; justify-content:center}
 /* Personen */
 .personen{display:flex; flex-wrap:wrap; gap:8px}
-.person{display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:0 14px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); font:inherit; font-size:15px; font-weight:600; cursor:pointer}
+.person{display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:0 14px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); font:inherit; font-size:calc(15px + var(--schrift-plus,0px)); font-weight:600; cursor:pointer}
 .person[aria-pressed="true"]{border:2px solid var(--ink)}
 .person .farbe{width:12px; height:12px; border-radius:50%; border:1px solid var(--ink); flex:none}
 /* Karte mit dem Plan */
@@ -83,13 +85,13 @@ textarea{resize:vertical; line-height:1.35}
 #svg{position:absolute; inset:0; width:100%; height:100%; display:block; touch-action:none}
 .map.setzen{cursor:crosshair}
 .zoom{position:absolute; right:8px; bottom:8px; display:flex; flex-direction:column; gap:6px}
-.zb{width:44px; height:44px; border-radius:10px; border:1px solid var(--line); background:var(--panel); color:var(--ink); font:inherit; font-size:22px; font-weight:600; line-height:1; display:flex; align-items:center; justify-content:center; cursor:pointer}
-.zb.klein{font-size:13px; font-weight:600}
+.zb{width:44px; height:44px; border-radius:10px; border:1px solid var(--line); background:var(--panel); color:var(--ink); font:inherit; font-size:calc(22px + var(--schrift-plus,0px)); font-weight:600; line-height:1; display:flex; align-items:center; justify-content:center; cursor:pointer}
+.zb.klein{font-size:calc(13px + var(--schrift-plus,0px)); font-weight:600}
 /* Etagenwahl: ein Schieber mit zwei Stellungen, oben Außen, unten Halle */
 .etagen{position:relative; width:44px; padding:3px; border:1px solid var(--line); border-radius:10px; background:var(--panel); display:flex; flex-direction:column; gap:0; margin-bottom:2px}
 .etagen-knauf{position:absolute; left:3px; right:3px; height:calc(50% - 3px); border-radius:8px; background:var(--accent); transition:transform .18s ease; transform:translateY(100%); pointer-events:none}
 .etagen[data-etage="aussen"] .etagen-knauf{transform:translateY(0)}
-.eb{position:relative; z-index:1; height:30px; border:0; background:none; font:inherit; font-size:12px; font-weight:600; color:var(--ink-2); cursor:pointer; border-radius:8px; padding:0; -webkit-tap-highlight-color:transparent}
+.eb{position:relative; z-index:1; height:30px; border:0; background:none; font:inherit; font-size:calc(12px + var(--schrift-plus,0px)); font-weight:600; color:var(--ink-2); cursor:pointer; border-radius:8px; padding:0; -webkit-tap-highlight-color:transparent}
 .eb[aria-pressed="true"]{color:var(--on-accent)}
 /* Filter nach Person */
 .filter-feld{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
@@ -106,23 +108,23 @@ textarea{resize:vertical; line-height:1.35}
 /* Tafel unten: Hinweis, Details, Formular, Verlauf */
 .tafel{border:1px solid var(--line); border-radius:16px; background:var(--panel); padding:16px; display:flex; flex-direction:column; gap:12px}
 .tafel .kopfzeile{display:flex; flex-direction:column; gap:4px}
-.obertitel{margin:0; font-size:13px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2)}
+.obertitel{margin:0; font-size:calc(13px + var(--schrift-plus,0px)); font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2)}
 .rueckfrage{display:flex; flex-direction:column; gap:8px; padding:12px; border:1px solid var(--fehler); border-radius:12px; background:var(--bg)}
 .reihe{display:flex; gap:10px; flex-wrap:wrap}
 .reihe > *{flex:1 1 140px}
 .aktionen{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
-.textknopf{min-height:40px; border:0; background:none; color:var(--ink-2); font:inherit; font-size:15px; font-weight:600; text-decoration:underline; cursor:pointer}
+.textknopf{min-height:40px; border:0; background:none; color:var(--ink-2); font:inherit; font-size:calc(15px + var(--schrift-plus,0px)); font-weight:600; text-decoration:underline; cursor:pointer}
 /* Textzeilen in der Ansicht */
 .zeilen-ansicht{display:flex; flex-direction:column; gap:12px; padding-top:12px; border-top:1px solid var(--line)}
 .zeile-block{display:flex; flex-direction:column; gap:2px; min-width:0}
-.zeile-titel{margin:0; font-size:15px; font-weight:600; overflow-wrap:anywhere}
-.zeile-text{margin:0; font-size:15px; white-space:pre-wrap; overflow-wrap:anywhere}
+.zeile-titel{margin:0; font-size:calc(15px + var(--schrift-plus,0px)); font-weight:600; overflow-wrap:anywhere}
+.zeile-text{margin:0; font-size:calc(15px + var(--schrift-plus,0px)); white-space:pre-wrap; overflow-wrap:anywhere}
 /* Textzeilen im Formular */
 .zeilen-liste{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px}
 .zeile-bearbeiten{display:flex; flex-direction:column; gap:6px; padding:8px; border:1px solid var(--line); border-radius:12px; background:var(--bg)}
 .zeile-kopf{display:flex; align-items:center; gap:6px}
 .zeile-kopf input{flex:1 1 auto}
-.zeile-weg{flex:none; min-height:36px; padding:0 6px; border:0; background:none; color:var(--ink-2); font:inherit; font-size:14px; font-weight:600; text-decoration:underline; cursor:pointer}
+.zeile-weg{flex:none; min-height:36px; padding:0 6px; border:0; background:none; color:var(--ink-2); font:inherit; font-size:calc(14px + var(--schrift-plus,0px)); font-weight:600; text-decoration:underline; cursor:pointer}
 /* Griff zum Verschieben: anfassen und ziehen, oder kurz gedrückt halten */
 .griff{flex:none; width:36px; min-height:40px; display:inline-flex; align-items:center; justify-content:center; padding:0; border:0; border-radius:8px; background:none; color:var(--ink-2); cursor:grab; touch-action:none; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none}
 .griff:hover{color:var(--ink)}
@@ -134,14 +136,14 @@ textarea{resize:vertical; line-height:1.35}
 .ziel-unten{box-shadow:inset 0 -3px 0 var(--accent)}
 /* Verlauf und Liste */
 .filter{display:flex; flex-wrap:wrap; gap:8px}
-.filter button{min-height:36px; padding:0 12px; border-radius:999px; border:1px solid var(--line); background:var(--bg); color:var(--ink); font:inherit; font-size:14px; font-weight:600; cursor:pointer}
+.filter button{min-height:36px; padding:0 12px; border-radius:999px; border:1px solid var(--line); background:var(--bg); color:var(--ink); font:inherit; font-size:calc(14px + var(--schrift-plus,0px)); font-weight:600; cursor:pointer}
 .filter button[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
 .verlauf{display:flex; flex-direction:column; max-height:260px; overflow-y:auto; margin:0; padding:0; list-style:none}
 .verlauf li{display:flex; gap:10px; align-items:flex-start; padding:10px 0; border-bottom:1px solid var(--line)}
 .verlauf li:last-child{border-bottom:0}
 .verlauf .farbe{width:12px; height:12px; margin-top:5px; border-radius:50%; border:1px solid var(--ink); flex:none}
 .verlauf .zeile{display:flex; flex-direction:column; gap:2px; min-width:0}
-.verlauf .wann{font-size:13px; color:var(--ink-2)}
+.verlauf .wann{font-size:calc(13px + var(--schrift-plus,0px)); color:var(--ink-2)}
 #alle-liste li{align-items:center}
 #alle-liste .zeile{flex:1 1 auto}
 .hin-knopf{flex:none; width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center; padding:0; border:1px solid var(--line); border-radius:10px; background:var(--panel); color:var(--ink); cursor:pointer}
@@ -151,7 +153,7 @@ textarea{resize:vertical; line-height:1.35}
 .format-leiste button{width:36px; height:32px; display:inline-flex; align-items:center; justify-content:center; padding:0; border:1px solid var(--line); border-radius:8px; background:var(--panel); color:var(--ink); cursor:pointer}
 .format-leiste svg{width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
 .zeile-text ul{margin:4px 0; padding-left:20px}
-.abzeichen{flex:none; width:28px; height:28px; border-radius:50%; border:1px solid var(--ink); display:inline-flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; line-height:1}
+.abzeichen{flex:none; width:28px; height:28px; border-radius:50%; border:1px solid var(--ink); display:inline-flex; align-items:center; justify-content:center; font-size:calc(13px + var(--schrift-plus,0px)); font-weight:700; line-height:1}
 /* Am PC: Karte links groß und beim Scrollen stehend, rechts Details, Filter und Liste */
 @media (min-width:1100px){
   .wrap{max-width:1560px}
@@ -166,7 +168,7 @@ textarea{resize:vertical; line-height:1.35}
 /* Einheitlicher Kopf auf allen Personalseiten: Logo, darunter-/daneben "Helmut-Körnig-Halle" und "Personal" wie auf der Startseite */
 .hkh-kopf{display:inline-flex !important; align-items:center; gap:10px; min-width:0; flex:none; text-decoration:none; color:inherit; border-radius:6px}
 .hkh-kopf img{flex:none; display:block; height:34px !important; width:auto}
-.hkh-marke{display:flex; flex-direction:column; gap:2px; margin:0; font-family:Barlow, system-ui, -apple-system, "Segoe UI", sans-serif; font-size:13px; font-weight:500; line-height:1.15; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2)}
+.hkh-marke{display:flex; flex-direction:column; gap:2px; margin:0; font-family:Barlow, system-ui, -apple-system, "Segoe UI", sans-serif; font-size:calc(13px + var(--schrift-plus,0px)); font-weight:500; line-height:1.15; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2)}
 .kopf{flex-wrap:nowrap}
 /* Anhänge: Bilder und Dateien in einer Aufgabe */
 .zeile-knoepfe{display:flex; flex-wrap:wrap; gap:8px}
@@ -174,7 +176,7 @@ textarea{resize:vertical; line-height:1.35}
 .anhang-zeile{display:flex; align-items:center; gap:10px; min-width:0}
 .anhang-mini{flex:none; width:64px; height:64px; border-radius:8px; border:1px solid var(--line); background:var(--panel); object-fit:cover; display:flex; align-items:center; justify-content:center; overflow:hidden}
 .anhang-mini svg{width:28px; height:28px; fill:none; stroke:var(--ink-2); stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round}
-.anhang-info{display:flex; flex-direction:column; gap:2px; min-width:0; font-size:14px}
+.anhang-info{display:flex; flex-direction:column; gap:2px; min-width:0; font-size:calc(14px + var(--schrift-plus,0px))}
 .anhang-name{font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .anhang-stand{color:var(--ink-2)}
 .anhang-stand.fehler{color:var(--fehler)}
@@ -182,7 +184,7 @@ textarea{resize:vertical; line-height:1.35}
 .anhang-bild img{display:block; width:100%; max-height:420px; object-fit:contain}
 .anhang-datei{display:flex; align-items:center; gap:10px; width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:12px; background:var(--bg); color:var(--ink); font:inherit; text-align:left; cursor:pointer}
 .anhang-datei svg{flex:none; width:26px; height:26px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round}
-.anhang-laedt{font-size:14px; color:var(--ink-2); padding:10px}
+.anhang-laedt{font-size:calc(14px + var(--schrift-plus,0px)); color:var(--ink-2); padding:10px}
 .bild-gross{position:fixed; inset:0; z-index:90; background:rgba(8,12,10,.92); display:flex; flex-direction:column}
 .bild-gross[hidden]{display:none}
 .bild-gross-kopf{display:flex; align-items:center; gap:12px; padding:max(10px, env(safe-area-inset-top)) 14px 10px}
@@ -455,6 +457,8 @@ async function seiteStarten() {
   if (!PERSONEN.some((x) => x.n === si.name)) PERSONEN.unshift({ bid: si.bid, n: si.name, c: si.farbe });
   zeigeBereich(true);
   rechteAnwenden();
+  /* Von Anfang an gefiltert: die eigenen Aufgaben und die für alle. "Alle zeigen" hebt das auf. */
+  if (!si.tablett) { S.nurPersonen = [si.name, OHNE]; filterPersonenZeichnen(); }
   starteSync();
 }
 /* Blendet aus, was dieser Zugang nicht darf. Die Datenbank prüft es zusätzlich. */
