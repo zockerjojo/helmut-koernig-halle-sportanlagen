@@ -21,6 +21,9 @@
   --body:Barlow,system-ui,-apple-system,"Segoe UI",sans-serif;
   color-scheme:light;
 }
+:root[data-theme="light"]{--schrift-plus:2px}
+@media not (prefers-color-scheme: dark){:root:not([data-theme="dark"]){--schrift-plus:2px}}
+@media print{:root{--schrift-plus:0px !important}}
 :root[data-theme="dark"]{
   --bg:#0F1512; --panel:#18211C; --ink:#E7EEE9; --ink2:#9BAAA1; --line:#33413A;
   --akzent:#4CC38A; --auf-akzent:#06150E; --fehler:#F2766B; --schleier:rgba(0,0,0,.6);
@@ -28,12 +31,12 @@
 }
 *{box-sizing:border-box}
 [hidden]{display:none !important}
-body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:16px; line-height:1.35}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:calc(16px + var(--schrift-plus,0px)); line-height:1.35}
 .seite{min-height:100vh; min-height:100dvh; max-width:640px; margin:0 auto; padding:18px 16px 14px; display:flex; flex-direction:column; gap:14px}
 .kopf{display:flex; flex-direction:column; gap:6px}
 .kopfzeile{display:flex; justify-content:space-between; align-items:center; gap:12px}
-.marke{margin:0; font-size:13px; font-weight:500; letter-spacing:.04em; text-transform:uppercase; color:var(--ink2)}
-h1{margin:0; font-family:var(--display); font-weight:600; font-size:clamp(32px, 8vw, 44px); line-height:1; text-wrap:balance}
+.marke{margin:0; font-size:calc(13px + var(--schrift-plus,0px)); font-weight:500; letter-spacing:.04em; text-transform:uppercase; color:var(--ink2)}
+h1{margin:0; font-family:var(--display); font-weight:600; font-size:calc(clamp(32px, 8vw, 44px) + var(--schrift-plus,0px)); line-height:1; text-wrap:balance}
 .thema-knopf{display:inline-flex; align-items:center; justify-content:center; flex:none; width:44px; height:44px; padding:0; border-radius:50%; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer}
 .thema-knopf:hover{border-color:var(--ink)}
 .thema-knopf svg{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
@@ -43,29 +46,29 @@ h1{margin:0; font-family:var(--display); font-weight:600; font-size:clamp(32px, 
 button:focus-visible{outline:3px solid var(--ink); outline-offset:2px}
 .nur-leser{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
 table{width:100%; border-collapse:separate; border-spacing:0; table-layout:fixed; background:var(--panel); border:1px solid var(--line); border-radius:14px; overflow:hidden}
-thead th{padding:8px 12px; border-bottom:2px solid var(--ink); text-align:left; font-size:13px; font-weight:600; color:var(--ink2)}
+thead th{padding:8px 12px; border-bottom:2px solid var(--ink); text-align:left; font-size:calc(13px + var(--schrift-plus,0px)); font-weight:600; color:var(--ink2)}
 tbody th, tbody td{padding:10px 12px; border-bottom:1px solid var(--line); text-align:left; vertical-align:middle}
 tbody tr:last-child th, tbody tr:last-child td{border-bottom:0}
 tbody th{font-weight:400}
-.anlage{display:block; font-family:var(--display); font-weight:600; font-size:19px; line-height:1.05; overflow-wrap:anywhere}
-.sub{display:block; margin-top:2px; font-size:13px; font-weight:400; color:var(--ink2)}
-.pille{display:inline-block; padding:3px 9px; border-radius:999px; color:var(--weiss); font-size:14px; font-weight:600; white-space:nowrap}
+.anlage{display:block; font-family:var(--display); font-weight:600; font-size:calc(19px + var(--schrift-plus,0px)); line-height:1.05; overflow-wrap:anywhere}
+.sub{display:block; margin-top:2px; font-size:calc(13px + var(--schrift-plus,0px)); font-weight:400; color:var(--ink2)}
+.pille{display:inline-block; padding:3px 9px; border-radius:999px; color:var(--weiss); font-size:calc(14px + var(--schrift-plus,0px)); font-weight:600; white-space:nowrap}
 .pille.gruen{background:var(--gruen)}
 .pille.rot{background:var(--rot)}
-.termin{margin:6px 0 0; font-size:15px; line-height:1.3; color:var(--ink)}
-.zustand{display:block; font-size:14px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--ink2)}
-.kasten{margin:6px 0 0; padding:8px 10px; border-radius:10px; color:var(--weiss); font-family:var(--display); font-weight:600; font-size:18px; line-height:1.15}
+.termin{margin:6px 0 0; font-size:calc(15px + var(--schrift-plus,0px)); line-height:1.3; color:var(--ink)}
+.zustand{display:block; font-size:calc(14px + var(--schrift-plus,0px)); font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--ink2)}
+.kasten{margin:6px 0 0; padding:8px 10px; border-radius:10px; color:var(--weiss); font-family:var(--display); font-weight:600; font-size:calc(18px + var(--schrift-plus,0px)); line-height:1.15}
 .kasten.gruen{background:var(--gruen)}
 .kasten.rot{background:var(--rot)}
-.leer{color:var(--ink2); font-size:15px}
+.leer{color:var(--ink2); font-size:calc(15px + var(--schrift-plus,0px))}
 /* Aushang am Sportlereingang: dasselbe Kästchen wie die Tabelle darüber. */
 .aushang{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:12px 14px; display:flex; flex-direction:column; gap:6px}
 /* Überschrift exakt wie die Anlagennamen in der Tabelle (z. B. „Tribüne Nord“) */
-.aushang-titel{margin:0; font-family:var(--display); font-weight:600; font-size:19px; line-height:1.05; color:var(--ink); overflow-wrap:anywhere}
-.aushang-text{margin:0; font-size:16px; line-height:1.35; color:var(--ink); white-space:pre-wrap; overflow-wrap:anywhere}
+.aushang-titel{margin:0; font-family:var(--display); font-weight:600; font-size:calc(19px + var(--schrift-plus,0px)); line-height:1.05; color:var(--ink); overflow-wrap:anywhere}
+.aushang-text{margin:0; font-size:calc(16px + var(--schrift-plus,0px)); line-height:1.35; color:var(--ink); white-space:pre-wrap; overflow-wrap:anywhere}
 .aushang-text.ohne{color:var(--ink2)}
-.verbindung{margin:0; font-size:13px; font-weight:600; color:var(--ink)}
-.stand{margin:0; font-size:14px; font-weight:500; color:var(--ink2)}
+.verbindung{margin:0; font-size:calc(13px + var(--schrift-plus,0px)); font-weight:600; color:var(--ink)}
+.stand{margin:0; font-size:calc(14px + var(--schrift-plus,0px)); font-weight:500; color:var(--ink2)}
 /* Auf schmalen Bildschirmen steht der Name über dem Status, damit er nicht mitten im Wort umbricht */
 @media (max-width:599px){
   table, tbody{display:block}
@@ -81,11 +84,11 @@ tbody th{font-weight:400}
 .schleier{position:fixed; top:0; right:0; bottom:0; left:0; z-index:10; display:flex; flex-direction:column; align-items:center; padding:96px 16px 16px; background:var(--schleier); overflow:auto}
 .fenster{width:100%; max-width:420px; background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:20px; display:flex; flex-direction:column; gap:16px; box-shadow:0 12px 32px rgba(0,0,0,.28)}
 .fenster-kopf{display:flex; flex-direction:column; gap:6px}
-.fenster h2{margin:0; font-family:var(--display); font-weight:600; font-size:30px; line-height:1.05}
+.fenster h2{margin:0; font-family:var(--display); font-weight:600; font-size:calc(30px + var(--schrift-plus,0px)); line-height:1.05}
 .fenster h2:focus{outline:none}
 .fenster form{display:flex; flex-direction:column; gap:16px}
-.feld{display:flex; flex-direction:column; gap:6px; font-size:15px; color:var(--ink2)}
-.feld input{font:inherit; font-size:16px; color:var(--ink); background:var(--bg); min-height:48px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; width:100%}
+.feld{display:flex; flex-direction:column; gap:6px; font-size:calc(15px + var(--schrift-plus,0px)); color:var(--ink2)}
+.feld input{font:inherit; font-size:calc(16px + var(--schrift-plus,0px)); color:var(--ink); background:var(--bg); min-height:48px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; width:100%}
 /* Augen-Taste: blendet den eingegebenen Code ein und aus */
 .feld-eingabe{position:relative; display:flex}
 .feld-eingabe input{padding-right:52px}
@@ -96,10 +99,10 @@ tbody th{font-weight:400}
 .augen-knopf .auge-zu{display:none}
 .augen-knopf[aria-pressed="true"] .auge-auf{display:none}
 .augen-knopf[aria-pressed="true"] .auge-zu{display:block}
-.hinweis{margin:0; font-size:14px; line-height:1.35; color:var(--ink2)}
-.fehler{margin:0; min-height:20px; font-size:14px; color:var(--fehler)}
+.hinweis{margin:0; font-size:calc(14px + var(--schrift-plus,0px)); line-height:1.35; color:var(--ink2)}
+.fehler{margin:0; min-height:20px; font-size:calc(14px + var(--schrift-plus,0px)); color:var(--fehler)}
 .reihe{display:flex; gap:10px}
-.knopf{flex:1; font:inherit; font-size:15px; font-weight:600; min-height:44px; padding:8px 18px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer}
+.knopf{flex:1; font:inherit; font-size:calc(15px + var(--schrift-plus,0px)); font-weight:600; min-height:44px; padding:8px 18px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer}
 .knopf.primaer{background:var(--akzent); border-color:var(--akzent); color:var(--auf-akzent)}
 .knopf:disabled{opacity:.6; cursor:default}
 .fenster a:focus-visible, .fenster input:focus-visible{outline:3px solid var(--ink); outline-offset:2px}
@@ -108,7 +111,7 @@ tbody th{font-weight:400}
 .logo-link img{flex:none; display:block; height:34px; width:auto}
 .logo-link:focus-visible{outline:3px solid var(--ink); outline-offset:3px}
 /* Hinweis und Abspann unter der Tabelle, in der Schriftgröße der Zusatzzeilen */
-.hinweis-block{display:flex; flex-direction:column; gap:8px; font-size:13px; line-height:1.4; color:var(--ink2)}
+.hinweis-block{display:flex; flex-direction:column; gap:8px; font-size:calc(13px + var(--schrift-plus,0px)); line-height:1.4; color:var(--ink2)}
 .hinweis-block p{margin:0}
 .hinweis-titel{font-weight:600; color:var(--ink)}
 .abspann{margin-top:4px; padding-top:10px; border-top:1px solid var(--line)}
@@ -127,7 +130,7 @@ tbody th{font-weight:400}
 .glocke[aria-pressed="true"]{background:var(--ink); border-color:var(--ink); color:var(--panel)}
 .glocke[aria-pressed="true"] .glocke-strich{display:none}
 .glocke[disabled]{opacity:.5; cursor:progress}
-.push-hinweis{margin:4px 0 0; padding:10px 12px; border:1px solid var(--line); border-radius:12px; background:var(--panel); font-size:14px; line-height:1.4; color:var(--ink)}
+.push-hinweis{margin:4px 0 0; padding:10px 12px; border:1px solid var(--line); border-radius:12px; background:var(--panel); font-size:calc(14px + var(--schrift-plus,0px)); line-height:1.4; color:var(--ink)}
 </style>
 </head>
 <body>

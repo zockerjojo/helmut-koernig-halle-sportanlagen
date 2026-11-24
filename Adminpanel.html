@@ -19,6 +19,10 @@
   --body:Barlow,system-ui,-apple-system,"Segoe UI",sans-serif;
   color-scheme:light;
 }
+:root[data-theme="light"]{--schrift-plus:2px}
+@media not (prefers-color-scheme: dark){:root:not([data-theme="dark"]){--schrift-plus:2px}}
+@media print{:root{--schrift-plus:0px !important}}
+:root[data-theme="light"] .marke-klein.an{color:var(--ink)}
 :root[data-theme="dark"]{
   --bg:#0F1512; --panel:#18211C; --ink:#E7EEE9; --ink-2:#9BAAA1; --line:#33413A;
   --accent:#4CC38A; --on-accent:#06150E; --fehler:#F2766B; --erledigt:#7F8D85;
@@ -26,10 +30,10 @@
 }
 *{box-sizing:border-box}
 [hidden]{display:none !important}
-body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:16px; line-height:1.4}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:calc(16px + var(--schrift-plus,0px)); line-height:1.4}
 .wrap{max-width:900px; margin:0 auto; padding:0 20px 40px}
 .kopf{display:flex; justify-content:space-between; align-items:center; gap:12px 16px; flex-wrap:wrap; padding-top:24px}
-.marke{font-family:var(--display); font-weight:600; font-size:24px; line-height:1; letter-spacing:.04em; text-transform:uppercase}
+.marke{font-family:var(--display); font-weight:600; font-size:calc(24px + var(--schrift-plus,0px)); line-height:1; letter-spacing:.04em; text-transform:uppercase}
 .kopf-knoepfe{display:flex; gap:10px; flex:none; align-items:center}
 .rund-knopf{display:inline-flex; align-items:center; justify-content:center; flex:none; width:44px; height:44px; padding:0; border-radius:50%; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; touch-action:manipulation}
 .rund-knopf:hover{border-color:var(--ink)}
@@ -38,28 +42,28 @@ body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); 
 .rund-knopf .sonne{display:none}
 :root[data-theme="dark"] #dunkel .sonne{display:block}
 :root[data-theme="dark"] #dunkel .mond{display:none}
-.knopf{font:inherit; font-size:15px; font-weight:600; min-height:44px; padding:8px 18px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer}
+.knopf{font:inherit; font-size:calc(15px + var(--schrift-plus,0px)); font-weight:600; min-height:44px; padding:8px 18px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer}
 .knopf.primaer{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
 .knopf.gefahr{border-color:var(--fehler); color:var(--fehler); background:var(--panel)}
 .sym-knopf{min-width:48px; padding:0 10px !important; display:inline-flex; align-items:center; justify-content:center; gap:3px}
 .sym-knopf svg{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round}
-.sym-zahl{font-size:12px; font-weight:700}
-.knopf.klein{min-height:36px; padding:6px 14px; font-size:14px}
+.sym-zahl{font-size:calc(12px + var(--schrift-plus,0px)); font-weight:700}
+.knopf.klein{min-height:36px; padding:6px 14px; font-size:calc(14px + var(--schrift-plus,0px))}
 .knopf:disabled{opacity:.5; cursor:not-allowed}
 .logo-link{display:inline-flex; align-items:center; gap:10px; min-width:0; text-decoration:none; color:inherit; border-radius:6px}
 button:focus-visible, input:focus-visible, a:focus-visible, summary:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
-h1{margin:0; font-family:var(--display); font-weight:600; font-size:clamp(32px, 8vw, 44px); line-height:1; text-wrap:balance}
-h2{margin:0; font-family:var(--display); font-weight:600; font-size:26px; line-height:1.05}
-h3{margin:0; font-size:15px; font-weight:600}
-.muted{margin:0; font-size:15px; color:var(--ink-2)}
-.meldung{margin:0; min-height:20px; font-size:14px; color:var(--ink-2)}
+h1{margin:0; font-family:var(--display); font-weight:600; font-size:calc(clamp(32px, 8vw, 44px) + var(--schrift-plus,0px)); line-height:1; text-wrap:balance}
+h2{margin:0; font-family:var(--display); font-weight:600; font-size:calc(26px + var(--schrift-plus,0px)); line-height:1.05}
+h3{margin:0; font-size:calc(15px + var(--schrift-plus,0px)); font-weight:600}
+.muted{margin:0; font-size:calc(15px + var(--schrift-plus,0px)); color:var(--ink-2)}
+.meldung{margin:0; min-height:20px; font-size:calc(14px + var(--schrift-plus,0px)); color:var(--ink-2)}
 .meldung.fehler{color:var(--fehler)}
 .stapel{display:flex; flex-direction:column; gap:20px; margin-top:20px}
 .karte{border:1px solid var(--line); border-radius:16px; background:var(--panel); padding:16px; display:flex; flex-direction:column; gap:14px}
 .kopfzeile{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap}
 .anmeldung{max-width:420px; margin:48px auto 0; display:flex; flex-direction:column; gap:16px}
-.feld{display:flex; flex-direction:column; gap:6px; font-size:15px; color:var(--ink-2)}
-input[type="password"], input[type="text"]{font:inherit; font-size:16px; color:var(--ink); background:var(--weiss); min-height:44px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; width:100%; min-width:0}
+.feld{display:flex; flex-direction:column; gap:6px; font-size:calc(15px + var(--schrift-plus,0px)); color:var(--ink-2)}
+input[type="password"], input[type="text"]{font:inherit; font-size:calc(16px + var(--schrift-plus,0px)); color:var(--ink); background:var(--weiss); min-height:44px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; width:100%; min-width:0}
 :root[data-theme="dark"] input[type="password"], :root[data-theme="dark"] input[type="text"]{background:#0E1512}
 .feld-eingabe{position:relative; display:flex}
 .feld-eingabe input{padding-right:52px}
@@ -78,48 +82,48 @@ details.nutzer > summary:hover{background:var(--panel)}
 details[open] > summary .pfeil{transform:rotate(90deg)}
 .inhalt{padding:12px 14px 14px; display:flex; flex-direction:column; gap:12px; border-top:1px solid var(--line)}
 .punkt{width:22px; height:22px; border-radius:50%; border:1px solid var(--ink); flex:none}
-.nname{font-family:var(--display); font-weight:600; font-size:22px; text-transform:uppercase; line-height:1}
-.marke-klein{font-size:12px; font-weight:600; padding:3px 9px; border-radius:999px; border:1px solid var(--line); color:var(--ink-2)}
+.nname{font-family:var(--display); font-weight:600; font-size:calc(22px + var(--schrift-plus,0px)); text-transform:uppercase; line-height:1}
+.marke-klein{font-size:calc(12px + var(--schrift-plus,0px)); font-weight:600; padding:3px 9px; border-radius:999px; border:1px solid var(--line); color:var(--ink-2)}
 .marke-klein.an{border-color:var(--accent); color:var(--accent)}
 .marke-klein.aus{color:var(--ink-2); text-decoration:line-through}
 .marke-klein.sperre{border-color:var(--fehler); color:var(--fehler)}
-.code{display:flex; align-items:center; gap:8px; font-size:15px; color:var(--ink-2); flex-wrap:wrap}
-.code code{font-family:ui-monospace,Menlo,Consolas,monospace; font-size:15px; letter-spacing:.1em; color:var(--ink); word-break:break-all}
+.code{display:flex; align-items:center; gap:8px; font-size:calc(15px + var(--schrift-plus,0px)); color:var(--ink-2); flex-wrap:wrap}
+.code code{font-family:ui-monospace,Menlo,Consolas,monospace; font-size:calc(15px + var(--schrift-plus,0px)); letter-spacing:.1em; color:var(--ink); word-break:break-all}
 .aktionen{display:flex; gap:8px; flex-wrap:wrap}
 .farben{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
 .farbwahl{width:36px; height:36px; padding:0; border-radius:50%; border:2px solid var(--line); cursor:pointer}
 .farbwahl[aria-pressed="true"]{border-color:var(--ink); box-shadow:0 0 0 3px var(--accent)}
 .eigene-farbe{width:44px; height:36px; padding:2px; border:1px solid var(--line); border-radius:8px; background:var(--panel); cursor:pointer}
 .kreuze{display:flex; flex-direction:column; gap:10px; border:1px solid var(--line); border-radius:12px; padding:12px; background:var(--panel)}
-.kreuz{display:flex; align-items:flex-start; gap:10px; font-size:15px; color:var(--ink)}
+.kreuz{display:flex; align-items:flex-start; gap:10px; font-size:calc(15px + var(--schrift-plus,0px)); color:var(--ink)}
 .kreuz input{width:22px; height:22px; margin:1px 0 0; accent-color:var(--accent); flex:none}
 .kreuz .txt{display:flex; flex-direction:column}
-.kreuz .zusatz{font-size:13px; color:var(--ink-2)}
+.kreuz .zusatz{font-size:calc(13px + var(--schrift-plus,0px)); color:var(--ink-2)}
 .unter{margin-left:32px; display:flex; flex-direction:column; gap:10px; padding-left:12px; border-left:2px solid var(--line)}
 .unter[hidden]{display:none}
 .bereich-block{display:flex; flex-direction:column; gap:10px}
 .bereich-block + .bereich-block{border-top:1px solid var(--line); padding-top:12px}
 .kreuz input:disabled + .txt{opacity:.55}
-.hinweis{border:1px dashed var(--line); border-radius:12px; padding:12px; font-size:14px; color:var(--ink-2); background:var(--bg)}
-.notfall{font-size:13px; color:var(--ink-2); margin:0}
+.hinweis{border:1px dashed var(--line); border-radius:12px; padding:12px; font-size:calc(14px + var(--schrift-plus,0px)); color:var(--ink-2); background:var(--bg)}
+.notfall{font-size:calc(13px + var(--schrift-plus,0px)); color:var(--ink-2); margin:0}
 details.sicher > summary{list-style:none; cursor:pointer; display:inline-flex}
 details.sicher > summary::-webkit-details-marker{display:none}
 .sich{display:flex; flex-direction:column; gap:4px; margin-top:14px}
 .sz{display:flex; align-items:center; gap:10px; justify-content:space-between; border-bottom:1px solid var(--line); padding:8px 0; flex-wrap:wrap}
 .sz:last-child{border-bottom:0}
-.sz .wann{font-size:14px; color:var(--ink-2)}
+.sz .wann{font-size:calc(14px + var(--schrift-plus,0px)); color:var(--ink-2)}
 /* Besucherzahlen: wie früher auf der Sportanlagen-Seite, drei Zahlen und 14 Tage als Balken */
 .zahlen{display:flex; flex-wrap:wrap; gap:14px 28px}
 .zahl{display:flex; flex-direction:column; gap:2px}
-.zahl b{font-family:var(--display); font-weight:600; font-size:30px; line-height:1}
-.zahl span{font-size:14px; color:var(--ink-2)}
+.zahl b{font-family:var(--display); font-weight:600; font-size:calc(30px + var(--schrift-plus,0px)); line-height:1}
+.zahl span{font-size:calc(14px + var(--schrift-plus,0px)); color:var(--ink-2)}
 .balken{display:flex; flex-direction:column; gap:5px}
-.balken-zeile{display:grid; grid-template-columns:72px minmax(0,1fr) 36px; align-items:center; gap:10px; font-size:14px}
+.balken-zeile{display:grid; grid-template-columns:72px minmax(0,1fr) 36px; align-items:center; gap:10px; font-size:calc(14px + var(--schrift-plus,0px))}
 .balken-tag{color:var(--ink-2); font-variant-numeric:tabular-nums}
 .balken-feld{display:block; width:100%; height:10px; border-radius:999px; background:var(--line)}
 .balken-strich{display:block; height:100%; min-width:3px; border-radius:999px; background:var(--accent)}
 .balken-zahl{text-align:right; font-variant-numeric:tabular-nums}
-.rueckfrage{border:1px solid var(--fehler); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; font-size:14px}
+.rueckfrage{border:1px solid var(--fehler); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; font-size:calc(14px + var(--schrift-plus,0px))}
 /* Am PC: Besucher links, Benutzer und Formular rechts daneben, Sicherungen ganz unten */
 @media (min-width:1100px){
   .wrap{max-width:1280px}
@@ -132,7 +136,7 @@ details.sicher > summary::-webkit-details-marker{display:none}
 /* Einheitlicher Kopf auf allen Personalseiten: Logo, darunter-/daneben "Helmut-Körnig-Halle" und "Personal" wie auf der Startseite */
 .hkh-kopf{display:inline-flex !important; align-items:center; gap:10px; min-width:0; flex:none; text-decoration:none; color:inherit; border-radius:6px}
 .hkh-kopf img{flex:none; display:block; height:34px !important; width:auto}
-.hkh-marke{display:flex; flex-direction:column; gap:2px; margin:0; font-family:Barlow, system-ui, -apple-system, "Segoe UI", sans-serif; font-size:13px; font-weight:500; line-height:1.15; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2)}
+.hkh-marke{display:flex; flex-direction:column; gap:2px; margin:0; font-family:Barlow, system-ui, -apple-system, "Segoe UI", sans-serif; font-size:calc(13px + var(--schrift-plus,0px)); font-weight:500; line-height:1.15; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2)}
 .spalte{display:flex; flex-direction:column; gap:20px; min-width:0}
 </style>
 </head>
@@ -212,7 +216,7 @@ details.sicher > summary::-webkit-details-marker{display:none}
           <input id="f-code" type="text" maxlength="60" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="letter-spacing:.1em">
         </span>
       </label>
-      <p class="muted" style="font-size:14px">Mindestens 6 Zeichen. Der Code wird nur hier gezeigt, gib ihn der Person persönlich weiter.</p>
+      <p class="muted" style="font-size:calc(14px + var(--schrift-plus,0px))">Mindestens 6 Zeichen. Der Code wird nur hier gezeigt, gib ihn der Person persönlich weiter.</p>
 
       <div class="feld">Was darf die Person?
         <p class="hinweis" id="f-selbst" hidden>Das sind deine eigenen Rechte. Die kann nur ein anderer Admin ändern. Name, Farbe und Code kannst du hier anpassen.</p>
@@ -385,7 +389,7 @@ function zeichneListe() {
         <div class="code">Code <code data-code="${esc(b.bid)}">${"•".repeat(Math.min(14, (b.code || "").length || 8))}</code>
           <button class="knopf klein" type="button" data-zeigen="${esc(b.bid)}">Anzeigen</button>
         </div>
-        <p class="muted" style="font-size:14px">${esc(beschreibung(b))} · ${n === 1 ? "1 Gerät angemeldet" : n + " Geräte angemeldet"}${selbst ? " · Das bist du." : ""}</p>
+        <p class="muted" style="font-size:calc(14px + var(--schrift-plus,0px))">${esc(beschreibung(b))} · ${n === 1 ? "1 Gerät angemeldet" : n + " Geräte angemeldet"}${selbst ? " · Das bist du." : ""}</p>
         <div class="aktionen">
           <button class="knopf klein sym-knopf" type="button" data-bearbeiten="${esc(b.bid)}" title="Bearbeiten" aria-label="Bearbeiten"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /> <path d="M13.5 6.5l4 4" /></svg></button>
           <button class="knopf klein sym-knopf" type="button" data-abmelden="${esc(b.bid)}"${selbst || n === 0 ? " disabled" : ""} title="Alle Geräte abmelden${n ? ` (${n} angemeldet)` : ""}" aria-label="Alle Geräte abmelden${n ? `, ${n} angemeldet` : ""}"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" /> <path d="M9 12h12l-3 -3" /> <path d="M18 15l3 -3" /></svg>${n ? `<span class="sym-zahl">${n}</span>` : ""}</button>
@@ -493,13 +497,13 @@ function rechteZeichnen(rechte, gesperrt) {
         liste.map(([id, name, zusatz]) => kreuz(`arbeitsplan:${id}`, name, zusatz, tun[id] === true, gesperrt)).join("")
       ).join("") + (ZUSATZRECHTE.arbeitsplan ?? []).map((z) => kreuz(`arbeitsplan:${z.id}`, z.name, z.zusatz, tun[z.id] === true, gesperrt)).join("");
     } else if (f.id === "admin") {
-      unter = `<p class="muted" style="font-size:13px">Ein Admin hat überall alle Rechte, auch alle Unterrechte.</p>`;
+      unter = `<p class="muted" style="font-size:calc(13px + var(--schrift-plus,0px))">Ein Admin hat überall alle Rechte, auch alle Unterrechte.</p>`;
     } else {
       unter = (ZUSATZRECHTE[f.id] ?? []).map((z) => kreuz(`${f.id}:${z.id}`, z.name, z.zusatz, tun[z.id] === true, gesperrt)).join("");
     }
     if (f.fuerAlle) {
       /* Ansehen darf jeder mit Code, hier gibt es nur die Unterrechte. */
-      return `<div class="bereich-block"><h3 style="margin:4px 0 2px">${esc(f.name)}</h3><p class="muted" style="font-size:13px;margin:0 0 6px">${esc(f.zusatz)}</p>
+      return `<div class="bereich-block"><h3 style="margin:4px 0 2px">${esc(f.name)}</h3><p class="muted" style="font-size:calc(13px + var(--schrift-plus,0px));margin:0 0 6px">${esc(f.zusatz)}</p>
       <div class="unter" data-unter="${f.id}">${unter}</div></div>`;
     }
     return `<div class="bereich-block">${kreuz(f.id, f.name, f.zusatz, an, gesperrt)}
