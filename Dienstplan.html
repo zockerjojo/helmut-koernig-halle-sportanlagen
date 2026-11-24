@@ -20,8 +20,10 @@
   --body:Barlow,system-ui,-apple-system,"Segoe UI",sans-serif;
   color-scheme:light;
 }
-:root[data-theme="light"]{--schrift-plus:2px}
-@media not (prefers-color-scheme: dark){:root:not([data-theme="dark"]){--schrift-plus:2px}}
+:root[data-theme="light"]:not(.tablett){--schrift-plus:4px}
+@media screen{:root[data-theme="light"]:not(.tablett) body{font-weight:500}}
+@media not (prefers-color-scheme: dark){:root:not([data-theme="dark"]):not(.tablett){--schrift-plus:4px}}
+@media screen{@media not (prefers-color-scheme: dark){:root:not([data-theme="dark"]):not(.tablett) body{font-weight:500}}}
 @media print{:root{--schrift-plus:0px !important}}
 :root[data-theme="dark"]{
   --bg:#0F1512; --panel:#18211C; --ink:#E7EEE9; --ink-2:#9BAAA1; --line:#33413A;
@@ -104,6 +106,11 @@ table.plan{border-collapse:separate; border-spacing:0; width:100%; min-width:138
 :root[data-theme="light"]:not(.tablett) .plan input.feld{height:auto; min-height:25px; line-height:1.3; padding-top:3px; padding-bottom:3px}
 :root[data-theme="light"] .plan input.feld::placeholder{opacity:1}
 :root[data-theme="light"] .plan tbody tr.heute td.nr,:root[data-theme="light"] .plan tbody tr.heute td.tag,:root[data-theme="light"] .plan th.ich{color:var(--ink)}
+:root[data-theme="light"]:not(.tablett) .plan tbody td{font-weight:600}
+:root[data-theme="light"]:not(.tablett) .plan tbody td.zeit{white-space:normal; overflow-wrap:anywhere}
+:root[data-theme="light"]:not(.tablett) .plan tbody input.feld{font-weight:600}
+:root[data-theme="light"]:not(.tablett) .plan thead tr:nth-child(2) th{font-weight:600}
+:root[data-theme="light"]:not(.tablett) .plan tbody td.kz.kurz,:root[data-theme="light"]:not(.tablett) .plan tbody td.kz.ftg,:root[data-theme="light"]:not(.tablett) .plan tbody tr.heute td.nr,:root[data-theme="light"]:not(.tablett) .plan tbody tr.heute td.tag,:root[data-theme="light"]:not(.tablett) .plan tbody input.feld.kurz{font-weight:700}
 }
 /* Zu lange Veranstaltung: antippen zeigt den ganzen Text, noch einmal antippen klappt ihn wieder zu */
 .plan td.ver.offen{white-space:normal; overflow:visible; line-height:1.3; height:auto; padding:4px 6px}

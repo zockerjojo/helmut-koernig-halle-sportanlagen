@@ -19,8 +19,10 @@
   --body:Barlow,system-ui,-apple-system,"Segoe UI",sans-serif;
   color-scheme:light;
 }
-:root[data-theme="light"]{--schrift-plus:2px}
-@media not (prefers-color-scheme: dark){:root:not([data-theme="dark"]){--schrift-plus:2px}}
+:root[data-theme="light"]:not(.tablett){--schrift-plus:4px}
+@media screen{:root[data-theme="light"]:not(.tablett) body{font-weight:500}}
+@media not (prefers-color-scheme: dark){:root:not([data-theme="dark"]):not(.tablett){--schrift-plus:4px}}
+@media screen{@media not (prefers-color-scheme: dark){:root:not([data-theme="dark"]):not(.tablett) body{font-weight:500}}}
 @media print{:root{--schrift-plus:0px !important}}
 :root[data-theme="light"] .marke-klein.an{color:var(--ink)}
 :root[data-theme="dark"]{
