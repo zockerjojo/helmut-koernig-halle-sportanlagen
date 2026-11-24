@@ -12,10 +12,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#E9EDEA; --panel:#F7F9F7; --ink:#14201B; --ink-2:#55635C; --line:#C3CCC6;
+  --bg:#E9EDEA; --panel:#F7F9F7; --ink:#000; --ink-2:#000; --line:#C3CCC6;
   --accent:#17694B; --on-accent:#FFFFFF; --fehler:#B3261E;
   --display:"Barlow Condensed","Arial Narrow",sans-serif;
   --body:Barlow,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --schrift-plus:2px;
   color-scheme:light;
 }
 :root[data-theme="dark"]{
@@ -24,21 +25,21 @@
 }
 *{box-sizing:border-box}
 [hidden]{display:none !important}
-body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:17px; line-height:1.4}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:calc(17px + var(--schrift-plus,0px)); line-height:1.4}
 .wrap{max-width:1100px; margin:0 auto; padding:24px 20px 120px}
 .kopf{display:flex; align-items:center; gap:12px}
 .kopf img{height:40px; width:auto}
-.marke{display:flex; flex-direction:column; gap:2px; font-size:14px; font-weight:500; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2); line-height:1.15}
-h1{margin:28px 0 6px; font-family:var(--display); font-weight:600; font-size:clamp(36px, 7vw, 56px); line-height:1; text-transform:uppercase}
+.marke{display:flex; flex-direction:column; gap:2px; font-size:calc(14px + var(--schrift-plus,0px)); font-weight:500; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2); line-height:1.15}
+h1{margin:28px 0 6px; font-family:var(--display); font-weight:600; font-size:calc(clamp(36px, 7vw, 56px) + var(--schrift-plus,0px)); line-height:1; text-transform:uppercase}
 .muted{margin:0; color:var(--ink-2)}
 .kacheln{display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:16px; margin-top:28px}
 .kachel{display:flex; flex-direction:column; gap:14px; padding:26px; min-height:180px; border-radius:20px; border:1px solid var(--line); background:var(--panel); color:var(--ink); text-decoration:none}
 .kachel:hover,.kachel:focus-visible{border-color:var(--accent); outline:none; box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent)}
 .kachel svg{width:44px; height:44px; fill:none; stroke:var(--accent); stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round}
-.kachel strong{font-family:var(--display); font-weight:600; font-size:30px; text-transform:uppercase; line-height:1.05}
-.kachel span{color:var(--ink-2); font-size:15px}
+.kachel strong{font-family:var(--display); font-weight:600; font-size:calc(30px + var(--schrift-plus,0px)); text-transform:uppercase; line-height:1.05}
+.kachel span{color:var(--ink-2); font-size:calc(15px + var(--schrift-plus,0px))}
 .karte{margin-top:28px; max-width:520px; padding:22px; border-radius:18px; border:1px solid var(--line); background:var(--panel)}
-label{display:block; font-weight:600; font-size:15px; margin:14px 0 6px}
+label{display:block; font-weight:600; font-size:calc(15px + var(--schrift-plus,0px)); margin:14px 0 6px}
 input{width:100%; font:inherit; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:var(--bg); color:var(--ink)}
 .code-feld{position:relative}
 .code-feld input{padding-right:52px}
@@ -105,7 +106,7 @@ body{overflow:hidden}
   </form>
 </section>
 <script type="module">
-import { sitzung, tablettFreischalten, istRechteFehler } from "./js/zugang.js?v=1795474046";
+import { sitzung, tablettFreischalten, istRechteFehler } from "./js/zugang.js?v=1795543172";
 const $ = (id) => document.getElementById(id);
 const SONNE = `<path d="M8 12a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /> <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" />`, MOND = `<path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008" />`;
 const SEITEN = ["Reinigungsplan", "Arbeitsplan", "Dienstplan"];
@@ -138,7 +139,7 @@ function rahmen(name) {
   f.className = "rahmen weg";
   f.title = name;
   f.setAttribute("allow", "fullscreen; screen-wake-lock");
-  f.src = `./Tablet/${name}.html?v=1795474046`;
+  f.src = `./Tablet/${name}.html?v=1795543172`;
   f.addEventListener("load", () => themaSetzen(dunkel(), false));
   $("rahmen-box").appendChild(f);
   return (RAHMEN[name] = f);
