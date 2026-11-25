@@ -43,9 +43,10 @@ const STIL = `
 .feier-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 4vw;box-sizing:border-box;font-family:${FAMILIE};pointer-events:none}
 .feier-zeile{position:relative;margin:0;line-height:${ZEILENHOEHE};white-space:pre;text-align:center;transform:rotate(-3deg)}
 .feier-zeile:nth-child(2n){transform:rotate(2deg)}
-/* Der Glanz ist eine einzige helle Bahn über jeder Zeile, die nur verschoben wird.
+/* Der Glanz ist eine helle Bahn über jeder Zeile. Sie wandert innerhalb der Zeile (background-position),
+   damit sie nicht über den Textrand hinausläuft. An den Rändern wird sie weich ausgeblendet.
    Ein Filter für jeden einzelnen Buchstaben hatte das Bild ruckeln lassen. */
-.feier-zeile::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(100deg,transparent 40%,rgba(255,255,255,.55) 50%,transparent 60%);transform:translateX(-100%);animation:feierSchein 3.2s ease-in-out 1.2s infinite}
+.feier-zeile::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(100deg,transparent 46.6%,rgba(255,255,255,.55) 50%,transparent 53.4%) no-repeat;background-size:300% 100%;background-position:100% 0;-webkit-mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent),linear-gradient(180deg,transparent,#000 22%,#000 78%,transparent);-webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent),linear-gradient(180deg,transparent,#000 22%,#000 78%,transparent);mask-composite:intersect;animation:feierSchein 3.2s ease-in-out 1.2s infinite}
 .feier-b,.feier-w{display:inline-block}
 .feier-z{display:inline-block;color:var(--farbe,${CREME});text-shadow:${SCHATTEN}}
 .feier-b{animation:feierPop .6s cubic-bezier(.3,1.5,.5,1) both;animation-delay:calc(var(--i)*60ms + 240ms)}
@@ -60,7 +61,7 @@ const STIL = `
 @keyframes feierEin{from{opacity:0}to{opacity:1}}
 @keyframes feierPop{0%{opacity:0;transform:translateY(.5em) scale(.1) rotate(-30deg)}55%{opacity:1;transform:translateY(-.14em) scale(1.18) rotate(7deg)}78%{transform:translateY(.03em) scale(.96) rotate(-2deg)}100%{opacity:1;transform:none}}
 @keyframes feierWelle{0%,100%{transform:translateY(0)}50%{transform:translateY(-.12em)}}
-@keyframes feierSchein{0%{transform:translateX(-100%)}45%,100%{transform:translateX(100%)}}
+@keyframes feierSchein{0%{background-position:100% 0}45%,100%{background-position:0 0}}
 @keyframes feierWackel{0%,100%{transform:translate(0,0) rotate(0)}20%{transform:translate(-.5vw,.3vw) rotate(-.6deg)}40%{transform:translate(.5vw,-.3vw) rotate(.6deg)}60%{transform:translate(-.4vw,-.2vw) rotate(-.4deg)}80%{transform:translate(.4vw,.2vw) rotate(.4deg)}}
 `;
 
