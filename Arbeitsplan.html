@@ -380,7 +380,7 @@ import { getDatabase, ref, get, set, update, onValue } from "https://www.gstatic
 import { firebaseConfig } from "./js/config.js";
 import { sitzung, anmelden as zugangAnmelden, abmelden, darf, darfAufgabe, darfVertreten, namen as namenLaden } from "./js/zugang.js";
 import { leisteStarten } from "./js/leiste.js";
-import { feierBereinigt, feierSpielen } from "./js/feier.js";
+import { feierAnzeigen, feierBereinigt, feierSpielen } from "./js/feier.js";
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -1497,7 +1497,7 @@ $("d-erledigt").addEventListener("click", async () => {
   if (!e) return;
   const wirdErledigt = istOffen(e);
   /* Die Feier startet sofort, nicht erst nach dem Speichern: unterwegs kann die Verbindung fehlen. */
-  if (wirdErledigt && FEIER.aktiv) feierSpielen(FEIER);
+  if (wirdErledigt && FEIER.aktiv && feierAnzeigen()) feierSpielen(FEIER);
   const pfad = `${BASIS}/eintraege/${id}`;
   const ok = await schreiben({
     [`${pfad}/status`]: wirdErledigt ? "erledigt" : "offen",

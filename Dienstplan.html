@@ -29,7 +29,7 @@
 *{box-sizing:border-box}
 [hidden]{display:none !important}
 body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:calc(16px + var(--schrift-plus,0px)); line-height:1.4}
-.wrap{max-width:1400px; margin:0 auto; padding:0 16px 40px}
+.wrap{max-width:none; margin:0 auto; padding:0 clamp(16px, 2vw, 40px) 40px}
 .kopf{display:flex; align-items:center; gap:12px; padding-top:24px}
 .hkh-kopf{display:inline-flex; align-items:center; gap:10px; min-width:0; flex:none; text-decoration:none; color:inherit; border-radius:6px}
 .hkh-kopf img{flex:none; display:block; height:34px; width:auto}
@@ -70,7 +70,7 @@ button:focus-visible, a:focus-visible{outline:3px solid var(--accent); outline-o
 /* Die Tabelle wie der Papierplan: alle Zeilen gleich hoch */
 .rahmen{background:var(--panel); border:1px solid var(--line); border-radius:14px; overflow:auto; -webkit-overflow-scrolling:touch}
 /* Zeilen im gleichen Verhältnis wie auf dem Papierplan: Zeilenhöhe etwa 1,7 x Schriftgröße */
-table.plan{border-collapse:separate; border-spacing:0; width:100%; min-width:1380px; font-size:calc(15px + var(--schrift-plus,0px)); font-variant-numeric:tabular-nums}
+table.plan{border-collapse:separate; border-spacing:0; width:100%; font-size:calc(15px + var(--schrift-plus,0px)); font-variant-numeric:tabular-nums}
 .plan th,.plan td{border:0; border-right:1px solid var(--line); border-bottom:1px solid var(--line); padding:0 6px; text-align:center; white-space:nowrap; height:26px; line-height:25px; overflow:hidden; text-overflow:ellipsis}
 .plan thead th{background:var(--panel); font-weight:600}
 .plan thead tr:nth-child(2) th{font-weight:500; color:var(--ink-2); font-size:calc(13px + var(--schrift-plus,0px))}
@@ -96,7 +96,8 @@ table.plan{border-collapse:separate; border-spacing:0; width:100%; min-width:138
 .plan .ver{width:100%; max-width:1px}
 /* Zu lange Veranstaltung: antippen zeigt den ganzen Text, noch einmal antippen klappt ihn wieder zu */
 .plan td.ver.offen{white-space:normal; overflow:visible; line-height:1.3; height:auto; padding:4px 6px}
-@media (max-width:899px){ .plan td.ver{text-align:left} }
+/* Auf dem Bildschirm steht die Veranstaltung links, auch wenn die Spalte sehr breit ist. Im Druck bleibt es wie bisher. */
+@media screen{ .plan th.ver,.plan td.ver{text-align:left} .plan th.ver input.feld,.plan td.ver input.feld{text-align:left} }
 .plan th.ich,.plan td.ich{background:var(--ich)}
 .plan tr.we td.ich{background:color-mix(in srgb, var(--ich) 55%, var(--wochenende))}
 .plan th.ich{color:var(--accent)}
@@ -166,7 +167,7 @@ html.tablett table.plan{min-width:0}
   .plan tr > :last-child{border-right:0}
   .plan tbody tr:last-child > *{border-bottom:0}
   .plan th.nr,.plan td.nr,.plan th.tag,.plan td.tag{position:static; box-shadow:none}
-  table.plan{zoom:1 !important}
+  table.plan{zoom:1 !important; width:100% !important}
   .plan .ver{min-width:0; max-width:none; width:auto}
   .plan .zeit{width:86px; min-width:86px; max-width:86px}
   .plan .vb{width:46px; min-width:46px; max-width:46px}
@@ -625,6 +626,7 @@ try { ZOOM = Number(localStorage.getItem("hkh-dienstplan-zoom")) || 1; } catch (
 function zoomSetzen(z, merken = true) {
   ZOOM = Math.min(2, Math.max(0.4, Math.round(z * 100) / 100));
   plan.style.zoom = String(ZOOM);
+  breiteAnpassen();
   $("zoom-wert").textContent = `${Math.round(ZOOM * 100)} %`;
   $("zoom-aus").disabled = ZOOM <= 0.4; $("zoom-ein").disabled = ZOOM >= 2;
   if (merken) try { localStorage.setItem("hkh-dienstplan-zoom", String(ZOOM)); } catch (e) {}
@@ -634,6 +636,16 @@ $("zoom-aus").addEventListener("click", () => zoomSetzen(ZOOM - 0.1));
 $("zoom-ein").addEventListener("click", () => zoomSetzen(ZOOM + 0.1));
 $("zoom-wert").addEventListener("click", () => zoomSetzen(1));
 const rahmen = $("rahmen");
+/* Die Tabelle füllt die ganze Breite des Bildschirms. Der Zoom ändert dann nur die Schrift,
+   nicht die Breite. Auf dem Handy bleibt sie mindestens 1380 Punkte breit und wird gewischt. */
+function breiteAnpassen() {
+  if (window.HKH_TABLETT) return;   // auf dem Tablett passt einpassen() die Tabelle an
+  const frei = $("rahmen").clientWidth;
+  /* Ab 1000 Punkten Breite passt sich die Tabelle dem Bildschirm an. Darunter (Handy) bleibt sie 1380 breit. */
+  const mindest = frei >= 1000 ? 1000 : 1380;
+  plan.style.width = `${Math.max(mindest, Math.floor(frei / ZOOM))}px`;
+}
+new ResizeObserver(() => breiteAnpassen()).observe(rahmen);
 rahmen.addEventListener("wheel", (e) => {
   if (!e.ctrlKey) return;
   e.preventDefault();
