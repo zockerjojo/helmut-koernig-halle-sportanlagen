@@ -1,19 +1,19 @@
 /* Feier nach dem Erledigen einer Aufgabe: ein Vollbild-Overlay mit einem Schriftzug,
-   der Buchstabe für Buchstabe erscheint, dazu Konfetti, Feuerwerk und Funkeln.
+   der Buchstabe für Buchstabe erscheint, dazu Konfetti, Feuerwerk, Funkeln, Herzen, Emoji-Regen und Wackeln.
    Die Arbeitsplan-Seite spielt sie beim Erledigen ab, das Admin-Panel für die Vorschau.
    Dieses Modul liest nichts aus der Datenbank. Die Seiten geben die Einstellungen herein. */
 
 export const FEIER_STANDARD = {
   aktiv: true,
   schrift: "vorlage",
-  effekte: { konfetti: true, raketen: true, sterne: true },
+  effekte: { konfetti: true, raketen: true, sterne: true, herzen: false, emojiregen: false, wackeln: false },
   texte: ["du bist der Beste!", "Stark gemacht!", "Top erledigt!", "Feierabend-Held!", "Weiter so!"],
 };
 export const FEIER_SCHRIFTEN = ["vorlage", "bunt"];
 export const FEIER_MAX_TEXTE = 12;
 export const FEIER_MAX_ZEICHEN = 80;
 
-const PAL = ["#ff4f8b", "#ffb000", "#22b573", "#2f80ed", "#ff7a1a", "#8b5cf6", "#00a8c6"];
+const PAL = ["#ff4f8b", "#ffb000", "#3ddc84", "#8fd8ff", "#ff7a1a", "#b794f6", "#3fe0d0"];
 const CREME = "#fff3d6";
 const NAVY = "#17416b";
 const NAVY_TIEF = "#0c2a45";
@@ -30,7 +30,7 @@ const SCHATTEN = [
 ].join(",");
 
 const STIL = `
-.feier{position:fixed;inset:0;z-index:10000;background:#fbfaf6;overflow:hidden;cursor:pointer;touch-action:none;-webkit-tap-highlight-color:transparent;animation:feierAuf .35s ease both}
+.feier{position:fixed;inset:0;z-index:10000;background:radial-gradient(ellipse at 50% 42%,#2b78cc 0%,#1a4f8f 55%,#0c2a45 100%);overflow:hidden;cursor:pointer;touch-action:none;-webkit-tap-highlight-color:transparent;animation:feierAuf .35s ease both}
 .feier.raus{animation:feierAus .8s ease-in forwards}
 .feier-leinwand{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .feier-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 4vw;box-sizing:border-box;font-family:${FAMILIE};pointer-events:none}
@@ -43,6 +43,7 @@ const STIL = `
 .feier-z{animation:feierGlanz 2.4s linear infinite;animation-delay:calc(var(--i)*70ms + 1600ms)}
 .feier.ruhig .feier-text{animation:feierEin .6s ease both}
 .feier.ruhig .feier-b,.feier.ruhig .feier-w,.feier.ruhig .feier-z{animation:none}
+.feier.wackeln .feier-text{animation:feierWackel .45s ease-in-out .9s 5 both}
 .feier-sr{position:absolute;width:1px;height:1px;margin:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @keyframes feierAuf{from{opacity:0}to{opacity:1}}
 @keyframes feierAus{to{opacity:0}}
@@ -50,6 +51,7 @@ const STIL = `
 @keyframes feierPop{0%{opacity:0;transform:translateY(.5em) scale(.1) rotate(-30deg)}55%{opacity:1;transform:translateY(-.14em) scale(1.18) rotate(7deg)}78%{transform:translateY(.03em) scale(.96) rotate(-2deg)}100%{opacity:1;transform:none}}
 @keyframes feierWelle{0%,100%{transform:translateY(0)}50%{transform:translateY(-.12em)}}
 @keyframes feierGlanz{0%{filter:brightness(1)}7%{filter:brightness(1.6)}14%,100%{filter:brightness(1)}}
+@keyframes feierWackel{0%,100%{transform:translate(0,0) rotate(0)}20%{transform:translate(-.5vw,.3vw) rotate(-.6deg)}40%{transform:translate(.5vw,-.3vw) rotate(.6deg)}60%{transform:translate(-.4vw,-.2vw) rotate(-.4deg)}80%{transform:translate(.4vw,.2vw) rotate(.4deg)}}
 `;
 
 const zufall = (a, b) => a + Math.random() * (b - a);
@@ -72,6 +74,9 @@ export function feierBereinigt(roh) {
       konfetti: schalter(e.konfetti, true),
       raketen: schalter(e.raketen, true),
       sterne: schalter(e.sterne, true),
+      herzen: schalter(e.herzen, false),
+      emojiregen: schalter(e.emojiregen, false),
+      wackeln: schalter(e.wackeln, false),
     },
     texte: texte.length ? texte : FEIER_STANDARD.texte.slice(),
   };
@@ -91,6 +96,13 @@ function zeichenVon(text) {
     return [...new Intl.Segmenter("de", { granularity: "grapheme" }).segment(text)].map((s) => s.segment);
   }
   return Array.from(text);
+}
+
+/* Emojis aus den Texten für den Emoji-Regen. Ohne Emoji in den Texten: Standard-Emojis. */
+const EMOJI_VORGABE = ["🎉", "🏆", "⭐", "💪", "🥳", "🎈"];
+function emojisAus(texte) {
+  const alle = texte.flatMap((t) => zeichenVon(t)).filter((z) => /\p{Extended_Pictographic}/u.test(z));
+  return alle.length ? alle : EMOJI_VORGABE;
 }
 
 let messCtx = null;
@@ -206,6 +218,7 @@ export function feierSpielen(roh) {
   let fertig = false, rAF = 0, zeilen = null, w = 0, h = 0, maas = 1;
   let t0 = 0, letzt = 0, letzteFunke = 0;
   let teile = [], raketen = [], raketenPlan = [], funken = [], sterne = [];
+  let herzenListe = [], emojiListe = [], letzteHerz = 0, letzteEmoji = 0, emojiVorrat = [];
 
   function groesse() {
     w = el.clientWidth;
@@ -270,7 +283,7 @@ export function feierSpielen(roh) {
   function funkeNeu() {
     funken.push({
       x: Math.random() * w, y: -6, vy: zufall(40, 90) * maas, sw: zufall(0, 6.28), ph: zufall(0, 6.28),
-      r: zufall(1.2, 2.2) * maas, farbe: Math.random() < 0.5 ? "#ffb000" : "#2f80ed", alt: 0, leben: zufall(3.5, 5.5),
+      r: zufall(1.2, 2.2) * maas, farbe: Math.random() < 0.5 ? "#ffb000" : "#fff3d6", alt: 0, leben: zufall(3.5, 5.5),
     });
   }
 
@@ -289,6 +302,33 @@ export function feierSpielen(roh) {
     ctx.restore();
   }
 
+  function herzNeu() {
+    herzenListe.push({
+      x: zufall(0.06, 0.94) * w, y: h + 24, vy: zufall(90, 160) * maas, sw: zufall(0, 6.28),
+      s: zufall(9, 16) * maas, farbe: Math.random() < 0.6 ? "#ff4f8b" : "#ffb3d1", alt: 0, leben: zufall(3.8, 5),
+    });
+  }
+
+  function herzZeichnen(x, y, s, farbe, a) {
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.fillStyle = farbe;
+    ctx.beginPath();
+    ctx.moveTo(x, y + s * 0.35);
+    ctx.bezierCurveTo(x - s, y - s * 0.35, x - s * 0.5, y - s * 1.1, x, y - s * 0.45);
+    ctx.bezierCurveTo(x + s * 0.5, y - s * 1.1, x + s, y - s * 0.35, x, y + s * 0.35);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function emojiNeu() {
+    emojiListe.push({
+      x: zufall(0.05, 0.95) * w, y: -36, vy: zufall(110, 190) * maas, sw: zufall(0, 6.28),
+      gross: zufall(22, 36) * maas, zeichen: emojiVorrat[Math.floor(Math.random() * emojiVorrat.length)],
+      alt: 0, leben: zufall(3.6, 4.8),
+    });
+  }
+
   function schleife(jetzt) {
     if (fertig) return;
     const t = jetzt - t0;
@@ -298,6 +338,8 @@ export function feierSpielen(roh) {
 
     while (raketenPlan.length && raketenPlan[0].start <= t) raketen.push(raketenPlan.shift());
     if (effekte.sterne && !ruhig && t < 4300 && jetzt - letzteFunke > 45) { funkeNeu(); letzteFunke = jetzt; }
+    if (effekte.herzen && !ruhig && t < 4600 && jetzt - letzteHerz > 150) { herzNeu(); letzteHerz = jetzt; }
+    if (effekte.emojiregen && !ruhig && t < 4600 && jetzt - letzteEmoji > 170) { emojiNeu(); letzteEmoji = jetzt; }
 
     raketen = raketen.filter((r) => {
       const p = Math.min(1, (t - r.start) / r.flugzeit);
@@ -370,6 +412,30 @@ export function feierSpielen(roh) {
       }
     }
 
+    herzenListe = herzenListe.filter((p) => {
+      p.alt += dt;
+      if (p.alt >= p.leben || p.y < -2 * p.s) return false;
+      p.y -= p.vy * dt;
+      p.x += Math.sin(p.alt * 2.2 + p.sw) * 26 * dt;
+      herzZeichnen(p.x, p.y, p.s, p.farbe, Math.min(1, (p.leben - p.alt) / 0.8));
+      return true;
+    });
+
+    emojiListe = emojiListe.filter((p) => {
+      p.alt += dt;
+      if (p.alt >= p.leben || p.y > h + 40) return false;
+      p.y += p.vy * dt;
+      p.x += Math.sin(p.alt * 1.6 + p.sw) * 18 * dt;
+      ctx.save();
+      ctx.globalAlpha = Math.min(1, (p.leben - p.alt) / 0.7);
+      ctx.font = `${p.gross}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(p.zeichen, p.x, p.y);
+      ctx.restore();
+      return true;
+    });
+
     rAF = requestAnimationFrame(schleife);
   }
 
@@ -390,6 +456,8 @@ export function feierSpielen(roh) {
       if (effekte.sterne) sterne = STERN_POS.map(([fx, fy]) => ({ fx, fy, r: zufall(6, 11), ph: zufall(0, 6.28) }));
       if (effekte.raketen) raketenPlan = raketenPlanBauen();
       if (effekte.konfetti) konfetti(150);
+      if (effekte.emojiregen) emojiVorrat = emojisAus(konfig.texte);
+      if (effekte.wackeln) el.classList.add("wackeln");
     }
     rAF = requestAnimationFrame(schleife);
     zeitgeber.push(setTimeout(() => el.classList.add("raus"), dauer - 900));
