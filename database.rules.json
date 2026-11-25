@@ -484,6 +484,15 @@
           },
           "sterne": {
             ".validate": "newData.isBoolean()"
+          },
+          "herzen": {
+            ".validate": "newData.isBoolean()"
+          },
+          "emojiregen": {
+            ".validate": "newData.isBoolean()"
+          },
+          "wackeln": {
+            ".validate": "newData.isBoolean()"
           }
         },
         "texte": {

@@ -104,9 +104,14 @@ details[open] > summary .pfeil{transform:rotate(90deg)}
 .notfall{font-size:13px; color:var(--ink-2); margin:0}
 details.sicher > summary{list-style:none; cursor:pointer; display:inline-flex}
 details.sicher > summary::-webkit-details-marker{display:none}
-/* Feier beim Erledigen, eingeklappt unter den Rechten */
-details.feier-block > summary{list-style:none; cursor:pointer; display:inline-flex}
-details.feier-block > summary::-webkit-details-marker{display:none}
+/* Einklappbare Bereiche: die Rechte der Person, darin die Feier beim Erledigen */
+details.klapp > summary{list-style:none; cursor:pointer; display:inline-flex}
+details.klapp > summary::-webkit-details-marker{display:none}
+.klapp-inhalt{display:flex; flex-direction:column; gap:14px; margin-top:14px}
+.feier-emoji-wahl{display:flex; flex-wrap:wrap; gap:6px; padding:8px; border:1px solid var(--line); border-radius:12px; background:var(--panel)}
+.feier-emoji-wahl[hidden]{display:none}
+.feier-emoji-wahl button{font-size:22px; line-height:1; width:42px; height:42px; padding:0; border:1px solid transparent; border-radius:10px; background:transparent; cursor:pointer}
+.feier-emoji-wahl button:hover, .feier-emoji-wahl button:focus-visible{border-color:var(--line); background:var(--bg); outline:none}
 .feier-inhalt{display:flex; flex-direction:column; gap:14px; margin-top:14px; border:1px solid var(--line); border-radius:12px; padding:14px; background:var(--panel)}
 .feier-texte{display:flex; flex-direction:column; gap:8px}
 .feier-zeile-f{display:flex; align-items:center; gap:8px}
@@ -222,11 +227,12 @@ details.feier-block > summary::-webkit-details-marker{display:none}
       </label>
       <p class="muted" style="font-size:14px">Mindestens 6 Zeichen. Der Code wird nur hier gezeigt, gib ihn der Person persönlich weiter.</p>
 
-      <div class="feld">Was darf die Person?
+      <details class="klapp" id="f-rechte-block">
+        <summary class="knopf klein">Was darf die Person?</summary>
+        <div class="klapp-inhalt">
         <p class="hinweis" id="f-selbst" hidden>Das sind deine eigenen Rechte. Die kann nur ein anderer Admin ändern. Name, Farbe und Code kannst du hier anpassen.</p>
         <div class="kreuze" id="f-rechte"></div>
-      </div>
-      <details class="feier-block" id="f-feier">
+      <details class="klapp" id="f-feier">
         <summary class="knopf klein">Feier beim Erledigen</summary>
         <div class="feier-inhalt">
           <p class="notfall">Wenn diese Person eine Aufgabe abhakt, erscheint diese Feier auf dem Bildschirm.</p>
@@ -242,6 +248,9 @@ details.feier-block > summary::-webkit-details-marker{display:none}
               <label class="kreuz"><input id="f-feier-konfetti" type="checkbox"><span class="txt">Konfetti</span></label>
               <label class="kreuz"><input id="f-feier-raketen" type="checkbox"><span class="txt">Feuerwerk</span></label>
               <label class="kreuz"><input id="f-feier-sterne" type="checkbox"><span class="txt">Funkeln</span></label>
+              <label class="kreuz"><input id="f-feier-herzen" type="checkbox"><span class="txt">Herzen steigen auf</span></label>
+              <label class="kreuz"><input id="f-feier-emojiregen" type="checkbox"><span class="txt">Emoji-Regen (Emojis aus den Texten)</span></label>
+              <label class="kreuz"><input id="f-feier-wackeln" type="checkbox"><span class="txt">Bildschirm wackelt kurz</span></label>
             </div>
           </div>
           <div class="feld">Texte
@@ -251,6 +260,8 @@ details.feier-block > summary::-webkit-details-marker{display:none}
           </div>
           <div class="aktionen"><button class="knopf klein" id="f-feier-vorschau" type="button">Vorschau abspielen</button></div>
           <p class="meldung fehler" id="f-feier-fehler" role="alert"></p>
+        </div>
+      </details>
         </div>
       </details>
       <p class="meldung fehler" id="f-fehler" role="alert"></p>
@@ -567,12 +578,52 @@ const NEU_VORGABE = { arbeitsplan_tun: { erstellen: true, bearbeitenEigene: true
    Die Einstellungen stehen unter feier/<Benutzer>, getrennt vom Benutzer selbst.
    Gespeichert wird nur, wenn im Block etwas geändert wurde. */
 let feierGeaendert = false;
+/* Emoji-Auswahl: ein Raster, das unter der Zeile erscheint und das Emoji an der Cursorstelle einfügt. */
+const FEIER_EMOJIS = ["🎉", "🥳", "🎊", "🏆", "🥇", "🏅", "⭐", "🌟", "✨", "🔥", "💪", "👏", "🙌", "👍", "😎", "😄", "🤩", "🚀", "💯", "🎯", "⚽", "🏀", "🎈", "🍾", "🥂", "❤️", "😍", "🙏", "💥", "😂", "🎶"];
+const emojiWahl = document.createElement("div");
+emojiWahl.className = "feier-emoji-wahl";
+emojiWahl.hidden = true;
+for (const em of FEIER_EMOJIS) {
+  const knopf = document.createElement("button");
+  knopf.type = "button";
+  knopf.textContent = em;
+  knopf.title = em;
+  knopf.setAttribute("aria-label", "Emoji " + em);
+  knopf.addEventListener("click", () => emojiEinfuegen(em));
+  emojiWahl.appendChild(knopf);
+}
+let emojiZiel = null;
+function emojiWahlFuer(zeile, eingabe) {
+  if (!emojiWahl.hidden && emojiZiel === eingabe) { emojiWahl.hidden = true; return; }
+  emojiZiel = eingabe;
+  zeile.after(emojiWahl);
+  emojiWahl.hidden = false;
+}
+function emojiEinfuegen(em) {
+  const feld = emojiZiel;
+  if (!feld) return;
+  const a = feld.selectionStart ?? feld.value.length;
+  const b = feld.selectionEnd ?? a;
+  if (feld.value.length - (b - a) + em.length > FEIER_MAX_ZEICHEN) {
+    feierMeldung(`Dieser Text ist voll, höchstens ${FEIER_MAX_ZEICHEN} Zeichen.`, false);
+    return;
+  }
+  feld.value = feld.value.slice(0, a) + em + feld.value.slice(b);
+  feld.focus();
+  feld.setSelectionRange(a + em.length, a + em.length);
+  feierGeaendert = true;
+  emojiWahl.hidden = true;
+}
+document.addEventListener("click", (ev) => {
+  if (!emojiWahl.hidden && !emojiWahl.contains(ev.target) && !ev.target.closest(".feier-emoji-knopf")) emojiWahl.hidden = true;
+});
+document.addEventListener("keydown", (ev) => { if (ev.key === "Escape" && !emojiWahl.hidden) emojiWahl.hidden = true; });
 function feierMeldung(text, aufklappen = true) {
   $("f-feier-fehler").textContent = text;
-  if (aufklappen) $("f-feier").open = true;
+  if (aufklappen) { $("f-rechte-block").open = true; $("f-feier").open = true; }
 }
 function feierNeuKnopf() {
-  $("f-feier-neu").disabled = $("f-feier-texte").children.length >= FEIER_MAX_TEXTE;
+  $("f-feier-neu").disabled = $("f-feier-texte").querySelectorAll(":scope > .feier-zeile-f").length >= FEIER_MAX_TEXTE;
 }
 function feierZeileAnlegen(text = "") {
   const zeile = document.createElement("div");
@@ -589,8 +640,15 @@ function feierZeileAnlegen(text = "") {
   weg.className = "knopf klein";
   weg.textContent = "✕";
   weg.setAttribute("aria-label", "Text entfernen");
-  weg.addEventListener("click", () => { zeile.remove(); feierGeaendert = true; feierNeuKnopf(); });
-  zeile.append(eingabe, weg);
+  weg.addEventListener("click", () => { if (emojiZiel === eingabe) emojiWahl.hidden = true; zeile.remove(); feierGeaendert = true; feierNeuKnopf(); });
+  const emoji = document.createElement("button");
+  emoji.type = "button";
+  emoji.className = "knopf klein feier-emoji-knopf";
+  emoji.textContent = "😀";
+  emoji.title = "Emoji einfügen";
+  emoji.setAttribute("aria-label", "Emoji einfügen");
+  emoji.addEventListener("click", () => emojiWahlFuer(zeile, eingabe));
+  zeile.append(eingabe, emoji, weg);
   $("f-feier-texte").appendChild(zeile);
   feierNeuKnopf();
   return eingabe;
@@ -601,6 +659,9 @@ function feierZeichnen(konfig) {
   $("f-feier-konfetti").checked = konfig.effekte.konfetti;
   $("f-feier-raketen").checked = konfig.effekte.raketen;
   $("f-feier-sterne").checked = konfig.effekte.sterne;
+  $("f-feier-herzen").checked = konfig.effekte.herzen;
+  $("f-feier-emojiregen").checked = konfig.effekte.emojiregen;
+  $("f-feier-wackeln").checked = konfig.effekte.wackeln;
   $("f-feier-texte").innerHTML = "";
   konfig.texte.forEach((t) => feierZeileAnlegen(t));
   feierNeuKnopf();
@@ -612,7 +673,7 @@ function feierLesen() {
   return feierBereinigt({
     aktiv: $("f-feier-an").checked,
     schrift: document.querySelector('input[name="f-feier-schrift"]:checked')?.value,
-    effekte: { konfetti: $("f-feier-konfetti").checked, raketen: $("f-feier-raketen").checked, sterne: $("f-feier-sterne").checked },
+    effekte: { konfetti: $("f-feier-konfetti").checked, raketen: $("f-feier-raketen").checked, sterne: $("f-feier-sterne").checked, herzen: $("f-feier-herzen").checked, emojiregen: $("f-feier-emojiregen").checked, wackeln: $("f-feier-wackeln").checked },
     texte,
   });
 }
@@ -659,6 +720,7 @@ $("f-feier-vorschau").addEventListener("click", () => {
 
 function formularOeffnen(bid) {
   bearbeite = bid;
+  $("f-rechte-block").open = false;
   const b = bid ? benutzer[bid] : null;
   const selbst = !!bid && bid === ich?.bid;
   $("f-titel").textContent = b ? `${b.name} bearbeiten` : "Benutzer hinzufügen";
