@@ -41,15 +41,18 @@ const STIL = `
 .feier.raus{animation:feierAus .8s ease-in forwards}
 .feier-leinwand{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .feier-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 4vw;box-sizing:border-box;font-family:${FAMILIE};pointer-events:none}
-.feier-zeile{margin:0;line-height:${ZEILENHOEHE};white-space:pre;text-align:center;transform:rotate(-3deg)}
+.feier-zeile{position:relative;margin:0;line-height:${ZEILENHOEHE};white-space:pre;text-align:center;transform:rotate(-3deg)}
 .feier-zeile:nth-child(2n){transform:rotate(2deg)}
+/* Der Glanz ist eine einzige helle Bahn über jeder Zeile, die nur verschoben wird.
+   Ein Filter für jeden einzelnen Buchstaben hatte das Bild ruckeln lassen. */
+.feier-zeile::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(100deg,transparent 40%,rgba(255,255,255,.55) 50%,transparent 60%);transform:translateX(-100%);animation:feierSchein 3.2s ease-in-out 1.2s infinite}
 .feier-b,.feier-w{display:inline-block}
 .feier-z{display:inline-block;color:var(--farbe,${CREME});text-shadow:${SCHATTEN}}
 .feier-b{animation:feierPop .6s cubic-bezier(.3,1.5,.5,1) both;animation-delay:calc(var(--i)*60ms + 240ms)}
 .feier-w{animation:feierWelle 2s ease-in-out infinite;animation-delay:calc(var(--i)*80ms + 1200ms)}
-.feier-z{animation:feierGlanz 2.4s linear infinite;animation-delay:calc(var(--i)*70ms + 1600ms)}
 .feier.ruhig .feier-text{animation:feierEin .6s ease both}
-.feier.ruhig .feier-b,.feier.ruhig .feier-w,.feier.ruhig .feier-z{animation:none}
+.feier.ruhig .feier-b,.feier.ruhig .feier-w{animation:none}
+.feier.ruhig .feier-zeile::after{display:none}
 .feier.wackeln .feier-text{animation:feierWackel .45s ease-in-out .9s 5 both}
 .feier-sr{position:absolute;width:1px;height:1px;margin:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @keyframes feierAuf{from{opacity:0}to{opacity:1}}
@@ -57,7 +60,7 @@ const STIL = `
 @keyframes feierEin{from{opacity:0}to{opacity:1}}
 @keyframes feierPop{0%{opacity:0;transform:translateY(.5em) scale(.1) rotate(-30deg)}55%{opacity:1;transform:translateY(-.14em) scale(1.18) rotate(7deg)}78%{transform:translateY(.03em) scale(.96) rotate(-2deg)}100%{opacity:1;transform:none}}
 @keyframes feierWelle{0%,100%{transform:translateY(0)}50%{transform:translateY(-.12em)}}
-@keyframes feierGlanz{0%{filter:brightness(1)}7%{filter:brightness(1.6)}14%,100%{filter:brightness(1)}}
+@keyframes feierSchein{0%{transform:translateX(-100%)}45%,100%{transform:translateX(100%)}}
 @keyframes feierWackel{0%,100%{transform:translate(0,0) rotate(0)}20%{transform:translate(-.5vw,.3vw) rotate(-.6deg)}40%{transform:translate(.5vw,-.3vw) rotate(.6deg)}60%{transform:translate(-.4vw,-.2vw) rotate(-.4deg)}80%{transform:translate(.4vw,.2vw) rotate(.4deg)}}
 `;
 
@@ -200,6 +203,12 @@ function schriftBereit() {
 
 let lauf = null;
 
+/* Ob die Feier auf diesem Gerät gezeigt wird. Jede Person schaltet sie in den Einstellungen der Leiste aus;
+   das merkt sich das Gerät ("hkh-animation-aus"). Die Arbeitsplan-Seite fragt das ab, die Vorschau nicht. */
+export function feierAnzeigen() {
+  try { return localStorage.getItem("hkh-animation-aus") !== "1"; } catch (e) { return true; }
+}
+
 /* Spielt die Feier ab. Ein Tippen (oder Escape) beendet sie früher.
    Gibt eine Funktion zurück, die sie sofort beendet. */
 export function feierSpielen(roh) {
@@ -232,7 +241,8 @@ export function feierSpielen(roh) {
     w = el.clientWidth;
     h = el.clientHeight;
     maas = Math.max(0.8, Math.min(2.4, Math.min(w, h) / 400));
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    /* Das Konfetti braucht keine volle Schärfe. Mit 1,5 ist die Leinwand deutlich leichter als bei 2. */
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     leinwand.width = Math.round(w * dpr);
     leinwand.height = Math.round(h * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);

@@ -32,6 +32,9 @@ const CSS = `
 .hkh-einst button{display:flex; align-items:center; gap:10px; min-height:44px; padding:0 12px; border:0; border-radius:10px; background:none; color:var(--l-ink); font:500 15px Barlow, system-ui, -apple-system, "Segoe UI", sans-serif; text-align:left; cursor:pointer}
 .hkh-einst button[hidden]{display:none}
 .hkh-einst button:hover{background:color-mix(in srgb, var(--l-ink) 8%, transparent)}
+.hkh-haken{flex:none; display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border:2px solid var(--l-ink); border-radius:5px; font-size:14px; font-weight:700; line-height:1}
+.hkh-haken::after{content:"✓"}
+.hkh-einst button[aria-checked="false"] .hkh-haken::after{content:""}
 .hkh-leiste :focus-visible{outline:3px solid var(--l-akzent); outline-offset:2px}
 body.hkh-mit-leiste{padding-bottom:calc(var(--hkh-leiste-h, 62px) + 14px + env(safe-area-inset-bottom))}
 /* Schmale Bildschirme: die Leiste wird zweizeilig, damit nichts abgeschnitten ist und nichts gescrollt werden muss. */
@@ -89,6 +92,7 @@ export function leisteStarten(sitz, aktiv = "") {
     <div class="hkh-einst" role="menu" aria-label="Einstellungen" hidden>
       <button type="button" role="menuitem" data-thema></button>
       ${tab ? `<button type="button" role="menuitemcheckbox" data-voll aria-pressed="false"></button>` : ""}
+      <button type="button" role="menuitemcheckbox" data-animation aria-checked="true"><span class="hkh-haken" aria-hidden="true"></span><span>Animation zeigen</span></button>
       <button type="button" role="menuitem" data-ab${tab ? " hidden" : ""}>${svg("logout")}<span>Abmelden</span></button>
     </div>
     <button class="hkh-schalter" type="button" aria-controls="hkh-band" aria-expanded="${offen}" aria-label="Personal-Leiste ein- oder ausklappen" title="Bereiche">${svg("apps")}</button>`;
@@ -119,6 +123,17 @@ export function leisteStarten(sitz, aktiv = "") {
       if (an) (el.requestFullscreen || el.webkitRequestFullscreen)?.call(el)?.catch?.(() => {});
       else if (document.fullscreenElement || document.webkitFullscreenElement) (document.exitFullscreen || document.webkitExitFullscreen)?.call(document)?.catch?.(() => {});
       vollZeigen();
+    });
+  }
+  /* Animation zeigen: jede Person kann die Feier auf diesem Gerät ausschalten (siehe feierAnzeigen in feier.js). */
+  const animKnopf = leiste.querySelector("[data-animation]");
+  if (animKnopf) {
+    const animAn = () => { try { return localStorage.getItem("hkh-animation-aus") !== "1"; } catch (e) { return true; } };
+    animKnopf.setAttribute("aria-checked", String(animAn()));
+    animKnopf.addEventListener("click", () => {
+      const an = !animAn();
+      try { localStorage.setItem("hkh-animation-aus", an ? "0" : "1"); } catch (e) {}
+      animKnopf.setAttribute("aria-checked", String(an));
     });
   }
   const einstZu = () => { einst.hidden = true; einstKnopf.setAttribute("aria-expanded", "false"); };
