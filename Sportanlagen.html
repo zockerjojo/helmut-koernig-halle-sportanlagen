@@ -101,6 +101,10 @@ legend{font-size:14px; color:var(--ink-2); padding:0 0 6px}
   .wrap{max-width:1280px}
   .liste{grid-template-columns:repeat(3, minmax(0,1fr))}
 }
+/* Ab 1600 px etwas mehr Breite; drei Spalten bleiben, damit die Anlagen in ganzen Reihen stehen */
+@media (min-width:1600px){
+  html:not(.tablett) .wrap{max-width:1560px}
+}
 /* Einheitlicher Kopf auf allen Personalseiten: Logo, darunter-/daneben "Helmut-Körnig-Halle" und "Personal" wie auf der Startseite */
 .hkh-kopf{display:inline-flex !important; align-items:center; gap:10px; min-width:0; flex:none; text-decoration:none; color:inherit; border-radius:6px}
 .hkh-kopf img{flex:none; display:block; height:34px !important; width:auto}

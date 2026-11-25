@@ -145,6 +145,10 @@ details.klapp > summary::-webkit-details-marker{display:none}
   #panel{grid-auto-flow:row dense}
   #spalte-rechts > #formular{position:sticky; top:12px; max-height:calc(100vh - 96px); overflow:auto}
 }
+/* Ab 1600 px etwas mehr Breite; die zwei Spalten bleiben */
+@media (min-width:1600px){
+  html:not(.tablett) .wrap{max-width:1560px}
+}
 /* Einheitlicher Kopf auf allen Personalseiten: Logo, darunter-/daneben "Helmut-Körnig-Halle" und "Personal" wie auf der Startseite */
 .hkh-kopf{display:inline-flex !important; align-items:center; gap:10px; min-width:0; flex:none; text-decoration:none; color:inherit; border-radius:6px}
 .hkh-kopf img{flex:none; display:block; height:34px !important; width:auto}

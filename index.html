@@ -121,6 +121,10 @@ tbody th{font-weight:400}
   .seite > .verbindung{grid-column:1; grid-row:5}
   .seite > .hinweis-block{grid-column:2; grid-row:3; align-self:start}
 }
+/* Ab 1600 px etwas mehr Breite; das Tablett bleibt unverändert */
+@media (min-width:1600px){
+  html:not(.tablett) .seite{max-width:1440px; grid-template-columns:minmax(0,1.8fr) minmax(340px,1fr); column-gap:40px}
+}
 /* Glocke für Push-Nachrichten links neben Hell/Dunkel; durchgestrichen = aus */
 .kopf-knoepfe{display:flex; gap:10px; flex:none; align-items:center}
 .glocke .glocke-strich{display:inline}
