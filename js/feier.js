@@ -22,6 +22,13 @@ const DAUER = 5600;
 const DAUER_RUHIG = 2600;
 const ZEILENHOEHE = 1.12;
 const STERN_POS = [[0.08, 0.22], [0.92, 0.2], [0.14, 0.82], [0.86, 0.8], [0.5, 0.08], [0.5, 0.93]];
+const KONF_REIBUNG = 1.6;        // wie stark das Konfetti abgebremst wird
+const KONF_FALL = 0.17;          // Fallgeschwindigkeit als Anteil der Bildschirmhöhe pro Sekunde
+/* Zeitpunkte (ms) der Kanonen-Salven. "tief" schießt auf die untere Bildschirmhälfte,
+   damit unten nicht lange nichts fällt. */
+const KONF_STOSS = [{ t: 0 }, { t: 900 }, { t: 1600, tief: true }];
+const KONF_REGEN_ENDE = 3800;    // bis wann von oben Konfetti nachkommt (ms)
+const KONF_REGEN_PRO_S = 34;     // Teile pro Sekunde im Regen auf einem Handy-Bildschirm
 
 const SCHATTEN = [
   `.05em 0 0 ${NAVY}`, `-.05em 0 0 ${NAVY}`, `0 .05em 0 ${NAVY}`, `0 -.05em 0 ${NAVY}`,
@@ -219,6 +226,7 @@ export function feierSpielen(roh) {
   let t0 = 0, letzt = 0, letzteFunke = 0;
   let teile = [], raketen = [], raketenPlan = [], funken = [], sterne = [];
   let herzenListe = [], emojiListe = [], letzteHerz = 0, letzteEmoji = 0, emojiVorrat = [];
+  let konfettiStoss = 0, konfettiRest = 0;
 
   function groesse() {
     w = el.clientWidth;
@@ -244,19 +252,30 @@ export function feierSpielen(roh) {
 
   function taste(e) { if (e.key === "Escape") stoppe(); }
 
-  function konfetti(n) {
+  /* Konfetti: Zwei Kanonen unten in den Ecken schießen quer über den Bildschirm bis in die
+     Mitte, dazu fällt von oben über die ganze Breite ein Regen. Alle Teile fallen gleich
+     schnell, und der Fall ist ein Anteil der Bildschirmhöhe, damit sie lange sichtbar bleiben. */
+  function konfettiTeil(x, y, vx, vy, leben) {
+    teile.push({
+      typ: "k", x, y, vx, vy,
+      bw: zufall(6, 10) * maas, bh: zufall(3.5, 6) * maas,
+      rot: zufall(0, 6.28), vr: zufall(-6, 6), flip: zufall(0, 6.28), vf: zufall(4, 9),
+      farbe: PAL[Math.floor(Math.random() * PAL.length)], alt: 0, leben,
+    });
+  }
+
+  function konfettiKanone(n, tief) {
     for (let k = 0; k < n; k++) {
       const links = k % 2 === 0;
-      const winkel = zufall(links ? -86 : -120, links ? -60 : -94) * Math.PI / 180;
-      const v = zufall(380, 760);
-      teile.push({
-        typ: "k", x: links ? -4 : w + 4, y: h + 4,
-        vx: Math.cos(winkel) * v, vy: Math.sin(winkel) * v,
-        bw: zufall(6, 10) * maas, bh: zufall(3.5, 6) * maas,
-        rot: zufall(0, 6.28), vr: zufall(-6, 6), flip: zufall(0, 6.28), vf: zufall(4, 9),
-        farbe: PAL[k % PAL.length], alt: 0, leben: zufall(3.6, 5),
-      });
+      const x0 = links ? -4 : w + 4, y0 = h + 4;
+      const zx = links ? zufall(0.08, 0.85) * w : zufall(0.15, 0.92) * w;
+      const zy = tief ? zufall(0.5, 0.9) * h : zufall(0.08, 0.55) * h;
+      konfettiTeil(x0, y0, (zx - x0) * KONF_REIBUNG * 1.1, (zy - y0) * KONF_REIBUNG * 1.45, zufall(4.6, 5.6));
     }
+  }
+
+  function konfettiRegenNeu() {
+    konfettiTeil(zufall(0, 1) * w, -12 * maas, zufall(-18, 18) * maas, zufall(30, 80) * maas, zufall(4.2, 5.4));
   }
 
   function raketenPlanBauen() {
@@ -340,6 +359,13 @@ export function feierSpielen(roh) {
     if (effekte.sterne && !ruhig && t < 4300 && jetzt - letzteFunke > 45) { funkeNeu(); letzteFunke = jetzt; }
     if (effekte.herzen && !ruhig && t < 4600 && jetzt - letzteHerz > 150) { herzNeu(); letzteHerz = jetzt; }
     if (effekte.emojiregen && !ruhig && t < 4600 && jetzt - letzteEmoji > 170) { emojiNeu(); letzteEmoji = jetzt; }
+    if (effekte.konfetti && !ruhig) {
+      while (konfettiStoss < KONF_STOSS.length && t >= KONF_STOSS[konfettiStoss].t) { konfettiKanone(60, KONF_STOSS[konfettiStoss].tief); konfettiStoss++; }
+      if (t < KONF_REGEN_ENDE) {
+        konfettiRest += dt * KONF_REGEN_PRO_S * Math.min(3, Math.max(0.6, (w * h) / 329000));
+        while (konfettiRest >= 1) { konfettiRegenNeu(); konfettiRest -= 1; }
+      }
+    }
 
     raketen = raketen.filter((r) => {
       const p = Math.min(1, (t - r.start) / r.flugzeit);
@@ -359,8 +385,8 @@ export function feierSpielen(roh) {
     teile = teile.filter((p) => {
       p.alt += dt;
       if (p.alt >= p.leben) return false;
-      const k = p.typ === "k" ? 2.2 : 2.4;
-      p.vy += (p.typ === "k" ? 140 : 160) * dt;
+      const k = p.typ === "k" ? KONF_REIBUNG : 2.4;
+      p.vy += (p.typ === "k" ? KONF_REIBUNG * KONF_FALL * h : 160) * dt;
       const f = Math.exp(-k * dt);
       p.vx *= f;
       p.vy *= f;
@@ -455,7 +481,6 @@ export function feierSpielen(roh) {
     if (!ruhig) {
       if (effekte.sterne) sterne = STERN_POS.map(([fx, fy]) => ({ fx, fy, r: zufall(6, 11), ph: zufall(0, 6.28) }));
       if (effekte.raketen) raketenPlan = raketenPlanBauen();
-      if (effekte.konfetti) konfetti(150);
       if (effekte.emojiregen) emojiVorrat = emojisAus(konfig.texte);
       if (effekte.wackeln) el.classList.add("wackeln");
     }

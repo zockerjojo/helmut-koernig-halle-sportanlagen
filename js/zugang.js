@@ -161,7 +161,9 @@ export async function sitzung() {
 
 /* Darf die angemeldete Person diesen Bereich sehen? */
 const istFuerAlle = (bereich) => BEREICHE.some((f) => f.id === bereich && f.fuerAlle);   // sieht jeder mit Code
+/* „Animation bearbeiten“ öffnet das Admin Panel auch ohne Admin-Rechte. Dort gibt es dann nur die Animation. */
 export function darf(s, bereich) {
+  if (bereich === "admin" && s?.rechte?.feier === true) return true;
   return !!s && (s.istAdmin || istFuerAlle(bereich) || s.rechte?.[bereich] === true);
 }
 

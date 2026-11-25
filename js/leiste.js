@@ -68,6 +68,7 @@ export function leisteStarten(sitz, aktiv = "") {
   const REIHENFOLGE = ["sportanlagen", "reinigung", "arbeitsplan", "dienstplan", "admin"];
   const rang = (id) => { const i = REIHENFOLGE.indexOf(id); return i < 0 ? 99 : i; };
   const bereiche = BEREICHE.filter((f) => darf(sitz, f.id)).sort((x, y) => rang(x.id) - rang(y.id));
+  const bezeichnung = (f) => (f.id === "admin" && !sitz.istAdmin ? "Animation beim Erledigen" : f.name);
   leiste = document.createElement("div");
   leiste.className = "hkh-leiste";
   /* Auf dem Pausenraum-Tablet gibt es keine Leiste: die Knöpfe stehen oben in der Tablet-Hülle. */
@@ -80,7 +81,7 @@ export function leisteStarten(sitz, aktiv = "") {
   leiste.innerHTML = `
     <nav class="hkh-band" id="hkh-band" aria-label="Personalbereiche">
       <a class="hkh-sym" href="${tab ? "./Tablet/" : "./"}" aria-label="Startseite" title="Startseite"${aktiv === "" ? ' aria-current="page"' : ""}>${svg("clipboard-list")}</a>
-      ${bereiche.map((f) => `<a class="hkh-sym" href="${esc(ziel(f.seite))}" aria-label="${esc(f.name)}" title="${esc(f.name)}"${aktiv === f.id ? ' aria-current="page"' : ""}>${svg(BEREICH_SYMBOL[f.id])}</a>`).join("")}
+      ${bereiche.map((f) => `<a class="hkh-sym" href="${esc(ziel(f.seite))}" aria-label="${esc(bezeichnung(f))}" title="${esc(bezeichnung(f))}"${aktiv === f.id ? ' aria-current="page"' : ""}>${svg(BEREICH_SYMBOL[f.id])}</a>`).join("")}
       <span class="hkh-trenn" aria-hidden="true"></span>
       <span class="hkh-wer" title="Angemeldet"><span class="hkh-punkt" style="background:${esc(sitz.farbe)}"></span><span>${esc(sitz.name)}</span></span>
       <button class="hkh-sym" type="button" data-einst aria-label="Einstellungen" title="Einstellungen" aria-haspopup="true" aria-expanded="false">${svg("settings")}</button>
