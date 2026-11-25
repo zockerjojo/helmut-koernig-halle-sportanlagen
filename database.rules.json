@@ -464,6 +464,35 @@
         }
       }
     },
+    "feier": {
+      "$bid": {
+        ".read": "((auth != null && root.child('geraete').child(auth.uid).child('code').val() === root.child('zugang').child('admin').val()) || ((auth != null && root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('code').val() === root.child('geraete').child(auth.uid).child('code').val() && root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('gesperrt').val() !== true && (!root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('stand').exists() || root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('stand').val() <= root.child('geraete').child(auth.uid).child('seit').val())) && (root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('admin').val() === true || root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('admin').val() === true))) || (auth != null && root.child('geraete').child(auth.uid).child('benutzer').val() === $bid)",
+        ".write": "(auth != null && root.child('geraete').child(auth.uid).child('code').val() === root.child('zugang').child('admin').val()) || ((auth != null && root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('code').val() === root.child('geraete').child(auth.uid).child('code').val() && root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('gesperrt').val() !== true && (!root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('stand').exists() || root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('stand').val() <= root.child('geraete').child(auth.uid).child('seit').val())) && root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('admin').val() === true)",
+        ".validate": "newData.hasChildren(['aktiv','schrift','effekte','texte'])",
+        "aktiv": {
+          ".validate": "newData.isBoolean()"
+        },
+        "schrift": {
+          ".validate": "newData.val() == 'vorlage' || newData.val() == 'bunt'"
+        },
+        "effekte": {
+          "konfetti": {
+            ".validate": "newData.isBoolean()"
+          },
+          "raketen": {
+            ".validate": "newData.isBoolean()"
+          },
+          "sterne": {
+            ".validate": "newData.isBoolean()"
+          }
+        },
+        "texte": {
+          "$nr": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 240"
+          }
+        }
+      }
+    },
     "tabletts": {
       ".read": "(auth != null && root.child('geraete').child(auth.uid).child('code').val() === root.child('zugang').child('admin').val()) || ((auth != null && root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('code').val() === root.child('geraete').child(auth.uid).child('code').val() && root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('gesperrt').val() !== true && (!root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('stand').exists() || root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('stand').val() <= root.child('geraete').child(auth.uid).child('seit').val())) && (root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('admin').val() === true || root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('admin').val() === true))",
       "$uid": {

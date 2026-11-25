@@ -104,6 +104,14 @@ details[open] > summary .pfeil{transform:rotate(90deg)}
 .notfall{font-size:13px; color:var(--ink-2); margin:0}
 details.sicher > summary{list-style:none; cursor:pointer; display:inline-flex}
 details.sicher > summary::-webkit-details-marker{display:none}
+/* Feier beim Erledigen, eingeklappt unter den Rechten */
+details.feier-block > summary{list-style:none; cursor:pointer; display:inline-flex}
+details.feier-block > summary::-webkit-details-marker{display:none}
+.feier-inhalt{display:flex; flex-direction:column; gap:14px; margin-top:14px; border:1px solid var(--line); border-radius:12px; padding:14px; background:var(--panel)}
+.feier-texte{display:flex; flex-direction:column; gap:8px}
+.feier-zeile-f{display:flex; align-items:center; gap:8px}
+.feier-zeile-f input{flex:1; min-width:0}
+.feier-zeile-f .knopf{min-width:44px; padding:0 12px}
 .sich{display:flex; flex-direction:column; gap:4px; margin-top:14px}
 .sz{display:flex; align-items:center; gap:10px; justify-content:space-between; border-bottom:1px solid var(--line); padding:8px 0; flex-wrap:wrap}
 .sz:last-child{border-bottom:0}
@@ -218,6 +226,33 @@ details.sicher > summary::-webkit-details-marker{display:none}
         <p class="hinweis" id="f-selbst" hidden>Das sind deine eigenen Rechte. Die kann nur ein anderer Admin ändern. Name, Farbe und Code kannst du hier anpassen.</p>
         <div class="kreuze" id="f-rechte"></div>
       </div>
+      <details class="feier-block" id="f-feier">
+        <summary class="knopf klein">Feier beim Erledigen</summary>
+        <div class="feier-inhalt">
+          <p class="notfall">Wenn diese Person eine Aufgabe abhakt, erscheint diese Feier auf dem Bildschirm.</p>
+          <label class="kreuz"><input id="f-feier-an" type="checkbox"><span class="txt">Feier anzeigen</span></label>
+          <div class="feld">Schrift
+            <div class="kreuze">
+              <label class="kreuz"><input type="radio" name="f-feier-schrift" value="vorlage"><span class="txt">Creme mit blauem Rand, wie im Vorbild</span></label>
+              <label class="kreuz"><input type="radio" name="f-feier-schrift" value="bunt"><span class="txt">Bunt</span></label>
+            </div>
+          </div>
+          <div class="feld">Effekte
+            <div class="kreuze">
+              <label class="kreuz"><input id="f-feier-konfetti" type="checkbox"><span class="txt">Konfetti</span></label>
+              <label class="kreuz"><input id="f-feier-raketen" type="checkbox"><span class="txt">Feuerwerk</span></label>
+              <label class="kreuz"><input id="f-feier-sterne" type="checkbox"><span class="txt">Funkeln</span></label>
+            </div>
+          </div>
+          <div class="feld">Texte
+            <p class="notfall">Bei jeder erledigten Aufgabe wird einer davon zufällig gewählt. Emojis gehen einfach mit rein, zum Beispiel 🎉.</p>
+            <div id="f-feier-texte" class="feier-texte"></div>
+            <div class="aktionen"><button class="knopf klein" id="f-feier-neu" type="button">Text hinzufügen</button></div>
+          </div>
+          <div class="aktionen"><button class="knopf klein" id="f-feier-vorschau" type="button">Vorschau abspielen</button></div>
+          <p class="meldung fehler" id="f-feier-fehler" role="alert"></p>
+        </div>
+      </details>
       <p class="meldung fehler" id="f-fehler" role="alert"></p>
       <div class="aktionen">
         <button class="knopf" id="f-abbrechen" type="button">Abbrechen</button>
@@ -254,6 +289,7 @@ import {
   sitzung, anmelden, abmelden, anmeldeFehler, istRechteFehler, BEREICHE, AP_RECHTE, ZUSATZRECHTE,
 } from "./js/zugang.js";
 import { leisteStarten } from "./js/leiste.js";
+import { feierBereinigt, feierSpielen, FEIER_MAX_TEXTE, FEIER_MAX_ZEICHEN } from "./js/feier.js";
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -437,7 +473,9 @@ $("liste").addEventListener("click", async (e) => {
   const ja = e.target.closest("[data-ja]");
   if (ja) {
     const bid = ja.dataset.ja;
-    await schreiben({ [`benutzer/${bid}`]: null, [`kennungen/${bid}`]: null, [`namen/${bid}`]: null }, "Benutzer gelöscht.");
+    const geloescht = await schreiben({ [`benutzer/${bid}`]: null, [`kennungen/${bid}`]: null, [`namen/${bid}`]: null }, "Benutzer gelöscht.");
+    /* Die Feier wird separat entfernt: schlägt das fehl, bleibt die Löschung trotzdem gültig. */
+    if (geloescht) remove(ref(db, `feier/${bid}`)).catch(() => {});
     return;
   }
 });
@@ -447,10 +485,12 @@ async function schreiben(werte, erfolg) {
     await update(ref(db), werte);
     $("listen-meldung").textContent = erfolg;
     $("listen-meldung").classList.remove("fehler");
+    return true;
   } catch (err) {
     console.error(err);
     $("listen-meldung").textContent = istRechteFehler(err) ? "Das darfst du nicht." : "Das konnte nicht gespeichert werden.";
     $("listen-meldung").classList.add("fehler");
+    return false;
   }
 }
 
@@ -523,6 +563,100 @@ function rechteLesen() {
   return rechte;
 }
 const NEU_VORGABE = { arbeitsplan_tun: { erstellen: true, bearbeitenEigene: true, verschiebenEigene: true, loeschenEigene: true } };
+/* ---- Feier beim Erledigen ----
+   Die Einstellungen stehen unter feier/<Benutzer>, getrennt vom Benutzer selbst.
+   Gespeichert wird nur, wenn im Block etwas geändert wurde. */
+let feierGeaendert = false;
+function feierMeldung(text, aufklappen = true) {
+  $("f-feier-fehler").textContent = text;
+  if (aufklappen) $("f-feier").open = true;
+}
+function feierNeuKnopf() {
+  $("f-feier-neu").disabled = $("f-feier-texte").children.length >= FEIER_MAX_TEXTE;
+}
+function feierZeileAnlegen(text = "") {
+  const zeile = document.createElement("div");
+  zeile.className = "feier-zeile-f";
+  const eingabe = document.createElement("input");
+  eingabe.type = "text";
+  eingabe.maxLength = FEIER_MAX_ZEICHEN;
+  eingabe.autocomplete = "off";
+  eingabe.placeholder = "z. B. Super erledigt! 🎉";
+  eingabe.setAttribute("aria-label", "Text für die Feier");
+  eingabe.value = text;
+  const weg = document.createElement("button");
+  weg.type = "button";
+  weg.className = "knopf klein";
+  weg.textContent = "✕";
+  weg.setAttribute("aria-label", "Text entfernen");
+  weg.addEventListener("click", () => { zeile.remove(); feierGeaendert = true; feierNeuKnopf(); });
+  zeile.append(eingabe, weg);
+  $("f-feier-texte").appendChild(zeile);
+  feierNeuKnopf();
+  return eingabe;
+}
+function feierZeichnen(konfig) {
+  $("f-feier-an").checked = konfig.aktiv;
+  document.querySelectorAll('input[name="f-feier-schrift"]').forEach((r) => { r.checked = r.value === konfig.schrift; });
+  $("f-feier-konfetti").checked = konfig.effekte.konfetti;
+  $("f-feier-raketen").checked = konfig.effekte.raketen;
+  $("f-feier-sterne").checked = konfig.effekte.sterne;
+  $("f-feier-texte").innerHTML = "";
+  konfig.texte.forEach((t) => feierZeileAnlegen(t));
+  feierNeuKnopf();
+}
+/* Liest den Block. Ohne einen einzigen Text kommt null zurück. */
+function feierLesen() {
+  const texte = [...$("f-feier-texte").querySelectorAll("input")].map((i) => i.value.trim()).filter((t) => t.length > 0);
+  if (!texte.length) return null;
+  return feierBereinigt({
+    aktiv: $("f-feier-an").checked,
+    schrift: document.querySelector('input[name="f-feier-schrift"]:checked')?.value,
+    effekte: { konfetti: $("f-feier-konfetti").checked, raketen: $("f-feier-raketen").checked, sterne: $("f-feier-sterne").checked },
+    texte,
+  });
+}
+async function feierSpeichern(bid) {
+  if (!feierGeaendert) return true;
+  const konfig = feierLesen();
+  if (!konfig) { feierMeldung("Bitte mindestens einen Text eintragen."); return false; }
+  try {
+    await set(ref(db, `feier/${bid}`), konfig);
+    feierGeaendert = false;
+    return true;
+  } catch (err) {
+    console.error(err);
+    feierMeldung(istRechteFehler(err) ? "Das darfst du nicht." : "Die Feier konnte nicht gespeichert werden.");
+    return false;
+  }
+}
+async function feierLaden(bid) {
+  try {
+    const snap = await get(ref(db, `feier/${bid}`));
+    if (bearbeite !== bid || feierGeaendert) return;
+    feierZeichnen(feierBereinigt(snap.val()));
+  } catch (err) {
+    console.error(err);
+    if (bearbeite === bid) feierMeldung("Die Feier-Einstellungen konnten nicht geladen werden.", false);
+  }
+}
+function feierFormular(bid) {
+  feierGeaendert = false;
+  $("f-feier").open = false;
+  $("f-feier-fehler").textContent = "";
+  feierZeichnen(feierBereinigt(null));
+  if (bid) feierLaden(bid);
+}
+$("f-feier").addEventListener("input", () => { feierGeaendert = true; });
+$("f-feier").addEventListener("change", () => { feierGeaendert = true; });
+$("f-feier-neu").addEventListener("click", () => { feierGeaendert = true; feierZeileAnlegen("").focus(); });
+$("f-feier-vorschau").addEventListener("click", () => {
+  const konfig = feierLesen();
+  if (!konfig) { feierMeldung("Bitte mindestens einen Text eintragen. Dann zeigt die Vorschau ihn."); return; }
+  $("f-feier-fehler").textContent = "";
+  feierSpielen(konfig);
+});
+
 function formularOeffnen(bid) {
   bearbeite = bid;
   const b = bid ? benutzer[bid] : null;
@@ -537,6 +671,7 @@ function formularOeffnen(bid) {
   $("f-fehler").textContent = "";
   $("formular").hidden = false;
   $("formular").scrollIntoView({ behavior: "smooth", block: "start" });
+  feierFormular(bid);
   setTimeout(() => $("f-name").focus(), 60);
 }
 $("neu").addEventListener("click", () => formularOeffnen(null));
@@ -550,6 +685,7 @@ $("formular").addEventListener("submit", async (e) => {
   if (code.length < 6) { $("f-fehler").textContent = "Der Code braucht mindestens 6 Zeichen."; return; }
   const doppelt = Object.entries(benutzer).some(([k, b]) => k !== bearbeite && (b.code || "").toLowerCase() === code.toLowerCase());
   if (doppelt) { $("f-fehler").textContent = "Diesen Code hat schon jemand anderes."; return; }
+  if (feierGeaendert && !feierLesen()) { feierMeldung("Bitte mindestens einen Text eintragen."); return; }
   const bid = bearbeite || ("b" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6));
   const alt = benutzer[bid];
   /* Die eigenen Rechte bleiben unangetastet: nur Name, Farbe und Code gehen raus.
@@ -561,6 +697,7 @@ $("formular").addEventListener("submit", async (e) => {
         [`benutzer/${bid}/name`]: name, [`benutzer/${bid}/farbe`]: farbe, [`benutzer/${bid}/code`]: code,
         [`namen/${bid}`]: { name, farbe },
       });
+      if (!(await feierSpeichern(bid))) return;
       $("formular").hidden = true; bearbeite = null;
       $("listen-meldung").textContent = "Gespeichert."; $("listen-meldung").classList.remove("fehler");
     } catch (err) {
@@ -585,6 +722,7 @@ $("formular").addEventListener("submit", async (e) => {
       [`kennungen/${bid}`]: true,
       [`namen/${bid}`]: { name, farbe },
     });
+    if (!(await feierSpeichern(bid))) return;
     $("formular").hidden = true;
     bearbeite = null;
     $("listen-meldung").textContent = alt ? "Gespeichert." : "Benutzer angelegt.";

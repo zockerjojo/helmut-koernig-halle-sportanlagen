@@ -379,6 +379,7 @@ import { getDatabase, ref, get, set, update, onValue } from "https://www.gstatic
 import { firebaseConfig } from "./js/config.js";
 import { sitzung, anmelden as zugangAnmelden, abmelden, darf, darfAufgabe, darfVertreten, namen as namenLaden } from "./js/zugang.js";
 import { leisteStarten } from "./js/leiste.js";
+import { feierBereinigt, feierSpielen } from "./js/feier.js";
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -447,6 +448,15 @@ let ICH = null;
    eintragen" immer die eigene. Wird bewusst nicht gemerkt: nach dem Neuladen
    trägt wieder jeder für sich selbst ein. */
 let ALS = "";
+/* Die Feier-Einstellungen der angemeldeten Person, live: eine Änderung im Admin-Panel gilt sofort.
+   Ohne Eintrag oder ohne Leserecht bleibt die Standardfeier. */
+let FEIER = feierBereinigt(null);
+function feierBeobachten(si) {
+  if (!si?.bid || si.tablett) return;
+  onValue(ref(db, `feier/${si.bid}`),
+    (snap) => { FEIER = feierBereinigt(snap.val()); },
+    () => { FEIER = feierBereinigt(null); });
+}
 async function seiteStarten() {
   let si = null;
   try { si = await sitzung(); } catch (err) { console.error(err); }
@@ -457,6 +467,7 @@ async function seiteStarten() {
     return;
   }
   ICH = si;
+  feierBeobachten(si);
   S.ich = si.name;
   leisteStarten(si, "arbeitsplan");
   ALS = si.name;
@@ -1454,6 +1465,8 @@ $("d-erledigt").addEventListener("click", async () => {
   const e = id && S.eintraege[id];
   if (!e) return;
   const wirdErledigt = istOffen(e);
+  /* Die Feier startet sofort, nicht erst nach dem Speichern: unterwegs kann die Verbindung fehlen. */
+  if (wirdErledigt && FEIER.aktiv) feierSpielen(FEIER);
   await schreiben({
     [`${BASIS}/eintraege/${id}/status`]: wirdErledigt ? "erledigt" : "offen",
     ...verlaufPaar(wirdErledigt ? "erledigt" : "geoeffnet", titelVon(e), e.person ?? null),
