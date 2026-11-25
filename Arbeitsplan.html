@@ -303,6 +303,7 @@ html.tablett #alle-zeigen{display:none !important}
       <div class="zeilen-ansicht" id="d-zeilen" hidden></div>
       <div class="aktionen" style="margin-top:4px">
         <button class="knopf klein sym-knopf" id="d-bearbeiten" type="button" title="Bearbeiten" aria-label="Bearbeiten"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /> <path d="M13.5 6.5l4 4" /></svg></button>
+        <button class="knopf klein sym-knopf" id="d-bearbeitung" type="button" title="In Bearbeitung setzen" aria-label="In Bearbeitung setzen"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /> <path d="M12 7v5l3 2" /></svg></button>
         <button class="knopf klein sym-knopf" id="d-erledigt" type="button" title="Als erledigt markieren" aria-label="Als erledigt markieren"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12l5 5l10 -10" /></svg></button>
         <button class="knopf klein gefahr sym-knopf" id="d-loeschen" type="button" title="Löschen" aria-label="Löschen"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7l16 0" /> <path d="M10 11l0 6" /> <path d="M14 11l0 6" /> <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /> <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg></button>
       </div>
@@ -783,10 +784,16 @@ const istPfeil = (e) => e.art === "pfeil";
 const istOffen = (e) => e.status !== "erledigt";
 /* Der Titel ist die Aufgabe selbst. Die Textzeilen stehen nur in der Ansicht und im Formular. */
 const titelVon = (e) => e.text;
+/* Wann die Aufgabe in Bearbeitung gesetzt und wann sie erledigt wurde. */
+const zeitenVon = (e) => [
+  e.bearbeitetAm ? `in Bearbeitung seit ${zeitText(e.bearbeitetAm)}` : null,
+  e.erledigtAm && !istOffen(e) ? `erledigt ${zeitText(e.erledigtAm)}` : null,
+].filter(Boolean).join(" · ");
 const untertitelVon = (e) => {
   const wer = e.personen.join(", ");
-  if (!istOffen(e)) return wer ? `✓ ${wer} · erledigt` : "✓ erledigt";
-  return wer ? `${wer} · offen` : "Für alle · offen";
+  if (!istOffen(e)) return `✓ ${wer ? wer + " · " : ""}${zeitenVon(e) || "erledigt"}`;
+  const stand = e.status === "bearbeitung" ? (zeitenVon(e) || "in Bearbeitung") : "offen";
+  return wer ? `${wer} · ${stand}` : `Für alle · ${stand}`;
 };
 const punktFarbe = (e) => (istOffen(e) ? farbeVon(e.person) : stilWert("--erledigt", "#6B7770"));
 /* Die Karte bleibt immer weiß, auch im Dunkelmodus. Ihre Farben sind darum fest. Die Liste nimmt die Themenfarben. */
@@ -1056,6 +1063,11 @@ function waehle(id) {
   const meine = istMeine(e);
   $("d-bearbeiten").disabled = !darfAufgabe(ICH, "bearbeiten", meine);
   $("d-erledigt").disabled = !darfAufgabe(ICH, "erledigen", meine);
+  const inArbeit = e.status === "bearbeitung";
+  const bearbText = inArbeit ? "Zurück auf offen" : "In Bearbeitung setzen";
+  $("d-bearbeitung").title = bearbText; $("d-bearbeitung").setAttribute("aria-label", bearbText);
+  $("d-bearbeitung").classList.toggle("primaer", inArbeit);
+  $("d-bearbeitung").disabled = !istOffen(e) || !darfAufgabe(ICH, "erledigen", meine);
   $("d-loeschen").disabled = !darfAufgabe(ICH, "loeschen", meine);
   $("d-bearbeiten").title = $("d-bearbeiten").disabled ? "Diese Aufgabe darfst du nicht bearbeiten." : "Bearbeiten";
   $("d-loeschen").title = $("d-loeschen").disabled ? "Diese Aufgabe darfst du nicht löschen." : "Löschen";
@@ -1460,6 +1472,25 @@ $("t-formular").addEventListener("submit", async (e) => {
 
 $("d-bearbeiten").addEventListener("click", () => { if (S.gewaehlt) formularOeffnen(S.gewaehlt); });
 
+/* Die Zeitpunkte stehen in einem eigenen Schreibvorgang. So klappt das Abhaken auch dann,
+   wenn die Regeln für die neuen Felder noch nicht veröffentlicht sind. */
+function zeitenSetzen(pfad, werte) {
+  return update(ref(db, pfad), werte).catch((err) => console.error(err));
+}
+$("d-bearbeitung").addEventListener("click", async () => {
+  const id = S.gewaehlt;
+  const e = id && S.eintraege[id];
+  if (!e || !istOffen(e)) return;
+  const wirdBearbeitet = e.status !== "bearbeitung";
+  const pfad = `${BASIS}/eintraege/${id}`;
+  const ok = await schreiben({
+    [`${pfad}/status`]: wirdBearbeitet ? "bearbeitung" : "offen",
+    ...verlaufPaar(wirdBearbeitet ? "bearbeitung" : "geoeffnet", titelVon(e), e.person ?? null),
+  });
+  if (ok) await zeitenSetzen(pfad, wirdBearbeitet ? { bearbeitetAm: Date.now(), erledigtAm: null } : { bearbeitetAm: null, erledigtAm: null });
+  waehle(id);
+});
+
 $("d-erledigt").addEventListener("click", async () => {
   const id = S.gewaehlt;
   const e = id && S.eintraege[id];
@@ -1467,10 +1498,12 @@ $("d-erledigt").addEventListener("click", async () => {
   const wirdErledigt = istOffen(e);
   /* Die Feier startet sofort, nicht erst nach dem Speichern: unterwegs kann die Verbindung fehlen. */
   if (wirdErledigt && FEIER.aktiv) feierSpielen(FEIER);
-  await schreiben({
-    [`${BASIS}/eintraege/${id}/status`]: wirdErledigt ? "erledigt" : "offen",
+  const pfad = `${BASIS}/eintraege/${id}`;
+  const ok = await schreiben({
+    [`${pfad}/status`]: wirdErledigt ? "erledigt" : "offen",
     ...verlaufPaar(wirdErledigt ? "erledigt" : "geoeffnet", titelVon(e), e.person ?? null),
   });
+  if (ok) await zeitenSetzen(pfad, wirdErledigt ? { erledigtAm: Date.now() } : { erledigtAm: null, bearbeitetAm: null });
   waehle(id);
 });
 
@@ -1577,7 +1610,7 @@ $("f-personen").addEventListener("click", (e) => {
 
 /* ---- Verlauf anzeigen ---- */
 const FILTER = [["alle", "Alle"], ["erstellt", "erstellt"], ["bearbeitet", "bearbeitet"], ["erledigt", "erledigt"], ["geloescht", "gelöscht"]];
-const WORT = { erstellt: "erstellt", bearbeitet: "bearbeitet", erledigt: "erledigt", geoeffnet: "wieder geöffnet", geloescht: "gelöscht", verschoben: "verschoben", versetzt: "auf der Karte versetzt" };
+const WORT = { erstellt: "erstellt", bearbeitet: "bearbeitet", erledigt: "erledigt", geoeffnet: "wieder geöffnet", bearbeitung: "in Bearbeitung gesetzt", geloescht: "gelöscht", verschoben: "verschoben", versetzt: "auf der Karte versetzt" };
 function zeitText(ts) {
   if (!ts) return "";
   const d = new Date(ts);
@@ -1602,7 +1635,7 @@ $("v-filter").addEventListener("click", (e) => {
   verlaufZeichnen();
 });
 function verlaufZeichnen() {
-  const passt = (v) => S.filter === "alle" || v.was === S.filter || (S.filter === "bearbeitet" && v.was === "geoeffnet");
+  const passt = (v) => S.filter === "alle" || v.was === S.filter || (S.filter === "bearbeitet" && (v.was === "geoeffnet" || v.was === "bearbeitung"));
   const reihe = Object.values(S.verlauf).filter((v) => v && v.titel && passt(v)).sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, 100);
   $("v-liste").innerHTML = reihe.map((v) =>
     `<li><span class="farbe" style="background:${farbeVon(v.person)}"></span><span class="zeile"><span><strong>${esc(v.wer || "?")}</strong> hat ${esc(WORT[v.was] || v.was)}: ${esc(v.titel)}</span><span class="wann">${esc(zeitText(v.ts))}</span></span></li>`
@@ -1874,7 +1907,9 @@ function sauber(roh) {
       personen,
       zeilenAlt,
       ersteller: typeof e.ersteller === "string" ? e.ersteller : null,
-      status: e.status === "erledigt" ? "erledigt" : "offen",
+      status: e.status === "erledigt" ? "erledigt" : e.status === "bearbeitung" ? "bearbeitung" : "offen",
+      bearbeitetAm: zahl(e.bearbeitetAm),
+      erledigtAm: zahl(e.erledigtAm),
       ts: zahl(e.ts) ?? 0,
       reihe: zahl(e.reihe),
       zeilen,
