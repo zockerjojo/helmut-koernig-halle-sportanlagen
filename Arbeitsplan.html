@@ -158,8 +158,13 @@ html.tablett #alle-zeigen{display:none !important}
 /* Am PC: Karte links groß und beim Scrollen stehend, rechts Details, Filter und Liste */
 @media (min-width:1100px){
   .wrap{max-width:1560px}
-  #panel{display:grid; grid-template-columns:minmax(0,1fr) minmax(360px,420px); column-gap:24px; row-gap:12px; align-items:start}
+  /* Die Karte läuft über drei Zeilen (5 bis 7). Leere Zeilen für Filter und Aufgabe bekommen Höhe 0,
+     sonst teilt die Karte ihnen Platz zu und die Liste rutscht nach unten. Der Abstand kommt aus den Rändern. */
+  #panel{display:grid; grid-template-columns:minmax(0,1fr) minmax(360px,420px); column-gap:24px; row-gap:0; align-items:start; grid-template-rows:repeat(4,auto) var(--zeile-filter,0px) var(--zeile-aufgabe,0px) auto auto}
+  #panel:has(> #filter-tafel:not([hidden])){--zeile-filter:auto}
+  #panel:has(> #tafel:not([hidden])){--zeile-aufgabe:auto}
   #panel > *{grid-column:1 / -1}
+  #panel > #live-text, #panel > .feld, #panel > .leiste, #panel > #map, #panel > #karten-hinweis, #panel > #filter-tafel, #panel > #tafel, #panel > #listen-tafel{margin-top:12px}
   #panel > #map{grid-column:1; grid-row:5 / span 3; position:sticky; top:12px; max-height:calc(100vh - 96px)}
   #panel > #karten-hinweis{grid-column:1; grid-row:8}
   #panel > #filter-tafel{grid-column:2; grid-row:5; margin-bottom:0 !important}
@@ -360,7 +365,6 @@ html.tablett #alle-zeigen{display:none !important}
       <h2 id="listen-titel">Alle Aufgaben</h2>
       <button class="knopf klein" id="alle-zeigen" type="button" disabled>Alle anzeigen</button>
     </div>
-    <p class="muted" id="alle-hinweis">Oben steht die höchste Priorität (Prio 1). Neue Aufgaben kommen unten dazu. Die Aufgabe am Griff nach oben oder unten ziehen.</p>
     <ul class="verlauf" id="alle-liste" style="max-height:none"></ul>
     <p class="muted" id="alle-leer" hidden>Noch nichts eingetragen. Tippe oben auf „Aufgabe“ und dann auf den Plan.</p>
   </section>
@@ -1691,9 +1695,6 @@ function alleZeichnen() {
     return `<li class="${istOffen(e) ? "offen" : "erledigt"}" data-id="${esc(e.id)}">${griff}<span class="abzeichen" style="background:${farbe}; color:${kontrast(farbe)}">${nr ?? ""}</span><span class="zeile"><button class="textknopf" type="button" data-zeigen="${esc(e.id)}" style="text-align:left; color:var(--ink); min-height:auto">${esc(titelVon(e))}</button><span class="wann">${esc(untertitelVon(e))}${(e.zeilen ?? []).some((z) => z.art === "anhang") ? `<span class="anhang-marke" title="Mit Anhang" aria-label="Mit Anhang"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5" /></svg></span>` : ""}</span></span><button class="hin-knopf" type="button" data-hin="${esc(e.id)}" aria-label="Auf der Karte zeigen" title="Auf der Karte zeigen"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 12a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /> <path d="M4 12a8 8 0 1 0 16 0a8 8 0 1 0 -16 0" /> <path d="M12 2l0 2" /> <path d="M12 20l0 2" /> <path d="M20 12l2 0" /> <path d="M2 12l2 0" /></svg></button></li>`;
   }).join("");
   $("alle-leer").hidden = alle.length > 0;
-  $("alle-hinweis").textContent = gefiltert
-    ? "Gefiltert: es stehen nur die ausgewählten Personen in der Liste. Die Prio-Reihenfolge lässt sich erst wieder ändern, wenn der Filter aus ist."
-    : "Oben steht die höchste Priorität (Prio 1). Neue Aufgaben kommen unten dazu. Die Aufgabe am Griff nach oben oder unten ziehen.";
 }
 $("alle-liste").addEventListener("click", (e) => {
   const knopf = e.target.closest("[data-zeigen], [data-hin]");

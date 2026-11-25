@@ -523,9 +523,9 @@ $("modus").addEventListener("click", (e) => {
 const uhr = (t) => { const z = t.replace(/[^0-9]/g, ""); if (!z) return ""; const s = z.length <= 2 ? z.padStart(2, "0") + "00" : z.padStart(4, "0").slice(0, 4); return String(Math.min(23, +s.slice(0, 2))).padStart(2, "0") + ":" + String(Math.min(59, +s.slice(2))).padStart(2, "0"); };
 const istZeit = (t) => /^\s*\d{1,2}([:.]?\d{2})?\s*(-|–|bis)\s*\d{1,2}([:.]?\d{2})?\s*$/.test(t) || /^\s*\d{1,2}[:.]\d{2}\s*$/.test(t);
 const plan = $("plan");
-/* Ein Schichtkürzel (z. B. F oder M) in einer F/M-Spalte gilt gleich für die ganze Woche:
-   Montag bis Freitag derselben Woche, ohne Wochenenden und Feiertage. Überschrieben werden
-   nur leere Felder und andere Kürzel, keine längeren Einträge. */
+/* Ein Schichtkürzel (z. B. F oder M) in einer F/M-Spalte gilt für die ganze Woche:
+   Montag bis Freitag derselben Woche, ohne Wochenenden und Feiertage. Es füllt nur leere Felder.
+   Was in der Woche schon steht, bleibt, auch ein anderes Kürzel. So lässt sich jeder Tag danach einzeln ändern. */
 function wocheFuellen(ri, sp, wert) {
   if (!PLAN || !/^[A-Za-zÄÖÜäöü]{1,2}$/.test(wert)) return;
   if (!/F\s*\/\s*M/i.test(PLAN.spalten[sp]?.a ?? "")) return;
@@ -538,9 +538,7 @@ function wocheFuellen(ri, sp, wert) {
   PLAN.zeilen.forEach((r, i) => {
     const tg = tagVon(r);
     if (i === ri || !tg || tg < montag || tg > montag + 4 || r.grau || feiertagVon(MONAT, r.nr)) return;
-    const alt = (r.z[sp]?.[0] ?? "").trim();
-    if (alt && !/^[A-Za-zÄÖÜäöü]{1,2}$/.test(alt)) return;
-    if (alt === wert) return;
+    if (!r.z[sp] || (r.z[sp][0] ?? "").trim()) return;
     r.z[sp][0] = wert;
     geaendertHier = true;
     const feld = plan.querySelector(`[data-z="${i}"][data-sp="${sp}"][data-teil="0"]`);
