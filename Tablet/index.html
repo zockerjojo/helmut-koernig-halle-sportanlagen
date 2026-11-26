@@ -147,9 +147,9 @@ body{overflow:hidden}
     </form>
   </div>
 </div>
-<script src="./js/qrcode.js?v=1795704000"></script>
+<script src="./js/qrcode.js?v=1795705000"></script>
 <script type="module">
-import { sitzung, tablettFreischalten, istRechteFehler, anmelden, abmelden, anmeldeFehler, anfrageSenden, anfrageLoeschen, aufAnmeldungWarten, db, ref, get } from "./js/zugang.js?v=1795704000";
+import { sitzung, tablettFreischalten, istRechteFehler, anmelden, abmelden, anmeldeFehler, anfrageSenden, anfrageLoeschen, aufAnmeldungWarten, db, ref, get } from "./js/zugang.js?v=1795705000";
 const $ = (id) => document.getElementById(id);
 const SONNE = `<path d="M8 12a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /> <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" />`, MOND = `<path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008" />`;
 const SEITEN = ["Reinigungsplan", "Arbeitsplan", "Dienstplan"];
@@ -182,7 +182,7 @@ function rahmen(name) {
   f.className = "rahmen weg";
   f.title = name;
   f.setAttribute("allow", "fullscreen; screen-wake-lock");
-  f.src = `./Tablet/${name}.html?v=1795704000`;
+  f.src = `./Tablet/${name}.html?v=1795705000`;
   f.addEventListener("load", () => themaSetzen(dunkel(), false));
   $("rahmen-box").appendChild(f);
   return (RAHMEN[name] = f);
@@ -249,7 +249,20 @@ async function ausmelden() {
   if (ausgemeldet) return;
   ausgemeldet = true;
   try { await abmelden(); } catch (err) { console.error(err); }
-  location.reload();
+  await neuAufbauen();
+}
+/* Nach An- oder Abmelden wird die Hülle an Ort und Stelle neu aufgebaut. Die Seite selbst wird nicht neu
+   geladen, denn jedes Neuladen beendet den Vollbildmodus. */
+async function neuAufbauen() {
+  let s = null;
+  try { s = await sitzung(); } catch (err) { console.error(err); }
+  if (!s) { location.reload(); return; }
+  Object.keys(RAHMEN).forEach((n) => { RAHMEN[n].remove(); delete RAHMEN[n]; });
+  ausgemeldet = false;
+  kontoZeigen(s);
+  seite(decodeURIComponent(location.hash.slice(1)));
+  vorladen();
+  if (s.tablett) anfrageLoeschen(s.uid);
 }
 function fristZeigen() {
   if (!person || ausgemeldet) return;
@@ -312,7 +325,7 @@ function tafelOeffnen() {
       $("qr-fehler").textContent = "Die Anfrage konnte nicht geprüft werden: " + (err?.code || err?.message || "Fehler");
     }
   }, 2500);
-  abbestellen = aufAnmeldungWarten(geraet.uid, () => { anmeldungFertig(); });
+  abbestellen = aufAnmeldungWarten(geraet.uid, () => { if (!codeAnmeldung) anmeldungFertig(); });
 }
 function tafelZu() {
   if (tafel.hidden) return;
@@ -327,12 +340,17 @@ function tafelZu() {
   $("anmelden-fehler").textContent = "";
   $("qr-fehler").textContent = "";
 }
+let fertigLaeuft = false, codeAnmeldung = false;
 async function anmeldungFertig() {
-  aktiv();
-  clearInterval(anfrageTakt); anfrageTakt = null;
-  if (abbestellen) { abbestellen(); abbestellen = null; }
-  if (geraet) await anfrageLoeschen(geraet.uid);
-  location.reload();
+  if (fertigLaeuft) return;
+  fertigLaeuft = true;
+  try {
+    aktiv();
+    const uid = geraet?.uid;
+    tafelZu();
+    if (uid) await anfrageLoeschen(uid);
+    await neuAufbauen();
+  } finally { fertigLaeuft = false; }
 }
 
 $("anmelde-knopf").addEventListener("click", () => {
@@ -357,14 +375,18 @@ $("code-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   $("anmelden-los").disabled = true;
   $("anmelden-fehler").textContent = "";
+  /* Der Versuch schreibt zuerst nur zur Probe in die Datenbank. Das darf die Seite nicht für fertig halten. */
+  codeAnmeldung = true;
   try {
     await anmelden($("anmelden-code").value.trim(), { tablett: true });
     $("anmelden-code").value = "";
-    anmeldungFertig();
+    codeAnmeldung = false;
+    await anmeldungFertig();
   } catch (err) {
     console.error(err);
     $("anmelden-fehler").textContent = anmeldeFehler(err);
   } finally {
+    codeAnmeldung = false;
     $("anmelden-los").disabled = false;
   }
 });
