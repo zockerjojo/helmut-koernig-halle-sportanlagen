@@ -412,7 +412,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, onAuthStateChanged, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getDatabase, ref, get, set, update, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { firebaseConfig } from "./js/config.js";
-import { sitzung, anmelden as zugangAnmelden, abmelden, darf, darfAufgabe, darfVertreten, darfZusatz, namen as namenLaden } from "./js/zugang.js";
+import { sitzung, anmelden as zugangAnmelden, abmelden, darf, darfAufgabe, darfVertreten, darfZusatz, TABLETT, namen as namenLaden } from "./js/zugang.js";
 import { leisteStarten } from "./js/leiste.js";
 import { feierAnzeigen, feierBereinigt, feierSpielen } from "./js/feier.js";
 import { archivWeg, endetAm, istUeberFrist, monatsName } from "./js/archiv.js";
@@ -513,8 +513,8 @@ async function seiteStarten() {
   zeigeBereich(true);
   rechteAnwenden();
   /* Von Anfang an gefiltert: die eigenen Aufgaben und die für alle. "Alle zeigen" hebt das auf.
-     Der Admin sieht von Anfang an alle Aufgaben. */
-  if (!si.tablett && !si.istAdmin) S.nurPersonen = [si.name, OHNE];
+     Der Admin sieht von Anfang an alle Aufgaben, ebenso das Tablet, auch wenn dort jemand angemeldet ist. */
+  if (!TABLETT && !si.tablett && !si.istAdmin) S.nurPersonen = [si.name, OHNE];
   filterPersonenZeichnen();
   starteSync();
 }
