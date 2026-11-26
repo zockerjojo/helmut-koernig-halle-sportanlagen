@@ -131,7 +131,6 @@ textarea:focus-visible,.tf:focus-visible{outline:3px solid var(--accent);outline
 /* Noch nicht gewischte Bahnen: nur sichtbar, solange die Anzeige eingeschaltet ist.
    Hellgrau; auf hellem Untergrund etwas kraeftiger, damit es nicht verschwindet. */
 .nichtgereinigt{stroke:var(--ungewischt);stroke-opacity:.95}
-.map.nuroffen #free{display:none}
 .color .nichtgereinigt{stroke:#D7DCD8}
 /* Farb-Ansicht */
 .color .hall{fill:#4E9977}
@@ -1284,7 +1283,7 @@ function bildStil(farbig,v){
     +"#paint path.nichtgereinigt,#free path.nichtgereinigt{stroke:"+(farbig?"#D7DCD8":grau)+";stroke-opacity:"+(farbig?"1":".95")+"}"
     +"#pins circle{fill:"+(farbig?"#F29F05":panel)+";stroke:"+(farbig?"#2B1B00":ink)+"}"
     +"#pins text{font-family:sans-serif;fill:"+(farbig?"#2B1B00":ink)+"}"
-    +(ZEIGE_OFFEN?"#free{display:none}":"");
+    ;
 }
 function planBild(){
   var knopf=$("btn-bild");
