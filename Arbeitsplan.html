@@ -151,6 +151,8 @@ textarea{resize:vertical; line-height:1.35}
 html.tablett #alle-zeigen{display:none !important}
 @media print{#alle-zeigen{display:none !important}}
 #alle-liste .zeile{flex:1 1 auto}
+#archiv-inhalt{margin-top:12px}
+#archiv-jahre, #archiv-monate{margin-bottom:10px}
 .hin-knopf{flex:none; width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center; padding:0; border:1px solid var(--line); border-radius:10px; background:var(--panel); color:var(--ink); cursor:pointer}
 .hin-knopf:hover{border-color:var(--ink)}
 .hin-knopf svg{width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
@@ -168,12 +170,14 @@ html.tablett #alle-zeigen{display:none !important}
   #panel:has(> #filter-tafel:not([hidden])){--zeile-filter:auto}
   #panel:has(> #tafel:not([hidden])){--zeile-aufgabe:auto}
   #panel > *{grid-column:1 / -1}
-  #panel > #live-text, #panel > .feld, #panel > .leiste, #panel > #map, #panel > #karten-hinweis, #panel > #filter-tafel, #panel > #tafel, #panel > #listen-tafel{margin-top:12px}
+  #panel > #live-text, #panel > .feld, #panel > .leiste, #panel > #map, #panel > #karten-hinweis, #panel > #filter-tafel, #panel > #tafel, #panel > #listen-tafel, #panel > #erledigt-tafel, #panel > #geloescht-tafel{margin-top:12px}
   #panel > #map{grid-column:1; grid-row:5 / span 3; position:sticky; top:12px; max-height:calc(100vh - 96px)}
   #panel > #karten-hinweis{grid-column:1; grid-row:8}
   #panel > #filter-tafel{grid-column:2; grid-row:5; margin-bottom:0 !important}
   #panel > #tafel{grid-column:2; grid-row:6}
   #panel > #listen-tafel{grid-column:2; grid-row:7; max-height:calc(100vh - 96px); overflow:auto}
+  #panel > #erledigt-tafel{grid-column:2; grid-row:8; max-height:calc(100vh - 96px); overflow:auto}
+  #panel > #geloescht-tafel{grid-column:2; grid-row:9; max-height:calc(100vh - 96px); overflow:auto}
 }
 /* Einheitlicher Kopf auf allen Personalseiten: Logo, darunter-/daneben "Helmut-Körnig-Halle" und "Personal" wie auf der Startseite */
 .hkh-kopf{display:inline-flex !important; align-items:center; gap:10px; min-width:0; flex:none; text-decoration:none; color:inherit; border-radius:6px}
@@ -371,11 +375,33 @@ html.tablett #alle-zeigen{display:none !important}
 
   <section class="tafel" id="listen-tafel">
     <div class="listen-kopf">
-      <h2 id="listen-titel">Alle Aufgaben</h2>
+      <h2 id="listen-titel">Offene Aufgaben</h2>
       <button class="knopf klein" id="alle-zeigen" type="button" disabled>Alle anzeigen</button>
     </div>
     <ul class="verlauf" id="alle-liste" style="max-height:none"></ul>
     <p class="muted" id="alle-leer" hidden>Noch nichts eingetragen. Tippe oben auf „Aufgabe“ und dann auf den Plan.</p>
+  </section>
+  <section class="tafel" id="erledigt-tafel">
+    <div class="listen-kopf">
+      <h2 id="erledigt-titel">Erledigte Aufgaben</h2>
+    </div>
+    <ul class="verlauf" id="erledigt-liste" style="max-height:none"></ul>
+    <p class="muted" id="erledigt-leer" hidden>Noch nichts erledigt.</p>
+    <button class="knopf klein" id="archiv-knopf" type="button" aria-expanded="false" aria-controls="archiv-inhalt">Aufgaben-Archiv</button>
+    <div id="archiv-inhalt" hidden>
+      <div class="filter" id="archiv-jahre" role="group" aria-label="Jahr im Archiv"></div>
+      <div class="filter" id="archiv-monate" role="group" aria-label="Monat im Archiv"></div>
+      <ul class="verlauf" id="archiv-liste"></ul>
+      <p class="muted" id="archiv-leer" hidden>Noch nichts archiviert. Erledigte Aufgaben kommen nach 30 Tagen hierher.</p>
+    </div>
+  </section>
+  <section class="tafel" id="geloescht-tafel">
+    <div class="listen-kopf">
+      <h2 id="geloescht-titel">Gelöschte Aufgaben</h2>
+    </div>
+    <p class="muted">Gelöschte Aufgaben werden nach 30 Tagen endgültig entfernt.</p>
+    <ul class="verlauf" id="geloescht-liste" style="max-height:none"></ul>
+    <p class="muted" id="geloescht-leer" hidden>Nichts gelöscht.</p>
   </section>
 </section>
 
@@ -386,9 +412,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, onAuthStateChanged, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getDatabase, ref, get, set, update, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { firebaseConfig } from "./js/config.js";
-import { sitzung, anmelden as zugangAnmelden, abmelden, darf, darfAufgabe, darfVertreten, namen as namenLaden } from "./js/zugang.js";
+import { sitzung, anmelden as zugangAnmelden, abmelden, darf, darfAufgabe, darfVertreten, darfZusatz, namen as namenLaden } from "./js/zugang.js";
 import { leisteStarten } from "./js/leiste.js";
 import { feierAnzeigen, feierBereinigt, feierSpielen } from "./js/feier.js";
+import { archivWeg, endetAm, istUeberFrist, monatsName } from "./js/archiv.js";
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -561,6 +588,13 @@ const S = {
   nurPersonen: [],
   /* Das Häkchen „Alle Personen dürfen erledigen“ der Aufgabe, die gerade bearbeitet wird */
   alleErl: false,
+  /* Die Einträge, wie die Datenbank sie hat (für Kopien und das Archiv), und die Kästen unten */
+  roh: {},
+  geloescht: {},
+  geloeschtRoh: {},
+  archivRoh: null,
+  archivJahr: null,
+  archivMonat: null,
 };
 /* Die Frage erscheint nur bei mehreren Personen. Dann dürfen alle eingetragenen Personen die Aufgabe erledigen. */
 const alleErledigen = () => S.personen.length > 1 && S.alleErl;
@@ -1526,18 +1560,74 @@ $("d-erledigt").addEventListener("click", async () => {
 
 $("d-loeschen").addEventListener("click", () => { $("d-rueckfrage").hidden = false; $("d-loeschen-ja").focus(); });
 $("d-loeschen-nein").addEventListener("click", () => { $("d-rueckfrage").hidden = true; $("d-loeschen").focus(); });
+/* ---- Löschen und Aufräumen ----
+   Löschen geht in zwei Schritten: erst die Kopie unter „geloescht“, dann das Original weg.
+   Nach 30 Tagen verschwindet die Kopie ganz (mit den Anhängen). Erledigte Aufgaben kommen nach
+   30 Tagen ins Archiv: erst die Kopie unter „archiv“, dann das Original weg. Jeder Schritt lässt
+   sich wiederholen, falls einer nach einem Fehler stehen bleibt. */
+async function gelingt(schritt) {
+  try {
+    await schritt();
+    return true;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
+}
 $("d-loeschen-ja").addEventListener("click", async () => {
   const id = S.gewaehlt;
   const e = id && S.eintraege[id];
-  if (!e) return;
-  const ok = await schreiben({
-    [`${BASIS}/eintraege/${id}`]: null,
-    ...verlaufPaar("geloescht", titelVon(e), e.person ?? null),
-  });
-  if (ok) anhaengeVerwerfen(e.zeilen ?? []);
+  const roh = id && S.roh[id];
+  if (!e || !roh) return;
+  /* Die Kopie zuerst. Gibt es sie schon, weil ein früherer Versuch halb geklappt hat, entfällt dieser Schritt. */
+  if (!S.geloescht[id]) {
+    const kopie = { ...roh, geloescht: Date.now(), geloeschtVon: S.ich };
+    const ok = await schreiben({
+      [`${BASIS}/geloescht/${id}`]: kopie,
+      ...verlaufPaar("geloescht", titelVon(e), e.person ?? null),
+    });
+    if (!ok) return;
+  }
+  const weg = await gelingt(() => set(ref(db, `${BASIS}/eintraege/${id}`), null));
   abwaehlen();
-  hinweisSetzen("Gelöscht. Der Verlauf zeigt es.");
+  hinweisSetzen(weg
+    ? "Gelöscht. Die Aufgabe steht 30 Tage im Kasten „Gelöschte Aufgaben“."
+    : "Die Aufgabe steht im Kasten „Gelöschte Aufgaben“, ist aber noch nicht ganz weg. Bitte noch einmal löschen.");
 });
+
+/* Das Aufräumen läuft beim Öffnen einmal, und nur, wenn beide Listen geladen sind.
+   Wer fremde Aufgaben löschen darf, räumt auf; alle anderen lassen alles stehen. */
+let eintraegeDa = false, geloeschtDa = false, aufgeraeumt = false;
+function aufraeumenStarten() {
+  if (aufgeraeumt || !eintraegeDa || !geloeschtDa || !ICH) return;
+  aufgeraeumt = true;
+  if (!darfZusatz(ICH, "arbeitsplan", "loeschenFremde")) return;
+  aufraeumen().catch((err) => console.error(err));
+}
+async function aufraeumen() {
+  const jetzt = Date.now();
+  /* Gelöschte: Ist das Original nach einem Fehler noch da, kommt es jetzt weg. Nach 30 Tagen geht die Kopie. */
+  for (const [id, kopie] of Object.entries(S.geloeschtRoh)) {
+    if (S.roh[id]) await gelingt(() => set(ref(db, `${BASIS}/eintraege/${id}`), null));
+    if (istUeberFrist(kopie?.geloescht, jetzt)
+      && await gelingt(() => set(ref(db, `${BASIS}/geloescht/${id}`), null))) {
+      anhaengeVerwerfen(S.geloescht[id]?.zeilen ?? []);
+    }
+  }
+  /* Erledigte: Ohne Datum bekommt die Aufgabe jetzt eins, damit die 30 Tage laufen. Nach 30 Tagen ins Archiv. */
+  for (const [id, e] of Object.entries(S.eintraege)) {
+    if (e.status !== "erledigt" || S.geloeschtRoh[id]) continue;
+    if (!e.erledigtAm) {
+      await gelingt(() => update(ref(db, `${BASIS}/eintraege/${id}`), { erledigtAm: jetzt }));
+      continue;
+    }
+    if (!istUeberFrist(e.erledigtAm, jetzt)) continue;
+    const kopie = { ...S.roh[id], archiviertAm: jetzt };
+    if (await gelingt(() => set(ref(db, `${BASIS}/archiv/${archivWeg(e.erledigtAm, id)}`), kopie))) {
+      await gelingt(() => set(ref(db, `${BASIS}/eintraege/${id}`), null));
+    }
+  }
+}
 
 /* ---- Prio: Reihenfolge der offenen Einträge ändern ---- */
 /* Verschiebt einen Eintrag von Platz „von“ nach Platz „nach“ (0 = ganz oben). Geschrieben wird nur
@@ -1731,12 +1821,12 @@ $("filter-alle").addEventListener("click", () => { S.nurPersonen = []; filterAnw
 $("filter-zu").addEventListener("click", () => { $("filter-tafel").hidden = true; });
 /* Die Überschrift der Liste zeigt, was gerade zu sehen ist. */
 function listenTitel() {
-  if (S.nurPersonen.length === 0) return "Alle Aufgaben";
+  if (S.nurPersonen.length === 0) return "Offene Aufgaben";
   const namen = S.nurPersonen.filter((x) => x !== OHNE);
   const ohne = S.nurPersonen.includes(OHNE);
-  if (namen.length === 0) return "Aufgaben für alle";
-  if (ICH && ohne && namen.length === 1 && namen[0] === ICH.name) return "Meine Aufgaben";
-  return "Aufgaben von " + namen.join(", ") + (ohne ? " und für alle" : "");
+  if (namen.length === 0) return "Offene Aufgaben für alle";
+  if (ICH && ohne && namen.length === 1 && namen[0] === ICH.name) return "Meine offenen Aufgaben";
+  return "Offene Aufgaben von " + namen.join(", ") + (ohne ? " und für alle" : "");
 }
 /* "Alle anzeigen" wirkt nur, solange ein Filter aktiv ist. */
 $("alle-zeigen").addEventListener("click", () => {
@@ -1745,31 +1835,129 @@ $("alle-zeigen").addEventListener("click", () => {
   filterAnwenden();
 });
 
-/* ---- Liste aller Aufgaben: offene nach Prio, erledigte darunter ---- */
+/* ---- Listen: offene Aufgaben, erledigte Aufgaben, gelöschte Aufgaben, Archiv ---- */
+const datumText = (ts) => (typeof ts === "number"
+  ? new Date(ts).toLocaleDateString("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric" })
+  : "");
+/* Eine Zeile mit Griff, Nummer und Knopf für die Karte. Erledigte Aufgaben haben keine Nummer und keinen Griff. */
+function zeileHtml(e, nr, mitGriff) {
+  const farbe = punktFarbe(e);
+  const griff = mitGriff
+    ? `<button class="griff" type="button" data-griff="${esc(e.id)}" aria-label="Priorität ändern: nach oben oder unten ziehen" title="Zum Ändern der Priorität ziehen">${GRIFF_SVG}</button>`
+    : `<span class="griff-platz" aria-hidden="true"></span>`;
+  return `<li class="${istOffen(e) ? "offen" : "erledigt"}" data-id="${esc(e.id)}">${griff}<span class="abzeichen" style="background:${farbe}; color:${kontrast(farbe)}">${nr ?? ""}</span><span class="zeile"><button class="textknopf" type="button" data-zeigen="${esc(e.id)}" style="text-align:left; color:var(--ink); min-height:auto">${esc(titelVon(e))}</button><span class="wann">${esc(untertitelVon(e))}${(e.zeilen ?? []).some((z) => z.art === "anhang") ? `<span class="anhang-marke" title="Mit Anhang" aria-label="Mit Anhang"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5" /></svg></span>` : ""}</span></span><button class="hin-knopf" type="button" data-hin="${esc(e.id)}" aria-label="Auf der Karte zeigen" title="Auf der Karte zeigen"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 12a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /> <path d="M4 12a8 8 0 1 0 16 0a8 8 0 1 0 -16 0" /> <path d="M12 2l0 2" /> <path d="M12 20l0 2" /> <path d="M20 12l2 0" /> <path d="M2 12l2 0" /></svg></button></li>`;
+}
+/* Offene Aufgaben nach Prio. Erledigte stehen im eigenen Kasten, neueste zuerst. */
 function alleZeichnen() {
   if (ziehtGerade) return;
-  const alle = sortiert();
+  /* Gelöschte Aufgaben erscheinen nur im Kasten dafür. */
+  const alle = sortiert().filter((e) => !S.geloescht[e.id]);
   const offen = alle.filter(istOffen);
-  const erledigt = alle.filter((e) => !istOffen(e));
+  const erledigt = alle.filter((e) => !istOffen(e)).sort((a, b) => (b.erledigtAm ?? b.ts) - (a.erledigtAm ?? a.ts));
   const nummern = new Map(offen.map((e, i) => [e.id, i + 1]));
   /* Gefiltert wird nur die Anzeige. Solange gefiltert ist, bleibt der Griff weg:
      Verschieben in einer Teilliste würde die Prio der versteckten Aufgaben verdrehen. */
   const gefiltert = S.nurPersonen.length > 0;
-  $("alle-liste").innerHTML = [...offen, ...erledigt].filter(passtZurPerson).map((e) => {
-    const nr = nummern.get(e.id);
-    const farbe = punktFarbe(e);
-    const griff = nr && !gefiltert && darfAufgabe(ICH, "prio")
-      ? `<button class="griff" type="button" data-griff="${esc(e.id)}" aria-label="Priorität ändern: nach oben oder unten ziehen" title="Zum Ändern der Priorität ziehen">${GRIFF_SVG}</button>`
-      : `<span class="griff-platz" aria-hidden="true"></span>`;
-    return `<li class="${istOffen(e) ? "offen" : "erledigt"}" data-id="${esc(e.id)}">${griff}<span class="abzeichen" style="background:${farbe}; color:${kontrast(farbe)}">${nr ?? ""}</span><span class="zeile"><button class="textknopf" type="button" data-zeigen="${esc(e.id)}" style="text-align:left; color:var(--ink); min-height:auto">${esc(titelVon(e))}</button><span class="wann">${esc(untertitelVon(e))}${(e.zeilen ?? []).some((z) => z.art === "anhang") ? `<span class="anhang-marke" title="Mit Anhang" aria-label="Mit Anhang"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5" /></svg></span>` : ""}</span></span><button class="hin-knopf" type="button" data-hin="${esc(e.id)}" aria-label="Auf der Karte zeigen" title="Auf der Karte zeigen"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 12a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /> <path d="M4 12a8 8 0 1 0 16 0a8 8 0 1 0 -16 0" /> <path d="M12 2l0 2" /> <path d="M12 20l0 2" /> <path d="M20 12l2 0" /> <path d="M2 12l2 0" /></svg></button></li>`;
-  }).join("");
-  $("alle-leer").hidden = alle.length > 0;
+  const offenSichtbar = offen.filter(passtZurPerson);
+  const erledigtSichtbar = erledigt.filter(passtZurPerson);
+  $("alle-liste").innerHTML = offenSichtbar.map((e) => zeileHtml(e, nummern.get(e.id), !gefiltert && darfAufgabe(ICH, "prio"))).join("");
+  $("erledigt-liste").innerHTML = erledigtSichtbar.map((e) => zeileHtml(e, null, false)).join("");
+  /* Leere Listen sagen, ob die Liste überhaupt leer ist oder nur die Auswahl. */
+  $("alle-leer").hidden = offenSichtbar.length > 0;
+  const nochNichts = !alle.length && !Object.keys(S.geloescht).length;
+  $("alle-leer").textContent = nochNichts
+    ? "Noch nichts eingetragen. Tippe oben auf „Aufgabe“ und dann auf den Plan."
+    : gefiltert ? "Für diese Auswahl gibt es keine offenen Aufgaben." : "Keine offenen Aufgaben.";
+  $("erledigt-leer").hidden = erledigtSichtbar.length > 0;
+  $("erledigt-leer").textContent = erledigt.length ? "Für diese Auswahl ist nichts erledigt." : "Noch nichts erledigt.";
+  geloeschtZeichnen();
+  /* Ist das Archiv offen, folgt es der Auswahl der Personen. */
+  if (!$("archiv-inhalt").hidden) archivZeichnen();
 }
-$("alle-liste").addEventListener("click", (e) => {
-  const knopf = e.target.closest("[data-zeigen], [data-hin]");
-  if (!knopf) return;
-  zuEintragSpringen(knopf.dataset.zeigen || knopf.dataset.hin);
+for (const liste of ["alle-liste", "erledigt-liste"]) {
+  $(liste).addEventListener("click", (e) => {
+    const knopf = e.target.closest("[data-zeigen], [data-hin]");
+    if (!knopf) return;
+    zuEintragSpringen(knopf.dataset.zeigen || knopf.dataset.hin);
+  });
+}
+
+/* Gelöschte Aufgaben: neueste zuerst. Sie sind nur zum Lesen, auf der Karte stehen sie nicht mehr. */
+function geloeschtZeichnen() {
+  const kopien = Object.keys(S.geloescht)
+    .sort((a, b) => (S.geloeschtRoh[b]?.geloescht ?? 0) - (S.geloeschtRoh[a]?.geloescht ?? 0))
+    .map((id) => ({ id, ...S.geloescht[id] }))
+    .filter(passtZurPerson);
+  $("geloescht-liste").innerHTML = kopien.map((e) => {
+    const geloeschtAm = S.geloeschtRoh[e.id]?.geloescht;
+    const frist = typeof geloeschtAm === "number" ? ` · endgültig am ${datumText(endetAm(geloeschtAm))}` : "";
+    return `<li><span class="farbe" style="background:${farbeVon(e.person)}"></span><span class="zeile"><span>${esc(titelVon(e))}</span><span class="wann">gelöscht ${esc(zeitText(geloeschtAm))}${esc(frist)}</span></span></li>`;
+  }).join("");
+  $("geloescht-leer").hidden = kopien.length > 0;
+  $("geloescht-leer").textContent = Object.keys(S.geloescht).length ? "Für diese Auswahl ist nichts gelöscht." : "Nichts gelöscht.";
+}
+
+/* ---- Aufgaben-Archiv: erst beim Knopfdruck laden, dann Jahr, Monat, Liste ---- */
+$("archiv-knopf").addEventListener("click", async () => {
+  const oeffnen = $("archiv-inhalt").hidden;
+  $("archiv-inhalt").hidden = !oeffnen;
+  $("archiv-knopf").setAttribute("aria-expanded", String(oeffnen));
+  if (!oeffnen) return;
+  if (S.archivRoh === null) {
+    try {
+      S.archivRoh = (await get(ref(db, `${BASIS}/archiv`))).val() ?? {};
+    } catch (err) {
+      console.error(err);
+      $("archiv-leer").textContent = "Das Archiv konnte nicht geladen werden. Bitte noch einmal öffnen.";
+      $("archiv-leer").hidden = false;
+      return;
+    }
+  }
+  archivZeichnen();
 });
+$("archiv-jahre").addEventListener("click", (e) => {
+  const knopf = e.target.closest("[data-jahr]");
+  if (!knopf) return;
+  S.archivJahr = knopf.dataset.jahr;
+  S.archivMonat = null;
+  archivZeichnen();
+});
+$("archiv-monate").addEventListener("click", (e) => {
+  const knopf = e.target.closest("[data-monat]");
+  if (!knopf) return;
+  S.archivMonat = knopf.dataset.monat;
+  archivZeichnen();
+});
+function archivZeichnen() {
+  /* Vor dem Laden nichts anfassen, sonst überschreibt die Anzeige eine Ladefehlermeldung. */
+  if (S.archivRoh === null) return;
+  const roh = S.archivRoh;
+  /* Gezählt und angezeigt wird nur, was die Personenauswahl zeigt. Jahre und Monate ohne Treffer entfallen. */
+  const treffer = (monatRoh) => Object.values(sauber(monatRoh ?? {})).filter(passtZurPerson).length;
+  const jahre = Object.keys(roh).sort().filter((j) => Object.values(roh[j] ?? {}).some((m) => treffer(m) > 0));
+  const knopfHtml = (anzeige, aktiv, attribut) => `<button type="button" aria-pressed="${aktiv}" ${attribut}>${esc(anzeige)}</button>`;
+  $("archiv-jahre").innerHTML = jahre.map((j) => knopfHtml(j, S.archivJahr === j, `data-jahr="${esc(j)}"`)).join("");
+  const monate = S.archivJahr && jahre.includes(S.archivJahr)
+    ? Object.keys(roh[S.archivJahr]).sort().filter((m) => treffer(roh[S.archivJahr][m]) > 0)
+    : [];
+  $("archiv-monate").innerHTML = monate.map((m) =>
+    knopfHtml(`${monatsName(m)} (${treffer(roh[S.archivJahr][m])})`, S.archivMonat === m, `data-monat="${esc(m)}"`)).join("");
+  const monatOffen = Boolean(S.archivJahr && S.archivMonat && roh[S.archivJahr]?.[S.archivMonat]);
+  const eintraege = monatOffen ? sauber(roh[S.archivJahr][S.archivMonat]) : {};
+  const liste = Object.entries(eintraege).map(([id, e]) => ({ id, ...e }))
+    .filter(passtZurPerson)
+    .sort((a, b) => (b.erledigtAm ?? b.ts) - (a.erledigtAm ?? a.ts));
+  $("archiv-liste").innerHTML = liste.map((e) => {
+    const wer = e.personen?.length ? e.personen.join(", ") : "für alle";
+    return `<li><span class="farbe" style="background:${farbeVon(e.person)}"></span><span class="zeile"><span>${esc(titelVon(e))}</span><span class="wann">${esc(wer)} · erledigt am ${esc(datumText(e.erledigtAm))}</span></span></li>`;
+  }).join("");
+  /* Leer ist das Archiv, wenn keine Jahre übrig sind oder der gewählte Monat unter der Auswahl leer ist. */
+  const leer = jahre.length === 0 || (monatOffen && liste.length === 0);
+  $("archiv-leer").hidden = !leer;
+  $("archiv-leer").textContent = !Object.keys(roh).length
+    ? "Noch nichts archiviert. Erledigte Aufgaben kommen nach 30 Tagen hierher."
+    : jahre.length === 0 ? "Für diese Auswahl ist nichts archiviert." : "Für diese Auswahl ist in diesem Monat nichts archiviert.";
+}
 sortierbar($("alle-liste"), "[data-griff]", (von, nach) => {
   if (von === nach) { alleZeichnen(); return; }
   reihenfolgeAendern(von, nach);
@@ -1980,7 +2168,8 @@ function starteSync() {
   if (syncLaeuft) return;
   syncLaeuft = true;
   onValue(ref(db, `${BASIS}/eintraege`), (snap) => {
-    S.eintraege = sauber(snap.val());
+    S.roh = snap.val() ?? {};
+    S.eintraege = sauber(S.roh);
     zeilenUmstellen();
     $("live-text").textContent = "Aufgaben und Pfeile für die ganze Halle. Alle sehen dasselbe.";
     if (S.gewaehlt && !S.eintraege[S.gewaehlt]) {
@@ -1991,6 +2180,15 @@ function starteSync() {
     }
     ansichtSetzen();
     zeichnePlan();
+    alleZeichnen();
+    eintraegeDa = true;
+    aufraeumenStarten();
+  }, datenFehler);
+  onValue(ref(db, `${BASIS}/geloescht`), (snap) => {
+    S.geloeschtRoh = snap.val() ?? {};
+    S.geloescht = sauber(S.geloeschtRoh);
+    geloeschtDa = true;
+    aufraeumenStarten();
     alleZeichnen();
   }, datenFehler);
   onValue(ref(db, `${BASIS}/verlauf`), (snap) => {
