@@ -49,7 +49,7 @@ body{overflow:hidden}
 #huelle{position:fixed; inset:0; display:flex; flex-direction:column}
 #huelle[hidden]{display:none}
 .oben{flex:none; display:flex; align-items:center; justify-content:flex-start; gap:12px; height:56px; padding:0 10px 0 16px; background:var(--panel); border-bottom:1px solid var(--line)}
-.knoepfe{display:flex; align-items:center; gap:6px; order:3; margin-left:auto}
+.knoepfe{display:flex; align-items:center; gap:6px; order:3; margin-left:12px}
 .sym{width:46px; height:44px; border-radius:12px; border:0; background:none; color:var(--ink); display:inline-flex; align-items:center; justify-content:center; padding:0; cursor:pointer; -webkit-tap-highlight-color:transparent}
 .sym:hover{background:color-mix(in srgb, var(--ink) 8%, transparent)}
 .sym[aria-current="page"]{background:var(--accent); color:var(--on-accent)}
@@ -58,7 +58,7 @@ body{overflow:hidden}
 .logo-oben{height:34px; width:auto; display:block; flex:none}
 .trenn{width:1px; height:28px; background:var(--line); margin:0 4px}
 /* Anmeldung oben rechts: Name und Farbe, Zeit bis zur Abmeldung, Anmelden oder Abmelden */
-.konto{flex:none; display:flex; align-items:center; gap:10px; min-width:0; order:2; margin-left:18px}
+.konto{flex:none; display:flex; align-items:center; gap:10px; min-width:0; order:2; margin-left:auto}
 .wer{display:flex; align-items:center; gap:8px; min-width:0; font-weight:600; font-size:calc(17px + var(--schrift-plus,0px)); white-space:nowrap}
 .wer span:last-child{overflow:hidden; text-overflow:ellipsis; max-width:200px}
 .punkt{flex:none; width:16px; height:16px; border-radius:50%; border:2px solid var(--ink)}
@@ -147,9 +147,9 @@ body{overflow:hidden}
     </form>
   </div>
 </div>
-<script src="./js/qrcode.js?v=1795706000"></script>
+<script src="./js/qrcode.js?v=1795707000"></script>
 <script type="module">
-import { sitzung, tablettFreischalten, istRechteFehler, anmelden, abmelden, anmeldeFehler, anfrageSenden, anfrageLoeschen, aufAnmeldungWarten, db, ref, get } from "./js/zugang.js?v=1795706000";
+import { sitzung, tablettFreischalten, istRechteFehler, anmelden, abmelden, anmeldeFehler, anfrageSenden, anfrageLoeschen, aufAnmeldungWarten, db, ref, get } from "./js/zugang.js?v=1795707000";
 const $ = (id) => document.getElementById(id);
 const SONNE = `<path d="M8 12a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /> <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" />`, MOND = `<path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008" />`;
 const SEITEN = ["Reinigungsplan", "Arbeitsplan", "Dienstplan"];
@@ -182,7 +182,7 @@ function rahmen(name) {
   f.className = "rahmen weg";
   f.title = name;
   f.setAttribute("allow", "fullscreen; screen-wake-lock");
-  f.src = `./Tablet/${name}.html?v=1795706000`;
+  f.src = `./Tablet/${name}.html?v=1795707000`;
   f.addEventListener("load", () => themaSetzen(dunkel(), false));
   $("rahmen-box").appendChild(f);
   return (RAHMEN[name] = f);
