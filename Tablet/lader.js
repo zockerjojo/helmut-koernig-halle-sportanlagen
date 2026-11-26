@@ -8,13 +8,13 @@
   /* Direkt aufgerufen: in die Tablet-Hülle, damit die Adresse gleich bleibt und das Vollbild hält */
   if (window.top === window) { location.replace("/Tablet/#" + name); return; }
   try {
-    var Z = await import("../js/zugang.js?v=1795710947");
+    var Z = await import("../js/zugang.js?v=1795711291");
     var s = await Z.sitzung();
     if (!s) { location.replace("/Tablet/"); return; }
     var html = await (await fetch("../" + name + ".html", { cache: "no-cache" })).text();
     /* Die Hülle gilt für jede Seite. Nur ohne Anmeldung kommt der Nur-Ansehen-Schutz dazu. */
-    var kopf = '<base href="../"><script src="/Tablet/huelle.js?v=1795710947"><\/script>'
-      + (s.tablett ? '<script src="/Tablet/schutz.js?v=1795710947"><\/script>' : "");
+    var kopf = '<base href="../"><script src="/Tablet/huelle.js?v=1795711291"><\/script>'
+      + (s.tablett ? '<script src="/Tablet/schutz.js?v=1795711291"><\/script>' : "");
     html = html.replace(/<head>/i, "<head>" + kopf);
     document.open();
     document.write(html);

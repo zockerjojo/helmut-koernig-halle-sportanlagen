@@ -130,6 +130,7 @@ textarea:focus-visible,.tf:focus-visible{outline:3px solid var(--accent);outline
 #paint path{stroke-opacity:.62}
 /* Noch nicht gewischte Bahnen: nur sichtbar, solange die Anzeige eingeschaltet ist.
    Hellgrau; auf hellem Untergrund etwas kraeftiger, damit es nicht verschwindet. */
+.map.nuroffen #free{display:none}
 .nichtgereinigt{stroke:var(--ungewischt);stroke-opacity:.95}
 .color .nichtgereinigt{stroke:#D7DCD8}
 /* Farb-Ansicht */
@@ -311,7 +312,7 @@ a.ghost{display:flex;align-items:center;justify-content:center;gap:2px;color:var
 
   <main class="map" id="map">
     <svg id="svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Hallenplan von oben">
-      <defs><clipPath id="inf"><path d="M268 93 H552 A80 80 0 0 1 552 253 H268 A80 80 0 0 1 268 93 Z"/></clipPath><clipPath id="outc"><path clip-rule="evenodd" d="M35 6 H675 L687 16 H737 V64 H697 Q703 160 694 255 L681 316 H31 L17 286 L14 226 Q-2 130 19 25 Z M268 60 H552 A113 113 0 0 1 552 286 H268 A113 113 0 0 1 268 60 Z M661 202 L655 277 L640 296 L597 296 L597 276.65 A113 113 0 0 0 661 202 Z M158 303 H563 V315 H158 Z M351 286 H364 V303 H351 Z M159 288.5 H351 V303 H159 Z M364 288.5 H563 V303 H364 Z"/></clipPath><clipPath id="noblk"><path clip-rule="evenodd" d="M-60 -60 H820 V400 H-60 Z M159 288.5 h192 v14.5 h-192 Z M364 288.5 h199 v14.5 h-199 Z M12 160 h87 v76 h-87 Z M117 66 h35 v40 h-35 Z M563 196 h43 v22 h-43 Z"/></clipPath><clipPath id="zaunc"><path d="M661 202 L655 277 L640 296 L597 296 L597 276.65 A113 113 0 0 0 661 202 Z"/></clipPath></defs>
+      <defs><clipPath id="inf"><path d="M268 93 H552 A80 80 0 0 1 552 253 H268 A80 80 0 0 1 268 93 Z"/></clipPath><clipPath id="outc"><path clip-rule="evenodd" d="M35 6 H675 L687 16 H737 V64 H697 Q703 160 694 255 L681 316 H31 L17 286 L14 226 Q-2 130 19 25 Z M268 60 H552 A113 113 0 0 1 552 286 H268 A113 113 0 0 1 268 60 Z M661 202 L655 277 L640 296 L597 296 L597 276.65 A113 113 0 0 0 661 202 Z M158 303 H563 V315 H158 Z M351 286 H364 V303 H351 Z M159 288.5 H351 V303 H159 Z M364 288.5 H563 V303 H364 Z"/></clipPath><clipPath id="noblk"><path clip-rule="evenodd" d="M-60 -60 H820 V400 H-60 Z M159 288.5 h192 v14.5 h-192 Z M364 288.5 h199 v14.5 h-199 Z M12 160 h87 v76 h-87 Z M117 66 h35 v40 h-35 Z M563 196 h43 v22 h-43 Z"/></clipPath><mask id="freimask" maskUnits="userSpaceOnUse" x="-60" y="-60" width="880" height="460"><rect x="-60" y="-60" width="880" height="460" fill="#fff"/><g id="freemask" fill="none" stroke="#000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"></g></mask><clipPath id="zaunc"><path d="M661 202 L655 277 L640 296 L597 296 L597 276.65 A113 113 0 0 0 661 202 Z"/></clipPath></defs>
       <g id="world">
         <path class="hall" id="hallp" d="M35 6 H675 L687 16 H737 V64 H697 Q703 160 694 255 L681 316 H31 L17 286 L14 226 Q-2 130 19 25 Z"/>
         <rect class="trib" x="160" y="8" width="520" height="6"/>
@@ -331,7 +332,7 @@ a.ghost{display:flex;align-items:center;justify-content:center;gap:2px;color:var
         <rect class="mat" x="314" y="192" width="43" height="36.5"/>
         <rect class="trib" x="161" y="289.5" width="58" height="12.5"/><rect class="trib" x="228" y="289.5" width="58" height="12.5"/><rect class="trib" x="295" y="289.5" width="58" height="12.5"/><rect class="trib" x="362" y="289.5" width="58" height="12.5"/><rect class="trib" x="429" y="289.5" width="58" height="12.5"/><rect class="trib" x="496" y="289.5" width="58" height="12.5"/>
         <g id="lanes" fill="none" stroke="none"></g>
-        <g id="paint" fill="none" clip-path="url(#noblk)"></g>
+        <g id="paint" fill="none" clip-path="url(#noblk)" mask="url(#freimask)"></g>
         <g>
           <path class="hallwall" d="M35 6 H675 L687 16 H737 V64 H697 Q703 160 694 255 L681 316 H31 L17 286 L14 226 Q-2 130 19 25 Z"/>
           <rect class="ln" x="31" y="18" width="700" height="39"/>
@@ -778,7 +779,9 @@ function freeDel(s){free=free.filter(function(f){return f.id!==s.id});var o={};o
 function segDist(p,a,b){var dx=b[0]-a[0],dy=b[1]-a[1],L=dx*dx+dy*dy,t=L?clamp(((p.x-a[0])*dx+(p.y-a[1])*dy)/L,0,1):0;return Math.hypot(p.x-(a[0]+t*dx),p.y-(a[1]+t*dy))}
 function nearFree(s,p){var pts=s.pts;if(pts.length===1)return Math.hypot(p.x-pts[0][0],p.y-pts[0][1])<=ERASE_R;for(var i=1;i<pts.length;i++){if(segDist(p,pts[i-1],pts[i])<=ERASE_R)return true}return false}
 function renderFree(){
+  var fm=document.getElementById("freemask");
   while(freeG.firstChild)freeG.removeChild(freeG.firstChild);
+  while(fm.firstChild)fm.removeChild(fm.firstChild);
   free.forEach(function(s){
     if(!s.pts.length)return;
     var el=document.createElementNS(NS,"path");
@@ -786,6 +789,7 @@ function renderFree(){
     el.setAttribute("fill","none");el.setAttribute("stroke",person(s.p).c);
     el.setAttribute("stroke-width","6");el.setAttribute("stroke-linecap","round");el.setAttribute("stroke-linejoin","round");
     freeG.appendChild(el);
+    if(ZEIGE_OFFEN){var m=el.cloneNode(false);m.removeAttribute("stroke");m.removeAttribute("stroke-width");fm.appendChild(m)}
   });
 }
 function freeStart(e){
@@ -1246,7 +1250,7 @@ document.addEventListener("fullscreenchange",function(){if(!document.fullscreenE
 function offenUmschalten(){
   ZEIGE_OFFEN=!ZEIGE_OFFEN;
   $("btn-offen").setAttribute("aria-pressed",String(ZEIGE_OFFEN));
-  map.classList.toggle("nuroffen",ZEIGE_OFFEN);
+  map.classList.toggle("nuroffen",ZEIGE_OFFEN);renderFree();
   lanes.forEach(render);
   progress();
   say(ZEIGE_OFFEN?"Grau ist, was noch nicht gewischt wurde. Das Gewischte ist ausgeblendet.":"Wieder alles zu sehen.",true);
@@ -1254,7 +1258,7 @@ function offenUmschalten(){
 $("btn-offen").addEventListener("click",offenUmschalten);
 /* Standard: die nicht gereinigten Bereiche sind gleich beim Öffnen zu sehen */
 $("btn-offen").setAttribute("aria-pressed",String(ZEIGE_OFFEN));
-map.classList.toggle("nuroffen",ZEIGE_OFFEN);
+map.classList.toggle("nuroffen",ZEIGE_OFFEN);renderFree();
 
 /* ---------- Plan als Bild herunterladen ---------- */
 /* Der Plan im SVG lebt von den Farben der Seite. Fuer das Bild werden sie
@@ -1283,7 +1287,7 @@ function bildStil(farbig,v){
     +"#paint path.nichtgereinigt,#free path.nichtgereinigt{stroke:"+(farbig?"#D7DCD8":grau)+";stroke-opacity:"+(farbig?"1":".95")+"}"
     +"#pins circle{fill:"+(farbig?"#F29F05":panel)+";stroke:"+(farbig?"#2B1B00":ink)+"}"
     +"#pins text{font-family:sans-serif;fill:"+(farbig?"#2B1B00":ink)+"}"
-    ;
+    +(ZEIGE_OFFEN?"#free{display:none}":"");
 }
 function planBild(){
   var knopf=$("btn-bild");
