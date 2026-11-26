@@ -1160,7 +1160,7 @@ var HINT={paint:"Mit dem Finger über einen Bereich ziehen. Zwei Finger zoomen u
 function syncButtons(){
   document.querySelectorAll("[data-k]").forEach(function(b){b.setAttribute("aria-pressed",String(S[b.dataset.k]===b.dataset.v))});
   map.classList.toggle("color",S.view==="color");
-  var pe=person(S.who);$("who-name").textContent=pe.n;$("who-dot").style.background=pe.c;
+  var pe=S.who?person(S.who):{n:"…",c:"transparent"};$("who-name").textContent=pe.n;$("who-dot").style.background=pe.c;
   $("dir-sw").setAttribute("data-d",S.dir);
   $("view-sw").setAttribute("data-d",S.view);
   $("art-sl").setAttribute("data-pos",S.art==="free"?"1":"0");
