@@ -697,6 +697,19 @@ svg.addEventListener("wheel", (e) => {
   zoomAuf(e.clientX, e.clientY, V.z * Math.pow(1.15, -schritt));
 }, { passive: false });
 window.addEventListener("resize", () => { ansichtSetzen(); zeichnePlan(); });
+/* Ändert sich der Platz der Karte (Tablet-Hülle, Leiste, Seitenwechsel), wird der Ausschnitt neu berechnet.
+   Sonst bliebe die Karte so klein, wie sie beim ersten Zeichnen gerechnet wurde. */
+try {
+  let kartenGroesse = "";
+  let kartenFrame = 0;
+  new ResizeObserver(() => {
+    const r = svg.getBoundingClientRect();
+    const g = Math.round(r.width) + "x" + Math.round(r.height);
+    if (g === kartenGroesse || kartenFrame) return;
+    kartenGroesse = g;
+    kartenFrame = requestAnimationFrame(() => { kartenFrame = 0; ansichtSetzen(); zeichnePlan(); });
+  }).observe(map);
+} catch (e) {}
 
 /* Zeiger auf der Karte: ein Finger schiebt die Karte, zwei Finger zoomen, und wer einen Eintrag
    kurz gedrueckt haelt, nimmt ihn auf und kann ihn versetzen. Kurzes Tippen oeffnet ihn. */

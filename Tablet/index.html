@@ -147,9 +147,9 @@ body{overflow:hidden}
     </form>
   </div>
 </div>
-<script src="./js/qrcode.js?v=1795707000"></script>
+<script src="./js/qrcode.js?v=1795708000"></script>
 <script type="module">
-import { sitzung, tablettFreischalten, istRechteFehler, anmelden, abmelden, anmeldeFehler, anfrageSenden, anfrageLoeschen, aufAnmeldungWarten, db, ref, get } from "./js/zugang.js?v=1795707000";
+import { sitzung, tablettFreischalten, istRechteFehler, anmelden, abmelden, anmeldeFehler, anfrageSenden, anfrageLoeschen, aufAnmeldungWarten, db, ref, get } from "./js/zugang.js?v=1795708000";
 const $ = (id) => document.getElementById(id);
 const SONNE = `<path d="M8 12a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /> <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" />`, MOND = `<path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008" />`;
 const SEITEN = ["Reinigungsplan", "Arbeitsplan", "Dienstplan"];
@@ -182,16 +182,36 @@ function rahmen(name) {
   f.className = "rahmen weg";
   f.title = name;
   f.setAttribute("allow", "fullscreen; screen-wake-lock");
-  f.src = `./Tablet/${name}.html?v=1795707000`;
+  f.src = `./Tablet/${name}.html?v=1795708000`;
   f.addEventListener("load", () => themaSetzen(dunkel(), false));
   $("rahmen-box").appendChild(f);
+  wache(f, 0);
   return (RAHMEN[name] = f);
+}
+/* Bleibt eine Seite bei „Einen Moment …“ oder „Keine Verbindung“ hängen, lädt nur dieser Rahmen neu.
+   Die Hülle selbst bleibt stehen, so bleibt auch das Vollbild. */
+function wache(f, versuch) {
+  setTimeout(() => {
+    if (!f.isConnected) return;
+    let haengt = false;
+    try {
+      const d = f.contentDocument;
+      const warte = d && d.getElementById("pruefung");
+      haengt = !d || (!!warte && !warte.hidden)
+        || /Keine Verbindung/.test(d.body ? d.body.textContent : "");
+    } catch (e) {}
+    if (!haengt || versuch >= 8) return;
+    try { f.contentWindow.location.reload(); } catch (e) { f.src = f.src; }
+    wache(f, versuch + 1);
+  }, versuch === 0 ? 12000 : 8000);
 }
 function seite(name) {
   if (!SEITEN.includes(name)) name = "Arbeitsplan";
   document.querySelectorAll("[data-seite]").forEach((b) => b.setAttribute("aria-current", b.dataset.seite === name ? "page" : "false"));
   rahmen(name);
   Object.entries(RAHMEN).forEach(([n, f]) => f.classList.toggle("weg", n !== name));
+  /* Die gezeigte Seite misst sich neu (Karte im Arbeitsplan) */
+  try { const w = RAHMEN[name].contentWindow; requestAnimationFrame(() => w.dispatchEvent(new w.Event("resize"))); } catch (e) {}
   history.replaceState(null, "", location.pathname + location.search + "#" + name);
 }
 function vorladen() { setTimeout(() => SEITEN.forEach(rahmen), 1500); }
