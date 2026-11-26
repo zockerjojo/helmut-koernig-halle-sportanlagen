@@ -37,6 +37,16 @@ label{display:block; font-weight:600; margin:0 0 6px}
 input{width:100%; font:inherit; font-size:18px; padding:12px 14px; border-radius:12px; border:1px solid var(--line); background:var(--bg); color:var(--ink)}
 .knopf{display:block; width:100%; font:inherit; font-weight:600; font-size:18px; min-height:52px; padding:10px 20px; margin-top:16px; border-radius:999px; border:1px solid var(--accent); background:var(--accent); color:var(--on-accent); cursor:pointer}
 .knopf:disabled{opacity:.6}
+.code-feld{position:relative}
+.code-feld input{padding-right:54px}
+.auge{position:absolute; top:0; right:0; bottom:0; width:50px; display:flex; align-items:center; justify-content:center; border:0; background:none; color:var(--ink-2); cursor:pointer; border-radius:0 12px 12px 0}
+.auge svg{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+.auge .zu{display:none}
+.auge[aria-pressed="true"] .auf{display:none}
+.auge[aria-pressed="true"] .zu{display:block}
+.detail{font-size:14px; color:var(--ink-2); margin:6px 0 0; word-break:break-word}
+.haken{display:inline-flex; align-items:center; justify-content:center; width:64px; height:64px; border-radius:50%; background:var(--accent); color:var(--on-accent); margin:0 0 12px}
+.haken svg{width:36px; height:36px; fill:none; stroke:currentColor; stroke-width:3; stroke-linecap:round; stroke-linejoin:round}
 .fehler{color:var(--fehler); font-weight:600; min-height:1.4em; margin:10px 0 0}
 .wer{font-family:var(--display); font-weight:600; font-size:clamp(34px, 8vw, 46px); line-height:1.05; text-transform:uppercase; margin:0 0 6px}
 </style>
@@ -52,28 +62,37 @@ input{width:100%; font:inherit; font-size:18px; padding:12px 14px; border-radius
 
   <section id="code" hidden>
     <h1>Mit Code anmelden</h1>
-    <p class="muted">Gib deinen persönlichen Code ein. Danach bestätigst du die Anmeldung am Tablett.</p>
+    <p class="muted">Gib deinen persönlichen Code ein. Danach bist du am Tablet angemeldet.</p>
     <form class="karte" id="form" autocomplete="off">
       <label for="code-feld">Persönlicher Code</label>
-      <input id="code-feld" type="password" autocomplete="off" required>
+      <div class="code-feld">
+        <input id="code-feld" type="password" autocomplete="off" required>
+        <button type="button" class="auge" id="auge" aria-pressed="false" aria-label="Code anzeigen" title="Code anzeigen">
+          <svg class="auf" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" /></svg>
+          <svg class="zu" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.585 10.587a2 2 0 0 0 2.829 2.828" /><path d="M16.681 16.673a8.717 8.717 0 0 1 -4.681 1.327c-3.6 0 -6.6 -2 -9 -6c1.272 -2.12 2.712 -3.678 4.32 -4.674m2.86 -1.146a9.055 9.055 0 0 1 1.82 -.18c3.6 0 6.6 2 9 6c-.666 1.11 -1.379 2.067 -2.138 2.87" /><path d="M3 3l18 18" /></svg>
+        </button>
+      </div>
       <button class="knopf" id="los" type="submit">Weiter</button>
       <p class="fehler" id="code-fehler" aria-live="polite"></p>
     </form>
   </section>
 
-  <section id="frage" hidden>
-    <h1>Am Tablett anmelden?</h1>
+  <section id="fertig" hidden>
+    <h1>Angemeldet</h1>
     <div class="karte">
-      <p>Du meldest dich am Tablett an als</p>
+      <span class="haken" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12l5 5l10 -10" /></svg></span>
       <p class="wer" id="wer"></p>
-      <button class="knopf" id="ja" type="button">Ja, am Tablett anmelden</button>
-      <p class="fehler" id="frage-fehler" aria-live="polite"></p>
+      <p>Du bist am Tablet angemeldet. Dieses Fenster kann zu.</p>
     </div>
   </section>
 
-  <section id="fertig" hidden>
-    <h1>Fertig</h1>
-    <div class="karte"><p>Das Tablett ist jetzt angemeldet. Dieses Fenster kann zu.</p></div>
+  <section id="fehler" hidden>
+    <h1>Das hat nicht geklappt</h1>
+    <div class="karte">
+      <p id="fehler-text">Tippe am Tablet noch einmal auf „Anmelden“ und scanne den Code neu.</p>
+      <p class="detail" id="fehler-detail"></p>
+      <button class="knopf" id="nochmal" type="button">Noch einmal versuchen</button>
+    </div>
   </section>
 
   <section id="ungueltig" hidden>
@@ -86,16 +105,46 @@ import { sitzung, anmelden, anmeldeFehler, auth, db, ref, get, set } from "./js/
 
 const $ = (id) => document.getElementById(id);
 const zeige = (welche) => {
-  for (const id of ["laden", "code", "frage", "fertig", "ungueltig"]) $(id).hidden = id !== welche;
+  for (const id of ["laden", "code", "fertig", "fehler", "ungueltig"]) $(id).hidden = id !== welche;
 };
 /* Die Kennung des Tabletts steht im QR-Code. Ohne sie passt der Link nicht. */
 const tablett = new URLSearchParams(location.search).get("t") || "";
 const gueltig = /^[A-Za-z0-9_-]{20,40}$/.test(tablett);
 
-async function frageZeigen(si) {
-  $("wer").textContent = si.name;
-  zeige("frage");
+/* Trägt die Anmeldung dieses Handys für das Tablet ein. Die Regeln prüfen, ob die Anfrage am Tablet frisch ist.
+   Ein Knopfdruck ist nicht nötig: wer schon angemeldet ist, ist nach dem Scannen sofort fertig. */
+async function uebertragen(si) {
+  zeige("laden");
+  try {
+    const uid = auth.currentUser?.uid;
+    if (!uid) throw Object.assign(new Error("nicht angemeldet"), { code: "app/keine-kennung" });
+    const g = (await get(ref(db, `geraete/${uid}`))).val();
+    if (!g?.benutzer) throw Object.assign(new Error("keine Person"), { code: "app/keine-person" });
+    await set(ref(db, `geraete/${tablett}`), { benutzer: g.benutzer, code: g.code, seit: g.seit });
+    $("wer").textContent = si.name;
+    zeige("fertig");
+    /* Das Fenster schließt sich selbst, wo der Browser es erlaubt; sonst bleibt „Angemeldet“ stehen. */
+    setTimeout(() => { try { window.close(); } catch (e) {} }, 1800);
+  } catch (err) {
+    console.error(err);
+    const code = err?.code || err?.message || "unbekannt";
+    $("fehler-text").textContent = /PERMISSION_DENIED|permission/i.test(String(code) + String(err?.message))
+      ? "Das Tablet hat die Anfrage nicht mehr offen. Tippe am Tablet noch einmal auf „Anmelden“ und scanne den Code neu."
+      : "Die Anmeldung am Tablet hat nicht geklappt. Bitte noch einmal versuchen.";
+    $("fehler-detail").textContent = "Fehler: " + code;
+    zeige("fehler");
+  }
 }
+
+$("nochmal").addEventListener("click", () => start());
+
+$("auge").addEventListener("click", () => {
+  const sichtbar = $("code-feld").type === "password";
+  $("code-feld").type = sichtbar ? "text" : "password";
+  $("auge").setAttribute("aria-pressed", String(sichtbar));
+  const t = sichtbar ? "Code verbergen" : "Code anzeigen";
+  $("auge").setAttribute("aria-label", t); $("auge").title = t;
+});
 
 $("form").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -110,7 +159,7 @@ $("form").addEventListener("submit", async (e) => {
     }
     const si = await sitzung();
     if (!si || si.tablett || !si.bid) throw new Error("keine Person");
-    await frageZeigen(si);
+    await uebertragen(si);
   } catch (err) {
     console.error(err);
     $("code-fehler").textContent = anmeldeFehler(err);
@@ -119,32 +168,15 @@ $("form").addEventListener("submit", async (e) => {
   }
 });
 
-/* Bestätigt: das Handy trägt die Anmeldung für das Tablett ein. Die Regeln prüfen, ob die Anfrage frisch ist. */
-$("ja").addEventListener("click", async () => {
-  $("ja").disabled = true;
-  $("frage-fehler").textContent = "";
-  try {
-    const uid = auth.currentUser?.uid;
-    if (!uid) throw new Error("nicht angemeldet");
-    const g = (await get(ref(db, `geraete/${uid}`))).val();
-    if (!g?.benutzer) throw new Error("keine Person");
-    await set(ref(db, `geraete/${tablett}`), { benutzer: g.benutzer, code: g.code, seit: g.seit });
-    zeige("fertig");
-  } catch (err) {
-    console.error(err);
-    $("frage-fehler").textContent = "Das hat nicht geklappt. Tippe am Tablett noch einmal auf „Anmelden“ und scanne den Code neu.";
-  } finally {
-    $("ja").disabled = false;
-  }
-});
-
-(async () => {
+async function start() {
   if (!gueltig) { zeige("ungueltig"); return; }
+  zeige("laden");
   let si = null;
   try { si = await sitzung(); } catch (err) { console.error(err); }
-  if (si && !si.tablett && si.bid) await frageZeigen(si);
+  if (si && !si.tablett && si.bid) await uebertragen(si);
   else zeige("code");
-})();
+}
+start();
 </script>
 </body>
 </html>
