@@ -77,6 +77,10 @@ textarea{resize:vertical; line-height:1.35}
 .personen{display:flex; flex-wrap:wrap; gap:8px}
 .person{display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:0 14px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); font:inherit; font-size:calc(15px + var(--schrift-plus,0px)); font-weight:600; cursor:pointer}
 .person[aria-pressed="true"]{border:2px solid var(--ink)}
+.frage-box{display:flex; flex-direction:column; gap:8px; padding:12px 14px; border-radius:14px; border:1px solid var(--line); background:var(--panel)}
+.frage-text{margin:0; font-weight:600; color:var(--ink)}
+.haken-zeile{display:flex; align-items:center; gap:10px; min-height:44px; margin:0; font-weight:500; color:var(--ink); cursor:pointer}
+.haken-zeile input{width:24px; height:24px; flex:none; margin:0; padding:0; accent-color:var(--accent)}
 .person .farbe{width:12px; height:12px; border-radius:50%; border:1px solid var(--ink); flex:none}
 /* Karte mit dem Plan */
 .map{position:relative; width:100%; aspect-ratio:793/525.1; min-height:220px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--panel); touch-action:none}
@@ -329,6 +333,10 @@ html.tablett #alle-zeigen{display:none !important}
           <span id="f-wer-text">Wer macht das? Mehrere möglich, oder niemand.</span>
           <div class="personen" role="group" aria-labelledby="f-wer-text" id="f-personen"></div>
         </div>
+        <div class="frage-box" id="f-frage" hidden>
+          <p class="frage-text">Sollen alle ausgewählten Personen den Job als erledigt melden können?</p>
+          <label class="haken-zeile"><input type="checkbox" id="f-alle-erledigen"><span>Alle Personen in diesem Job dürfen den Job als erledigt melden</span></label>
+        </div>
         <div class="feld" style="gap:8px">
           <span id="f-zeilen-text">Textzeilen, Bilder und Dateien (optional)</span>
           <ul class="zeilen-liste" id="f-zeilen" aria-labelledby="f-zeilen-text"></ul>
@@ -551,7 +559,11 @@ const S = {
   /* Welche Etage gerade zu sehen ist, und wessen Einträge. Leer heißt: alle. */
   etage: "halle",
   nurPersonen: [],
+  /* Das Häkchen „Alle Personen dürfen erledigen“ der Aufgabe, die gerade bearbeitet wird */
+  alleErl: false,
 };
+/* Die Frage erscheint nur bei mehreren Personen. Dann dürfen alle eingetragenen Personen die Aufgabe erledigen. */
+const alleErledigen = () => S.personen.length > 1 && S.alleErl;
 const ETAGEN = { halle: "UG", aussen: "EG" };
 const OHNE = "\u0000ohne";   /* steht im Filter für Einträge ohne Person */
 /* Eine Aufgabe gehört zu einer Etage, ein Pfeil kann von einer in die andere gehen. */
@@ -1061,13 +1073,15 @@ function waehle(id) {
   $("d-erledigt").innerHTML = istOffen(e) ? '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12l5 5l10 -10" /></svg>' : '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19.95 11a8 8 0 1 0 -.5 4m.5 5v-5h-5" /></svg>';
   $("d-erledigt").title = erlText; $("d-erledigt").setAttribute("aria-label", erlText);
   const meine = istMeine(e);
+  /* Ist die Aufgabe für mehrere Personen mit Häkchen, dürfen die eingetragenen Personen sie erledigen. */
+  const gemeinsam = e.alleDuerfenErledigen === true && !!ICH && (e.personen ?? []).includes(ICH.name);
   $("d-bearbeiten").disabled = !darfAufgabe(ICH, "bearbeiten", meine);
-  $("d-erledigt").disabled = !darfAufgabe(ICH, "erledigen", meine);
+  $("d-erledigt").disabled = !darfAufgabe(ICH, "erledigen", meine, gemeinsam);
   const inArbeit = e.status === "bearbeitung";
   const bearbText = inArbeit ? "Zurück auf offen" : "In Bearbeitung setzen";
   $("d-bearbeitung").title = bearbText; $("d-bearbeitung").setAttribute("aria-label", bearbText);
   $("d-bearbeitung").classList.toggle("primaer", inArbeit);
-  $("d-bearbeitung").disabled = !istOffen(e) || !darfAufgabe(ICH, "erledigen", meine);
+  $("d-bearbeitung").disabled = !istOffen(e) || !darfAufgabe(ICH, "erledigen", meine, gemeinsam);
   $("d-loeschen").disabled = !darfAufgabe(ICH, "loeschen", meine);
   $("d-bearbeiten").title = $("d-bearbeiten").disabled ? "Diese Aufgabe darfst du nicht bearbeiten." : "Bearbeiten";
   $("d-loeschen").title = $("d-loeschen").disabled ? "Diese Aufgabe darfst du nicht löschen." : "Löschen";
@@ -1274,6 +1288,7 @@ function formularOeffnen(id) {
   const pfeil = e ? istPfeil(e) : S.entwurf?.art === "pfeil";
   /* Neue Einträge gehen an die Person, für die gerade eingetragen wird. */
   S.personen = e ? [...e.personen] : (ALS && PERSONEN.some((p) => p.n === ALS) ? [ALS] : []);
+  S.alleErl = e ? e.alleDuerfenErledigen === true : false;
   S.zeilen = e ? (e.zeilen ?? []).map((z) => z.art === "anhang"
     ? { id: z.id, art: "anhang", titel: z.titel ?? "", anhang: z.anhang, name: z.name, typ: z.typ, groesse: z.groesse, status: "fertig" }
     : { id: z.id, titel: z.titel ?? "", text: z.text ?? "" }) : [];
@@ -1434,6 +1449,7 @@ $("t-formular").addEventListener("submit", async (e) => {
         [`${BASIS}/eintraege/${id}/text`]: titel,
         [`${BASIS}/eintraege/${id}/person`]: S.personen[0] ?? null,
         [`${BASIS}/eintraege/${id}/personen`]: S.personen.length ? S.personen.join("|") : null,
+        [`${BASIS}/eintraege/${id}/alleDuerfenErledigen`]: alleErledigen() ? true : null,
         [`${BASIS}/eintraege/${id}/zeilen`]: zeilen,
         ...verlaufPaar("bearbeitet", titel, S.personen[0] ?? null),
       });
@@ -1449,6 +1465,7 @@ $("t-formular").addEventListener("submit", async (e) => {
       const ersteller = vertreten ? (PERSONEN.find((x) => x.n === ALS)?.bid || ICH?.bid || "") : (ICH?.bid || "");
       const basis = { text: titel, status: "offen", ts: Date.now(), reihe: neueReihe(), ersteller };
       if (S.personen.length) { basis.person = S.personen[0]; basis.personen = S.personen.join("|"); }
+      if (alleErledigen()) basis.alleDuerfenErledigen = true;
       if (zeilen) basis.zeilen = zeilen;
       /* Die Etage steht beim Entwurf fest: ein Pfeil merkt sich die Etage seines
          Anfangs und die seines Endes, darum kann er von drinnen nach draußen gehen. */
@@ -1589,6 +1606,9 @@ function personenZeichnen() {
   $("f-personen").innerHTML = PERSONEN.map((p) =>
     `<button class="person" type="button" data-person="${esc(p.n)}" aria-pressed="${S.personen.includes(p.n)}"><span class="farbe" style="background:${p.c}"></span>${esc(p.n)}${S.personen.includes(p.n) ? " ✓" : ""}</button>`
   ).join("");
+  /* Mehrere Personen: die Frage, ob alle die Aufgabe erledigen dürfen */
+  $("f-frage").hidden = S.personen.length < 2;
+  $("f-alle-erledigen").checked = S.alleErl;
 }
 $("ich-wahl").addEventListener("click", (e) => {
   const knopf = e.target.closest("[data-als]");
@@ -1606,6 +1626,9 @@ $("f-personen").addEventListener("click", (e) => {
   S.personen = S.personen.includes(n) ? S.personen.filter((x) => x !== n) : [...S.personen, n];
   personenZeichnen();
   zeichnePlan();
+});
+$("f-alle-erledigen").addEventListener("change", (e) => {
+  S.alleErl = e.target.checked;
 });
 
 /* ---- Verlauf anzeigen ---- */
@@ -1913,6 +1936,7 @@ function sauber(roh) {
       ts: zahl(e.ts) ?? 0,
       reihe: zahl(e.reihe),
       zeilen,
+      alleDuerfenErledigen: e.alleDuerfenErledigen === true,
     };
     /* Einträge von früher haben keine Etage. Die gehören in die Halle. */
     const et = (v) => (v === "aussen" ? "aussen" : "halle");

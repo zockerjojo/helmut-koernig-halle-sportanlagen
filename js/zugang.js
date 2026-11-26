@@ -11,7 +11,7 @@
 // Datei.
 import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getDatabase, ref, get, set, update, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, get, set, update, onValue, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { firebaseConfig } from "./config.js";
 
 // Die öffentliche Anzeige hat die Verbindung oft schon aufgebaut. Dann wird dieselbe weiterbenutzt.
@@ -94,9 +94,7 @@ function ersterNutzer() {
    Ein Admin schaltet das Tablett einmal frei, dann steht es unter "tabletts". */
 export const TABLETT = /^\/Tablett?(\/|$)/.test(location.pathname) || globalThis.HKH_TABLETT === true;
 const NUR_ANSEHEN = { reinigung: true, arbeitsplan: true, dienstplan: true, reinigung_tun: {}, sportanlagen_tun: {}, arbeitsplan_tun: {}, dienstplan_tun: {} };
-async function tablettSitzung() {
-  const user = await ersterNutzer();
-  if (!user) return null;
+async function tablettSitzung(user) {
   let t = null;
   try {
     t = (await get(ref(db, `tabletts/${user.uid}`))).val();
@@ -117,14 +115,11 @@ export async function tablettFreischalten(code) {
   } finally {
     await remove(ref(db, `geraete/${user.uid}`)).catch(() => {});
   }
-  return tablettSitzung();
+  return tablettSitzung(user);
 }
 
-/* Die angemeldete Person, oder null. Enthält Name, Farbe und Rechte. */
-export async function sitzung() {
-  if (TABLETT) return tablettSitzung();
-  const user = await ersterNutzer();
-  if (!user) return null;
+/* Die angemeldete Person auf diesem Gerät, oder null. Enthält Name, Farbe und Rechte. */
+async function personSitzung(user) {
   let eintrag = null;
   try {
     eintrag = (await get(ref(db, `geraete/${user.uid}`))).val();
@@ -159,6 +154,16 @@ export async function sitzung() {
   };
 }
 
+/* Die angemeldete Person, oder null. Auf einem Tablett geht eine Anmeldung mit Code oder
+   Handy vor; ohne sie bleibt es beim Nur-Ansehen. */
+export async function sitzung() {
+  const user = await ersterNutzer();
+  if (!user) return null;
+  const person = await personSitzung(user);
+  if (person) return person;
+  return TABLETT ? tablettSitzung(user) : null;
+}
+
 /* Darf die angemeldete Person diesen Bereich sehen? */
 const istFuerAlle = (bereich) => BEREICHE.some((f) => f.id === bereich && f.fuerAlle);   // sieht jeder mit Code
 /* „Animation bearbeiten“ öffnet das Admin Panel auch ohne Admin-Rechte. Dort gibt es dann nur die Animation. */
@@ -180,13 +185,13 @@ export function darfVertreten(s, bereich) {
 }
 
 /* Darf sie das im Arbeitsplan? eigen sagt, ob es die eigene Aufgabe ist. */
-export function darfAufgabe(s, was, eigen) {
+export function darfAufgabe(s, was, eigen, gemeinsam = false) {
   if (!s) return false;
   if (s.istAdmin) return true;
   if (s.rechte?.arbeitsplan !== true) return false;
   const t = s.rechte?.arbeitsplan_tun ?? {};
   if (was === "erstellen") return t.erstellen === true;
-  if (was === "erledigen") return eigen ? true : t.erledigenFremde === true;
+  if (was === "erledigen") return (eigen || gemeinsam === true) ? true : t.erledigenFremde === true;
   if (was === "prio") return t.prio === true;
   const schl = { bearbeiten: "bearbeiten", verschieben: "verschieben", loeschen: "loeschen" }[was];
   if (!schl) return false;
@@ -194,8 +199,11 @@ export function darfAufgabe(s, was, eigen) {
 }
 
 /* Meldet dieses Gerät mit dem Code an. Wirft einen Fehler, wenn der Code nicht passt. */
-export async function anmelden(code) {
-  const { user } = await signInAnonymously(auth);
+export async function anmelden(code, { tablett = false } = {}) {
+  // Ein Tablett behält seine Kennung, auch wenn eine Seite darin selbst anmeldet. Sonst wäre es nach
+  // einem Fehlversuch nicht mehr freigeschaltet.
+  const amTablett = tablett || TABLETT;
+  const user = amTablett && auth.currentUser ? auth.currentUser : (await signInAnonymously(auth)).user;
   const jetzt = Date.now();
 
   // Erst der Admin-Code: dafür braucht es keine Kennung.
@@ -217,13 +225,13 @@ export async function anmelden(code) {
   for (const bid of kennungen) {
     try {
       await set(ref(db, `geraete/${user.uid}`), { benutzer: bid, code, seit: jetzt });
-      const s = await sitzung();
+      const s = await personSitzung(user);
       return { bid, istAdmin: !!s?.istAdmin };
     } catch (err) {
       if (!istRechteFehler(err)) throw err;
     }
   }
-  await signOut(auth).catch(() => {});
+  if (!amTablett) await signOut(auth).catch(() => {});
   const fehler = new Error("PERMISSION_DENIED");
   fehler.code = "PERMISSION_DENIED";
   throw fehler;
@@ -235,8 +243,35 @@ export async function abmelden() {
   if (user) {
     // Den Geräteeintrag mitnehmen, damit er nicht liegen bleibt.
     await remove(ref(db, `geraete/${user.uid}`)).catch(() => {});
+    // Ein Tablett bleibt angemeldet: meldet es sich ab, bekäme es eine neue Kennung und wäre nicht mehr freigeschaltet.
+    if (await istTablett(user.uid)) return;
   }
   return signOut(auth);
+}
+async function istTablett(uid) {
+  try {
+    return !!(await get(ref(db, `tabletts/${uid}`))).val();
+  } catch (err) {
+    return false;
+  }
+}
+
+/* Anfrage für die Anmeldung am Tablett. Das Tablett legt sie an, solange der QR-Code offen ist.
+   Das Handy prüft, ob sie frisch ist, und trägt dann die Anmeldung für das Tablett ein. */
+export function anfrageSenden(uid) {
+  return set(ref(db, `anfragen/${uid}`), { ts: serverTimestamp() });
+}
+export function anfrageLoeschen(uid) {
+  return remove(ref(db, `anfragen/${uid}`)).catch(() => {});
+}
+/* Ruft „wenn“ auf, sobald auf diesem Gerät eine Anmeldung eingetragen wird. Gibt das Abbestellen zurück. */
+export function aufAnmeldungWarten(uid, wenn) {
+  // Der erste Stand zählt nicht: ein alter Eintrag soll den Anmelde-Bildschirm nicht sofort schließen.
+  let erster = true;
+  return onValue(ref(db, `geraete/${uid}`), (snap) => {
+    if (erster) { erster = false; return; }
+    if (snap.exists()) wenn();
+  }, () => {});
 }
 
 /* Name und Farbe aller Benutzer. Setzt eine Anmeldung voraus; die vollen

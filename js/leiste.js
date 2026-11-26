@@ -58,6 +58,10 @@ function themaSetzen(dunkel) {
 }
 
 let leiste = null;
+/* Läuft die Seite in der Tablet-Hülle (/Tablet/), gilt dort die Hülle. */
+const inTabletHuelle = () => {
+  try { return window.parent !== window && typeof window.parent.hkhSeite === "function"; } catch (e) { return false; }
+};
 /* sitz: die Sitzung aus zugang.js. aktiv: Bereich der aktuellen Seite ("" = Startseite). */
 export function leisteStarten(sitz, aktiv = "") {
   if (!sitz) return;
@@ -74,8 +78,8 @@ export function leisteStarten(sitz, aktiv = "") {
   const bezeichnung = (f) => (f.id === "admin" && !sitz.istAdmin ? "Animation beim Erledigen" : f.name);
   leiste = document.createElement("div");
   leiste.className = "hkh-leiste";
-  /* Auf dem Pausenraum-Tablet gibt es keine Leiste: die Knöpfe stehen oben in der Tablet-Hülle. */
-  if (sitz?.tablett) return;
+  /* In der Tablet-Hülle gibt es keine Leiste: Knöpfe und Anmeldung stehen oben in der Hülle. */
+  if (sitz?.tablett || inTabletHuelle()) return;
   const tab = false;
   const ziel = (seite) => (tab ? seite.replace(/^\.\//, "./Tablet/") : seite);
   let offen = tab;

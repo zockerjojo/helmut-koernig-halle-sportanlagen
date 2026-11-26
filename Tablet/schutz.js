@@ -1,11 +1,9 @@
-/* Personal-Tablet: wird in jede Seite eingebunden, die in der Tablet-Hülle (/Tablet/) läuft.
-   Blendet alles zum Bearbeiten aus, gibt Antippen an die Hülle weiter (Vollbild, Bildschirm wach)
-   und hält Links innerhalb der Hülle. Die Datenbank erlaubt dem Tablet ohnehin nur das Lesen. */
+/* Personal-Tablet im Nur-Ansehen: wird zusätzlich zu huelle.js eingebunden, wenn niemand angemeldet ist.
+   Blendet alles zum Bearbeiten aus und schaltet Fenster und Drucken ab. Die Datenbank erlaubt dem Tablett
+   ohnehin nur das Lesen. Mit einer Anmeldung fehlt diese Datei, dann gelten die Rechte der Person. */
 (function () {
   window.HKH_TABLETT = true;
   document.documentElement.classList.add("tablett");
-  var huelle = null;
-  try { if (window.parent !== window && window.parent.hkhSeite) huelle = window.parent; } catch (x) {}
 
   var stil = document.createElement("style");
   stil.textContent = [
@@ -45,28 +43,7 @@
   ].join("\n");
   document.head.appendChild(stil);
 
-  /* Antippen: Vollbild und Wachhalten gehören zur Hülle */
-  document.addEventListener("pointerdown", function () {
-    if (!huelle) return;
-    try { huelle.hkhVollbild && huelle.hkhVollbild(); huelle.hkhWach && huelle.hkhWach(); } catch (x) {}
-  }, true);
-
   /* Keine neuen Fenster und kein Drucken */
   window.open = function () { return null; };
   window.print = function () {};
-
-  /* Links: nur die drei Seiten, und zwar innerhalb der Hülle. Alles andere bleibt stehen,
-     auch Downloads (Anhänge, Bilder vom Plan). */
-  var ERLAUBT = { "Dienstplan": 1, "Arbeitsplan": 1, "Reinigungsplan": 1 };
-  document.addEventListener("click", function (e) {
-    var a = e.target.closest && e.target.closest("a[href]");
-    if (!a) return;
-    e.preventDefault();
-    if (a.hasAttribute("download") || /^(blob:|data:)/.test(a.href)) return;
-    var u;
-    try { u = new URL(a.href, location.href); } catch (x) { return; }
-    if (u.origin !== location.origin) return;
-    var name = u.pathname.replace(/\.html$/, "").split("/").filter(Boolean).pop() || "";
-    if (ERLAUBT[name] && huelle) huelle.hkhSeite(name);
-  }, true);
 })();

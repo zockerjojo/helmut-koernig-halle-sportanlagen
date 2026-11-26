@@ -32,12 +32,6 @@ body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); 
 .marke{display:flex; flex-direction:column; gap:2px; font-size:calc(14px + var(--schrift-plus,0px)); font-weight:500; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2); line-height:1.15}
 h1{margin:28px 0 6px; font-family:var(--display); font-weight:600; font-size:calc(clamp(36px, 7vw, 56px) + var(--schrift-plus,0px)); line-height:1; text-transform:uppercase}
 .muted{margin:0; color:var(--ink-2)}
-.kacheln{display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:16px; margin-top:28px}
-.kachel{display:flex; flex-direction:column; gap:14px; padding:26px; min-height:180px; border-radius:20px; border:1px solid var(--line); background:var(--panel); color:var(--ink); text-decoration:none}
-.kachel:hover,.kachel:focus-visible{border-color:var(--accent); outline:none; box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent)}
-.kachel svg{width:44px; height:44px; fill:none; stroke:var(--accent); stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round}
-.kachel strong{font-family:var(--display); font-weight:600; font-size:calc(30px + var(--schrift-plus,0px)); text-transform:uppercase; line-height:1.05}
-.kachel span{color:var(--ink-2); font-size:calc(15px + var(--schrift-plus,0px))}
 .karte{margin-top:28px; max-width:520px; padding:22px; border-radius:18px; border:1px solid var(--line); background:var(--panel)}
 label{display:block; font-weight:600; font-size:calc(15px + var(--schrift-plus,0px)); margin:14px 0 6px}
 input{width:100%; font:inherit; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:var(--bg); color:var(--ink)}
@@ -63,12 +57,32 @@ body{overflow:hidden}
 .links{display:flex; align-items:center; gap:10px; min-width:0}
 .logo-oben{height:34px; width:auto; display:block; flex:none}
 .trenn{width:1px; height:28px; background:var(--line); margin:0 4px}
+/* Anmeldung oben rechts: Name und Farbe, Zeit bis zur Abmeldung, Anmelden oder Abmelden */
+.konto{flex:none; display:flex; align-items:center; gap:10px; min-width:0}
+.wer{display:flex; align-items:center; gap:8px; min-width:0; font-weight:600; font-size:calc(17px + var(--schrift-plus,0px)); white-space:nowrap}
+.wer span:last-child{overflow:hidden; text-overflow:ellipsis; max-width:200px}
+.punkt{flex:none; width:16px; height:16px; border-radius:50%; border:2px solid var(--ink)}
+.frist{min-width:3.4em; text-align:right; font-variant-numeric:tabular-nums; font-weight:600; font-size:calc(17px + var(--schrift-plus,0px)); color:var(--ink-2)}
+.konto-knopf{flex:none; display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:0 16px; border-radius:12px; border:1px solid var(--accent); background:var(--accent); color:var(--on-accent); font:inherit; font-weight:600; font-size:calc(17px + var(--schrift-plus,0px)); cursor:pointer; white-space:nowrap}
+.konto-knopf svg{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+.konto-knopf.abmelden{background:#B3261E; border-color:#B3261E; color:#FFFFFF}
 #rahmen-box{position:relative; flex:1 1 auto; min-height:0}
 .rahmen{position:absolute; inset:0; width:100%; height:100%; border:0; background:var(--bg)}
 .rahmen.weg{visibility:hidden; pointer-events:none}
 .mitte{display:flex; align-items:center; justify-content:center; height:100%}
 #freischalten{height:100%; overflow:auto}
 .fehler{color:var(--fehler); font-weight:600; min-height:1.4em; margin:10px 0 0}
+/* Anmelde-Overlay: der Hintergrund wird dunkler und unscharf */
+.tafel{position:fixed; inset:0; z-index:90; display:flex; align-items:center; justify-content:center; padding:20px; background:rgba(8,14,11,.55); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px)}
+.tafel-karte{position:relative; width:min(600px, 100%); max-height:100%; overflow:auto; padding:30px 28px 26px; border-radius:24px; border:1px solid var(--line); background:var(--panel); text-align:center}
+.tafel-zu{position:absolute; top:14px; right:14px; width:60px; height:60px; border-radius:50%; border:2px solid var(--ink); background:var(--bg); color:var(--ink); display:inline-flex; align-items:center; justify-content:center; padding:0; cursor:pointer}
+.tafel-zu svg{width:30px; height:30px; fill:none; stroke:currentColor; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round}
+.tafel h2{font-family:var(--display); font-weight:600; text-transform:uppercase; font-size:calc(44px + var(--schrift-plus,0px)); line-height:1; margin:4px 0 10px}
+.qr{display:inline-block; line-height:0; background:#FFFFFF; padding:16px; border-radius:18px; margin:10px auto 4px}
+.qr svg{display:block; width:min(56vh, 400px); height:auto}
+.tafel .knopf{display:block; margin:18px auto 0; min-width:260px}
+.tafel .code-form{margin-top:6px; text-align:left}
+.tafel .code-form .knopf{min-width:0; width:100%}
 </style>
 </head>
 <body>
@@ -84,6 +98,14 @@ body{overflow:hidden}
       <span class="trenn" aria-hidden="true"></span>
       <button type="button" class="sym" id="thema" title="Hell oder dunkel" aria-label="Hell oder dunkel"></button>
     </nav>
+    <div class="konto">
+      <span class="wer" id="wer" hidden><span class="punkt" id="wer-punkt" aria-hidden="true"></span><span id="wer-name"></span></span>
+      <span class="frist" id="frist" title="Zeit bis zur automatischen Abmeldung" hidden>10:00</span>
+      <button type="button" class="konto-knopf" id="anmelde-knopf" aria-haspopup="dialog" aria-expanded="false" title="Anmelden">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 8v-2a2 2 0 0 1 2 -2h7a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-7a2 2 0 0 1 -2 -2v-2" /><path d="M3 12h11" /><path d="M11 9l3 3l-3 3" /></svg>
+        <span id="anmelde-text">Anmelden</span>
+      </button>
+    </div>
   </header>
   <div id="rahmen-box"></div>
 </div>
@@ -105,8 +127,28 @@ body{overflow:hidden}
     <p class="fehler" id="fehler" aria-live="polite"></p>
   </form>
 </section>
+
+<div id="anmelden-tafel" class="tafel" role="dialog" aria-modal="true" aria-labelledby="anmelden-titel" hidden>
+  <div class="tafel-karte">
+    <button type="button" class="tafel-zu" id="anmelden-zu" aria-label="Anmelden schließen" title="Schließen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg></button>
+    <h2 id="anmelden-titel">Anmelden</h2>
+    <p class="muted">Mit dem Handy den Code scannen und dort bestätigen.</p>
+    <div class="qr" id="qr"></div>
+    <button type="button" class="knopf" id="mit-code">Mit Code anmelden</button>
+    <form id="code-form" class="code-form" autocomplete="off" hidden>
+      <label for="anmelden-code">Persönlicher Code</label>
+      <div class="code-feld">
+        <input id="anmelden-code" type="password" autocomplete="off" required>
+        <button class="auge" id="anmelden-auge" type="button" aria-pressed="false" aria-label="Code anzeigen" title="Code anzeigen"><svg class="auf" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="zu" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20C5 20 1 12 1 12a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg></button>
+      </div>
+      <button class="knopf" id="anmelden-los" type="submit">Anmelden</button>
+      <p class="fehler" id="anmelden-fehler" aria-live="polite"></p>
+    </form>
+  </div>
+</div>
+<script src="./js/qrcode.js?v=1795680287"></script>
 <script type="module">
-import { sitzung, tablettFreischalten, istRechteFehler } from "./js/zugang.js?v=1795543172";
+import { sitzung, tablettFreischalten, istRechteFehler, anmelden, abmelden, anmeldeFehler, anfrageSenden, anfrageLoeschen, aufAnmeldungWarten } from "./js/zugang.js?v=1795680287";
 const $ = (id) => document.getElementById(id);
 const SONNE = `<path d="M8 12a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /> <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" />`, MOND = `<path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008" />`;
 const SEITEN = ["Reinigungsplan", "Arbeitsplan", "Dienstplan"];
@@ -139,7 +181,7 @@ function rahmen(name) {
   f.className = "rahmen weg";
   f.title = name;
   f.setAttribute("allow", "fullscreen; screen-wake-lock");
-  f.src = `./Tablet/${name}.html?v=1795543172`;
+  f.src = `./Tablet/${name}.html?v=1795680287`;
   f.addEventListener("load", () => themaSetzen(dunkel(), false));
   $("rahmen-box").appendChild(f);
   return (RAHMEN[name] = f);
@@ -178,11 +220,153 @@ document.addEventListener("pointerdown", window.hkhWach, true);
 const start = Date.now();
 setInterval(() => { if (new Date().getHours() === 3 && Date.now() - start > 2 * 3600 * 1000) location.reload(); }, 60000);
 
+/* ---- Anmeldung am Tablett ---- */
+/* Ohne Aktion gilt nach 10 Minuten abmelden. Der Zeitpunkt der letzten Aktion bleibt beim Neuladen erhalten. */
+const LAUFZEIT = 10 * 60 * 1000;
+const AKTIV_MERKER = "hkh-tablett-aktiv";
+/* Der QR-Code bleibt höchstens so lange offen; das Handy braucht eine frische Anfrage. */
+const ANFRAGE_MAX = 5 * 60 * 1000;
+let geraet = null;      // Sitzung dieses Tabletts (mit uid)
+let person = null;      // angemeldete Person, sonst null
+let ausgemeldet = false;
+
+let zuletzt = 0;
+function aktiv() {
+  const jetzt = Date.now();
+  if (jetzt - zuletzt < 1000) return;
+  zuletzt = jetzt;
+  try { localStorage.setItem(AKTIV_MERKER, String(jetzt)); } catch (e) {}
+}
+window.hkhAktiv = aktiv;
+["pointerdown", "keydown", "touchstart", "wheel"].forEach((t) => document.addEventListener(t, aktiv, true));
+function letzteAktion() {
+  try { return Number(localStorage.getItem(AKTIV_MERKER)) || 0; } catch (e) { return 0; }
+}
+const verfallen = () => Date.now() - letzteAktion() >= LAUFZEIT;
+
+async function ausmelden() {
+  if (ausgemeldet) return;
+  ausgemeldet = true;
+  try { await abmelden(); } catch (err) { console.error(err); }
+  location.reload();
+}
+function fristZeigen() {
+  if (!person || ausgemeldet) return;
+  if (verfallen()) { ausmelden(); return; }
+  const rest = LAUFZEIT - (Date.now() - letzteAktion());
+  const min = Math.floor(rest / 60000), sek = Math.floor((rest % 60000) / 1000);
+  $("frist").textContent = `${min}:${String(sek).padStart(2, "0")}`;
+}
+setInterval(fristZeigen, 1000);
+
+/* Name und Farbe der Person oben, sonst nur der Knopf „Anmelden“ */
+function kontoZeigen(s) {
+  geraet = s;
+  person = s.tablett ? null : s;
+  const knopf = $("anmelde-knopf");
+  if (person) {
+    knopf.classList.add("abmelden");
+    knopf.title = "Abmelden";
+    $("anmelde-text").textContent = "Abmelden";
+    $("wer-name").textContent = person.name;
+    $("wer-punkt").style.background = person.farbe;
+  } else {
+    knopf.classList.remove("abmelden");
+    knopf.title = "Anmelden";
+    $("anmelde-text").textContent = "Anmelden";
+  }
+  $("wer").hidden = !person;
+  $("frist").hidden = !person;
+  fristZeigen();
+}
+
+/* QR-Code: das Handy öffnet die Seite Anmelden.html und trägt die Anmeldung für dieses Tablett ein. */
+const tafel = $("anmelden-tafel");
+let anfrageTakt = null, abbestellen = null, geoeffnetAm = 0;
+function qrZeichnen(text) {
+  const q = qrcode(0, "M");
+  q.addData(text);
+  q.make();
+  $("qr").innerHTML = q.createSvgTag({ cellSize: 7, margin: 2, alt: "QR-Code zum Anmelden am Tablett", title: "QR-Code zum Anmelden am Tablett" });
+}
+function tafelOeffnen() {
+  if (!geraet) return;
+  qrZeichnen(new URL("Anmelden.html?t=" + encodeURIComponent(geraet.uid), document.baseURI).href);
+  tafel.hidden = false;
+  $("anmelde-knopf").setAttribute("aria-expanded", "true");
+  geoeffnetAm = Date.now();
+  aktiv();
+  anfrageSenden(geraet.uid).catch((err) => console.error(err));
+  anfrageTakt = setInterval(() => {
+    if (Date.now() - geoeffnetAm > ANFRAGE_MAX) { tafelZu(); return; }
+    anfrageSenden(geraet.uid).catch((err) => console.error(err));
+  }, 30000);
+  abbestellen = aufAnmeldungWarten(geraet.uid, () => { anmeldungFertig(); });
+}
+function tafelZu() {
+  if (tafel.hidden) return;
+  tafel.hidden = true;
+  $("anmelde-knopf").setAttribute("aria-expanded", "false");
+  clearInterval(anfrageTakt); anfrageTakt = null;
+  if (abbestellen) { abbestellen(); abbestellen = null; }
+  if (geraet) anfrageLoeschen(geraet.uid);
+  $("code-form").hidden = true;
+  $("mit-code").hidden = false;
+  $("anmelden-code").value = "";
+  $("anmelden-fehler").textContent = "";
+}
+async function anmeldungFertig() {
+  aktiv();
+  clearInterval(anfrageTakt); anfrageTakt = null;
+  if (abbestellen) { abbestellen(); abbestellen = null; }
+  if (geraet) await anfrageLoeschen(geraet.uid);
+  location.reload();
+}
+
+$("anmelde-knopf").addEventListener("click", () => {
+  if (person) { ausmelden(); return; }
+  tafelOeffnen();
+});
+$("anmelden-zu").addEventListener("click", tafelZu);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") tafelZu(); });
+$("mit-code").addEventListener("click", () => {
+  $("code-form").hidden = false;
+  $("mit-code").hidden = true;
+  setTimeout(() => $("anmelden-code").focus(), 30);
+});
+$("anmelden-auge").addEventListener("click", () => {
+  const sichtbar = $("anmelden-code").type === "password";
+  $("anmelden-code").type = sichtbar ? "text" : "password";
+  $("anmelden-auge").setAttribute("aria-pressed", String(sichtbar));
+  const t = sichtbar ? "Code verbergen" : "Code anzeigen";
+  $("anmelden-auge").setAttribute("aria-label", t); $("anmelden-auge").title = t;
+});
+$("code-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  $("anmelden-los").disabled = true;
+  $("anmelden-fehler").textContent = "";
+  try {
+    await anmelden($("anmelden-code").value.trim(), { tablett: true });
+    $("anmelden-code").value = "";
+    anmeldungFertig();
+  } catch (err) {
+    console.error(err);
+    $("anmelden-fehler").textContent = anmeldeFehler(err);
+  } finally {
+    $("anmelden-los").disabled = false;
+  }
+});
+
 function zeigen(s) {
   $("pruefung").hidden = true;
   $("huelle").hidden = !s;
   $("freischalten").hidden = !!s;
-  if (s) { seite(decodeURIComponent(location.hash.slice(1))); vorladen(); wach(); }
+  if (!s) return;
+  kontoZeigen(s);
+  if (!s.tablett && verfallen()) { ausmelden(); return; }
+  seite(decodeURIComponent(location.hash.slice(1)));
+  vorladen();
+  wach();
 }
 $("auge").addEventListener("click", () => {
   const sichtbar = $("code").type === "password";
@@ -210,6 +394,8 @@ $("form").addEventListener("submit", async (e) => {
 (async () => {
   let s = null;
   try { s = await sitzung(); } catch (err) { console.error(err); }
+  /* Eine alte Anfrage vom letzten Öffnen des QR-Codes wegräumen */
+  if (s?.tablett) anfrageLoeschen(s.uid);
   zeigen(s);
 })();
 </script>

@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<base href="./">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Am Tablett anmelden · Helmut-Körnig-Halle</title>
+<link rel="icon" type="image/png" href="./bilder/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9EDEA; --panel:#F7F9F7; --ink:#000; --ink-2:#333; --line:#C3CCC6;
+  --accent:#17694B; --on-accent:#FFFFFF; --fehler:#B3261E;
+  --display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --body:Barlow,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#0F1512; --panel:#18211C; --ink:#E7EEE9; --ink-2:#9BAAA1; --line:#33413A;
+  --accent:#4CC38A; --on-accent:#06150E; --fehler:#F2766B; color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+body{margin:0; min-height:100vh; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:18px; line-height:1.4}
+.wrap{max-width:560px; margin:0 auto; padding:24px 20px 60px}
+.kopf{display:flex; align-items:center; gap:12px}
+.kopf img{height:40px; width:auto}
+.marke{display:flex; flex-direction:column; gap:2px; font-size:14px; font-weight:500; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2); line-height:1.15}
+h1{margin:26px 0 8px; font-family:var(--display); font-weight:600; font-size:clamp(34px, 8vw, 46px); line-height:1; text-transform:uppercase}
+p{margin:0 0 12px}
+.muted{color:var(--ink-2)}
+.karte{margin-top:18px; padding:22px; border-radius:18px; border:1px solid var(--line); background:var(--panel)}
+label{display:block; font-weight:600; margin:0 0 6px}
+input{width:100%; font:inherit; font-size:18px; padding:12px 14px; border-radius:12px; border:1px solid var(--line); background:var(--bg); color:var(--ink)}
+.knopf{display:block; width:100%; font:inherit; font-weight:600; font-size:18px; min-height:52px; padding:10px 20px; margin-top:16px; border-radius:999px; border:1px solid var(--accent); background:var(--accent); color:var(--on-accent); cursor:pointer}
+.knopf:disabled{opacity:.6}
+.fehler{color:var(--fehler); font-weight:600; min-height:1.4em; margin:10px 0 0}
+.wer{font-family:var(--display); font-weight:600; font-size:clamp(34px, 8vw, 46px); line-height:1.05; text-transform:uppercase; margin:0 0 6px}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="kopf">
+    <img src="./bilder/logo.png" alt="Dortmunder Sportstätten" width="480" height="241">
+    <span class="marke"><span>Helmut-Körnig-Halle</span><span>Personal</span></span>
+  </header>
+
+  <section id="laden"><p class="muted" style="margin-top:26px">Einen Moment …</p></section>
+
+  <section id="code" hidden>
+    <h1>Mit Code anmelden</h1>
+    <p class="muted">Gib deinen persönlichen Code ein. Danach bestätigst du die Anmeldung am Tablett.</p>
+    <form class="karte" id="form" autocomplete="off">
+      <label for="code-feld">Persönlicher Code</label>
+      <input id="code-feld" type="password" autocomplete="off" required>
+      <button class="knopf" id="los" type="submit">Weiter</button>
+      <p class="fehler" id="code-fehler" aria-live="polite"></p>
+    </form>
+  </section>
+
+  <section id="frage" hidden>
+    <h1>Am Tablett anmelden?</h1>
+    <div class="karte">
+      <p>Du meldest dich am Tablett an als</p>
+      <p class="wer" id="wer"></p>
+      <button class="knopf" id="ja" type="button">Ja, am Tablett anmelden</button>
+      <p class="fehler" id="frage-fehler" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <section id="fertig" hidden>
+    <h1>Fertig</h1>
+    <div class="karte"><p>Das Tablett ist jetzt angemeldet. Dieses Fenster kann zu.</p></div>
+  </section>
+
+  <section id="ungueltig" hidden>
+    <h1>Kein gültiger Code</h1>
+    <div class="karte"><p>Tippe am Tablett noch einmal auf „Anmelden“ und scanne den QR-Code neu.</p></div>
+  </section>
+</main>
+<script type="module">
+import { sitzung, anmelden, anmeldeFehler, auth, db, ref, get, set } from "./js/zugang.js?v=1795680287";
+
+const $ = (id) => document.getElementById(id);
+const zeige = (welche) => {
+  for (const id of ["laden", "code", "frage", "fertig", "ungueltig"]) $(id).hidden = id !== welche;
+};
+/* Die Kennung des Tabletts steht im QR-Code. Ohne sie passt der Link nicht. */
+const tablett = new URLSearchParams(location.search).get("t") || "";
+const gueltig = /^[A-Za-z0-9_-]{20,40}$/.test(tablett);
+
+async function frageZeigen(si) {
+  $("wer").textContent = si.name;
+  zeige("frage");
+}
+
+$("form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  $("los").disabled = true;
+  $("code-fehler").textContent = "";
+  try {
+    const { bid } = await anmelden($("code-feld").value.trim());
+    $("code-feld").value = "";
+    if (!bid) {
+      $("code-fehler").textContent = "Mit dem Admin-Code geht das nicht. Bitte den persönlichen Code eingeben.";
+      return;
+    }
+    const si = await sitzung();
+    if (!si || si.tablett || !si.bid) throw new Error("keine Person");
+    await frageZeigen(si);
+  } catch (err) {
+    console.error(err);
+    $("code-fehler").textContent = anmeldeFehler(err);
+  } finally {
+    $("los").disabled = false;
+  }
+});
+
+/* Bestätigt: das Handy trägt die Anmeldung für das Tablett ein. Die Regeln prüfen, ob die Anfrage frisch ist. */
+$("ja").addEventListener("click", async () => {
+  $("ja").disabled = true;
+  $("frage-fehler").textContent = "";
+  try {
+    const uid = auth.currentUser?.uid;
+    if (!uid) throw new Error("nicht angemeldet");
+    const g = (await get(ref(db, `geraete/${uid}`))).val();
+    if (!g?.benutzer) throw new Error("keine Person");
+    await set(ref(db, `geraete/${tablett}`), { benutzer: g.benutzer, code: g.code, seit: g.seit });
+    zeige("fertig");
+  } catch (err) {
+    console.error(err);
+    $("frage-fehler").textContent = "Das hat nicht geklappt. Tippe am Tablett noch einmal auf „Anmelden“ und scanne den Code neu.";
+  } finally {
+    $("ja").disabled = false;
+  }
+});
+
+(async () => {
+  if (!gueltig) { zeige("ungueltig"); return; }
+  let si = null;
+  try { si = await sitzung(); } catch (err) { console.error(err); }
+  if (si && !si.tablett && si.bid) await frageZeigen(si);
+  else zeige("code");
+})();
+</script>
+</body>
+</html>
