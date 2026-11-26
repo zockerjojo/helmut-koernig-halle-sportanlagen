@@ -298,6 +298,26 @@ details.klapp > summary::-webkit-details-marker{display:none}
         </details>
       </div>
     </section>
+
+    <section class="karte voll-nur" id="k-tablets" style="grid-column:1 / -1">
+      <div class="kopfzeile">
+        <div>
+          <h2>Tablets</h2>
+          <p class="notfall">Freigeschaltete Tablets. Abgemeldete Geräte brauchen danach den Admin-Code.</p>
+        </div>
+        <details class="sicher" id="tablets-block">
+          <summary class="knopf klein">Tablets öffnen</summary>
+          <div style="min-width:min(520px,78vw)">
+            <div class="sich" id="tablets-liste"></div>
+            <p class="muted" id="tablets-leer" hidden>Kein Tablet freigeschaltet.</p>
+            <p class="meldung" id="tablets-meldung" aria-live="polite"></p>
+            <div class="aktionen" style="margin-top:10px">
+              <button class="knopf klein" id="tablets-alle" type="button" hidden>Alle Tablets abmelden</button>
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
   </section>
 </div>
 
@@ -400,6 +420,7 @@ function horchen() {
   onValue(ref(db, "geraete"), (s) => { geraete = s.val() ?? {}; zeichneListe(); }, fehlerAnzeigen);
   onValue(ref(db, "sicherungen"), (s) => { sicherungen = s.val() ?? {}; zeichneSicherungen(); }, () => {});
   onValue(ref(db, "besuche"), (s) => zeichneBesucher(s.val() ?? {}), () => {});
+  tabletsStarten();
 }
 
 /* ---- Benutzerliste ---- */
@@ -916,6 +937,52 @@ $("sicherungen").addEventListener("click", async (e) => {
     console.error(err);
     $("sicherung-meldung").textContent = istRechteFehler(err) ? "Das darfst du nicht." : "Das Zurücksetzen hat nicht geklappt.";
   }
+});
+
+/* ---- Tablets: freigeschaltete Geräte ansehen und abmelden ---- */
+let tabletsStand = {};
+function tabletsZeichnen() {
+  const uids = Object.keys(tabletsStand).sort((x, y) => (tabletsStand[x]?.seit ?? 0) - (tabletsStand[y]?.seit ?? 0));
+  $("tablets-leer").hidden = uids.length > 0;
+  $("tablets-alle").hidden = uids.length === 0;
+  $("tablets-liste").innerHTML = uids.map((u, i) =>
+    `<div class="sz">
+      <span>${esc(tabletsStand[u]?.name ?? "Tablet")} ${i + 1} · seit ${esc(zeitText(tabletsStand[u]?.seit))}</span>
+      <span class="wann">…${esc(u.slice(-4))}</span>
+      <button class="knopf klein" type="button" data-tablet-ab="${esc(u)}">Abmelden</button>
+    </div>`).join("");
+}
+async function tabletsAbmelden(uids) {
+  /* Erst der Geräteeintrag, dann die Freigabe: beides in einem Schritt, damit nichts halb stehen bleibt. */
+  const werte = {};
+  for (const u of uids) { werte[`geraete/${u}`] = null; werte[`tabletts/${u}`] = null; }
+  $("tablets-meldung").textContent = "Wird abgemeldet …";
+  try {
+    await update(ref(db), werte);
+    $("tablets-meldung").textContent = uids.length === 1 ? "Das Tablet ist abgemeldet." : `${uids.length} Tablets sind abgemeldet.`;
+  } catch (err) {
+    console.error(err);
+    $("tablets-meldung").textContent = istRechteFehler(err) ? "Das darfst du nicht (sind die neuen Regeln veröffentlicht?)." : "Das Abmelden hat nicht geklappt.";
+  }
+}
+function tabletsStarten() {
+  onValue(ref(db, "tabletts"), (snap) => { tabletsStand = snap.val() ?? {}; tabletsZeichnen(); }, () => {});
+}
+/* Zweimal tippen: der Knopf fragt erst nach. */
+function sicherFragen(k, frage, normal) {
+  if (k.dataset.sicher === "ja") return true;
+  k.dataset.sicher = "ja";
+  k.textContent = frage;
+  k.classList.add("gefahr");
+  setTimeout(() => { if (k.isConnected) { k.dataset.sicher = ""; k.textContent = normal; k.classList.remove("gefahr"); } }, 6000);
+  return false;
+}
+$("tablets-liste").addEventListener("click", (e) => {
+  const k = e.target.closest("[data-tablet-ab]");
+  if (k && sicherFragen(k, "Wirklich abmelden?", "Abmelden")) tabletsAbmelden([k.dataset.tabletAb]);
+});
+$("tablets-alle").addEventListener("click", (e) => {
+  if (sicherFragen(e.currentTarget, "Wirklich alle abmelden?", "Alle Tablets abmelden")) tabletsAbmelden(Object.keys(tabletsStand));
 });
 
 /* ---- Besucher ---- */
