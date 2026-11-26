@@ -132,8 +132,9 @@ body{overflow:hidden}
   <div class="tafel-karte">
     <button type="button" class="tafel-zu" id="anmelden-zu" aria-label="Anmelden schließen" title="Schließen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg></button>
     <h2 id="anmelden-titel">Anmelden</h2>
-    <p class="muted">Mit dem Handy den Code scannen und dort bestätigen.</p>
+    <p class="muted">Mit dem Handy den Code scannen. Danach bist du hier angemeldet.</p>
     <div class="qr" id="qr"></div>
+    <p class="fehler" id="qr-fehler" aria-live="polite"></p>
     <button type="button" class="knopf" id="mit-code">Mit Code anmelden</button>
     <form id="code-form" class="code-form" autocomplete="off" hidden>
       <label for="anmelden-code">Persönlicher Code</label>
@@ -148,7 +149,7 @@ body{overflow:hidden}
 </div>
 <script src="./js/qrcode.js?v=1795680287"></script>
 <script type="module">
-import { sitzung, tablettFreischalten, istRechteFehler, anmelden, abmelden, anmeldeFehler, anfrageSenden, anfrageLoeschen, aufAnmeldungWarten } from "./js/zugang.js?v=1795680287";
+import { sitzung, tablettFreischalten, istRechteFehler, anmelden, abmelden, anmeldeFehler, anfrageSenden, anfrageLoeschen, aufAnmeldungWarten, db, ref, get } from "./js/zugang.js?v=1795680287";
 const $ = (id) => document.getElementById(id);
 const SONNE = `<path d="M8 12a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /> <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" />`, MOND = `<path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008" />`;
 const SEITEN = ["Reinigungsplan", "Arbeitsplan", "Dienstplan"];
@@ -301,6 +302,16 @@ function tafelOeffnen() {
     if (Date.now() - geoeffnetAm > ANFRAGE_MAX) { tafelZu(); return; }
     anfrageSenden(geraet.uid).catch((err) => console.error(err));
   }, 30000);
+  /* Prüfen, ob die Anfrage wirklich gespeichert ist; sonst kann das Handy nicht anmelden. */
+  setTimeout(async () => {
+    if (tafel.hidden || !geraet) return;
+    try {
+      const v = (await get(ref(db, `anfragen/${geraet.uid}`))).val();
+      $("qr-fehler").textContent = v?.ts ? "" : "Die Anfrage ist nicht gespeichert. Das Anmelden per QR-Code geht so nicht.";
+    } catch (err) {
+      $("qr-fehler").textContent = "Die Anfrage konnte nicht geprüft werden: " + (err?.code || err?.message || "Fehler");
+    }
+  }, 2500);
   abbestellen = aufAnmeldungWarten(geraet.uid, () => { anmeldungFertig(); });
 }
 function tafelZu() {
@@ -314,6 +325,7 @@ function tafelZu() {
   $("mit-code").hidden = false;
   $("anmelden-code").value = "";
   $("anmelden-fehler").textContent = "";
+  $("qr-fehler").textContent = "";
 }
 async function anmeldungFertig() {
   aktiv();

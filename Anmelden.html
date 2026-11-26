@@ -127,7 +127,12 @@ async function uebertragen(si) {
     setTimeout(() => { try { window.close(); } catch (e) {} }, 1800);
   } catch (err) {
     console.error(err);
-    const code = err?.code || err?.message || "unbekannt";
+    let code = err?.code || err?.message || "unbekannt";
+    /* Ein Handy, das selbst als Tablet freigeschaltet ist, darf keine Anmeldung für ein anderes eintragen. */
+    try {
+      const u = auth.currentUser?.uid;
+      if (u && (await get(ref(db, `tabletts/${u}`))).val()) code += " (dieses Gerät ist selbst als Tablet freigeschaltet)";
+    } catch (e) {}
     $("fehler-text").textContent = /PERMISSION_DENIED|permission/i.test(String(code) + String(err?.message))
       ? "Das Tablet hat die Anfrage nicht mehr offen. Tippe am Tablet noch einmal auf „Anmelden“ und scanne den Code neu."
       : "Die Anmeldung am Tablet hat nicht geklappt. Bitte noch einmal versuchen.";
