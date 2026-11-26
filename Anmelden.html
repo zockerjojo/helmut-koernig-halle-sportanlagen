@@ -101,7 +101,7 @@ input{width:100%; font:inherit; font-size:18px; padding:12px 14px; border-radius
   </section>
 </main>
 <script type="module">
-import { sitzung, anmelden, anmeldeFehler, auth, db, ref, get, set } from "./js/zugang.js?v=1795680287";
+import { sitzung, handyZuruecksetzen, istTablettGeraet, anmelden, anmeldeFehler, auth, db, ref, get, set } from "./js/zugang.js?v=1795703181";
 
 const $ = (id) => document.getElementById(id);
 const zeige = (welche) => {
@@ -177,7 +177,11 @@ async function start() {
   if (!gueltig) { zeige("ungueltig"); return; }
   zeige("laden");
   let si = null;
-  try { si = await sitzung(); } catch (err) { console.error(err); }
+  try { si = await sitzung(); } catch (err) { console.error(err); }   // wartet, bis die Anmeldung des Geräts feststeht
+  /* Ein Gerät, das selbst Tablet ist, kann kein anderes anmelden: neue Kennung, dann ganz normal weiter. */
+  try {
+    if (await istTablettGeraet()) { await handyZuruecksetzen(); si = null; }
+  } catch (err) { console.error(err); }
   if (si && !si.tablett && si.bid) await uebertragen(si);
   else zeige("code");
 }

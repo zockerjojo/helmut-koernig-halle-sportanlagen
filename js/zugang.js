@@ -237,6 +237,19 @@ export async function anmelden(code, { tablett = false } = {}) {
   throw fehler;
 }
 
+/* Ein Gerät, das selbst als Tablet freigeschaltet war (z. B. ein Handy, auf dem „/Tablet“ geöffnet wurde), darf kein
+   anderes Tablet anmelden. Dann bekommt es eine neue Kennung und ist danach ein ganz normales Handy. */
+export async function handyZuruecksetzen() {
+  const alt = auth.currentUser;
+  if (alt) await remove(ref(db, `geraete/${alt.uid}`)).catch(() => {});
+  await signOut(auth);
+  return (await signInAnonymously(auth)).user;
+}
+export async function istTablettGeraet() {
+  const u = auth.currentUser;
+  return !!u && (await istTablett(u.uid));
+}
+
 export async function abmelden() {
   merken(false);
   const user = auth.currentUser;
