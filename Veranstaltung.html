@@ -273,7 +273,7 @@ html.tablett #alle-zeigen{display:none !important}
   <div class="tafel" id="vorlagen-tafel" style="margin-bottom:12px" hidden>
     <div class="stapel">
       <h2>Veranstaltung speichern und laden</h2>
-      <p class="muted">Speichere die Aufgaben und Pfeile als Vorlage und lade sie bei der nächsten Veranstaltung wieder. Beim Laden steht alles auf „nicht bearbeitet“. Dateianhänge werden nicht mitgespeichert.</p>
+      <p class="muted">Speichere die Aufgaben und Pfeile als Vorlage und lade sie bei der nächsten Veranstaltung wieder. Beim Laden steht alles auf „nicht bearbeitet“. Dateianhänge (Bilder und Dateien) werden mitgespeichert.</p>
       <div class="vl-neu" id="vl-neu">
         <input id="vl-name" type="text" maxlength="60" placeholder="Name der Vorlage" aria-label="Name der Vorlage" autocomplete="off">
         <button class="knopf klein primaer" id="vl-speichern" type="button">Als neue Vorlage speichern</button>
@@ -2208,7 +2208,7 @@ function vlSchnappschuss() {
     const k = { ...e, status: "offen" };
     delete k.erledigtAm; delete k.bearbeitetAm; delete k.geloescht;
     if (typeof k.zeilen === "string") {
-      try { k.zeilen = JSON.stringify(JSON.parse(k.zeilen).filter((z) => z?.art !== "anhang")); } catch (err) { delete k.zeilen; }
+      try { JSON.parse(k.zeilen); } catch (err) { delete k.zeilen; }
     } else if (k.zeilen && typeof k.zeilen === "object") {
       k.zeilen = JSON.stringify(Object.values(k.zeilen).filter((z) => z?.art !== "anhang"));
     }
@@ -2216,6 +2216,40 @@ function vlSchnappschuss() {
   });
   return o;
 }
+const vlZeilen = (e) => { try { const z = JSON.parse(e.zeilen); return Array.isArray(z) ? z : []; } catch (err) { return []; } };
+const vlAnhangIds = (daten) => Object.values(daten).flatMap((e) => vlZeilen(e).filter((z) => z?.art === "anhang" && ANHANG_ID.test(z.anhang || "")).map((z) => z.anhang));
+const vlNeueAnhangId = () => "v" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+/* Kopiert alle Anhänge der Einträge unter neue Nummern. eintragFuer(schluessel) sagt, zu welchem Eintrag
+   die Kopie gehört. Geht etwas schief, werden die schon angelegten Kopien wieder gelöscht. */
+async function vlKopieren(daten, eintragFuer) {
+  const fertig = {}, angelegt = [];
+  const gesamt = vlAnhangIds(daten).length;
+  let n = 0;
+  try {
+    for (const [schl, e] of Object.entries(daten)) {
+      const zeilen = vlZeilen(e);
+      const neu = [];
+      for (const z of zeilen) {
+        if (z?.art !== "anhang" || !ANHANG_ID.test(z.anhang || "")) { neu.push(z); continue; }
+        const snap = await get(ref(db, `${ANHANG}/${z.anhang}`));
+        if (!snap.exists()) continue;   // Datei gibt es nicht mehr
+        vlMeldung(`Anhänge werden kopiert … ${++n} von ${gesamt}`);
+        const id = vlNeueAnhangId();
+        await set(ref(db, `${ANHANG}/${id}`), { ...snap.val(), eintrag: eintragFuer(schl), ts: Date.now(), von: ICH?.bid || "" });
+        angelegt.push(id);
+        neu.push({ ...z, anhang: id });
+      }
+      fertig[schl] = { ...e, zeilen: JSON.stringify(neu) };
+    }
+  } catch (err) {
+    console.error(err);
+    if (angelegt.length) await update(ref(db), Object.fromEntries(angelegt.map((id) => [`${ANHANG}/${id}`, null]))).catch(() => {});
+    throw err;
+  }
+  return fertig;
+}
+const vlAltIds = (v) => { try { return vlAnhangIds(JSON.parse(v.daten)); } catch (err) { return []; } };
+const vlWeg = (ids) => (ids.length ? update(ref(db), Object.fromEntries(ids.map((id) => [`${ANHANG}/${id}`, null]))).catch((err) => console.error(err)) : null);
 function vlZeichnen() {
   const ids = Object.keys(VL.liste).sort((a, b) => (VL.liste[a].name || "").localeCompare(VL.liste[b].name || "", "de"));
   $("vl-leer").hidden = ids.length > 0;
@@ -2253,12 +2287,19 @@ $("vl-speichern").addEventListener("click", async () => {
   if (!darfV("vorlageSpeichern")) return;
   const name = $("vl-name").value.trim().slice(0, 60);
   if (!name) { vlMeldung("Bitte einen Namen eingeben."); return; }
-  const daten = vlSchnappschuss();
-  const anzahl = Object.keys(daten).length;
+  const roh = vlSchnappschuss();
+  const anzahl = Object.keys(roh).length;
   if (!anzahl) { vlMeldung("Es gibt noch nichts zu speichern."); return; }
   if (Object.values(VL.liste).some((v) => (v.name || "").toLowerCase() === name.toLowerCase())
     && !confirm(`Es gibt schon eine Vorlage „${name}“. Trotzdem eine weitere speichern?`)) return;
-  if (await vlSchreiben({ [`${BASIS}/vorlagen/${neueId()}`]: { name, ts: Date.now(), von: S.ich, anzahl, daten: JSON.stringify(daten) } }, `Gespeichert als „${name}“.`)) $("vl-name").value = "";
+  const vid = neueId();
+  $("vl-speichern").disabled = true;
+  try {
+    const daten = await vlKopieren(roh, () => "vl_" + vid);
+    if (await vlSchreiben({ [`${BASIS}/vorlagen/${vid}`]: { name, ts: Date.now(), von: S.ich, anzahl, daten: JSON.stringify(daten) } }, `Gespeichert als „${name}“.`)) $("vl-name").value = "";
+    else vlWeg(vlAnhangIds(daten));
+  } catch (err) { vlMeldung("Die Anhänge konnten nicht kopiert werden. Es wurde nichts gespeichert."); }
+  $("vl-speichern").disabled = false;
 });
 $("vl-liste").addEventListener("click", async (ev) => {
   const k = ev.target.closest("[data-vl]");
@@ -2272,17 +2313,34 @@ $("vl-liste").addEventListener("click", async (ev) => {
     try { daten = JSON.parse(v.daten); } catch (err) { vlMeldung("Diese Vorlage ist beschädigt."); return; }
     const jetzt = Object.keys(S.roh).length;
     if (!confirm(`„${v.name}“ laden? Die ${jetzt} aktuellen Einträge werden ersetzt. Alles steht danach auf „nicht bearbeitet“.`)) return;
-    const werte = {};
-    Object.keys(S.roh).forEach((alt) => { werte[`${BASIS}/eintraege/${alt}`] = null; });
-    const t = Date.now();
-    Object.values(daten).forEach((e, i) => { werte[`${BASIS}/eintraege/${neueId()}`] = { ...e, status: "offen", ts: t + i }; });
-    Object.assign(werte, verlaufPaar("vorlage", v.name, null));
-    if (await vlSchreiben(werte, `„${v.name}“ ist geladen.`)) $("vorlagen-tafel").hidden = true, $("vorlagen-knopf").setAttribute("aria-pressed", "false");
+    const alteAnhaenge = Object.values(S.roh).flatMap((e) => vlZeilen(e).filter((z) => z?.art === "anhang" && ANHANG_ID.test(z.anhang || "")).map((z) => z.anhang));
+    const neuId = {};
+    Object.keys(daten).forEach((k) => { neuId[k] = neueId(); });
+    k.disabled = true;
+    try {
+      const kopiert = await vlKopieren(daten, (schl) => neuId[schl]);
+      const werte = {};
+      Object.keys(S.roh).forEach((alt) => { werte[`${BASIS}/eintraege/${alt}`] = null; });
+      const t = Date.now();
+      Object.entries(kopiert).forEach(([schl, e], i) => { werte[`${BASIS}/eintraege/${neuId[schl]}`] = { ...e, status: "offen", ts: t + i }; });
+      Object.assign(werte, verlaufPaar("vorlage", v.name, null));
+      if (await vlSchreiben(werte, `„${v.name}“ ist geladen.`)) {
+        vlWeg(alteAnhaenge);
+        $("vorlagen-tafel").hidden = true; $("vorlagen-knopf").setAttribute("aria-pressed", "false");
+      } else vlWeg(vlAnhangIds(kopiert));
+    } catch (err) { vlMeldung("Die Anhänge konnten nicht kopiert werden. Es wurde nichts geändert."); }
+    k.disabled = false;
   } else if (was === "ueberschreiben") {
     if (!darfV("vorlageBearbeiten")) return;
     if (!confirm(`„${v.name}“ mit dem jetzigen Stand überschreiben?`)) return;
-    const daten = vlSchnappschuss();
-    await vlSchreiben({ [`${BASIS}/vorlagen/${id}`]: { name: v.name, ts: Date.now(), von: S.ich, anzahl: Object.keys(daten).length, daten: JSON.stringify(daten) } }, `„${v.name}“ ist überschrieben.`);
+    const roh = vlSchnappschuss();
+    k.disabled = true;
+    try {
+      const daten = await vlKopieren(roh, () => "vl_" + id);
+      if (await vlSchreiben({ [`${BASIS}/vorlagen/${id}`]: { name: v.name, ts: Date.now(), von: S.ich, anzahl: Object.keys(daten).length, daten: JSON.stringify(daten) } }, `„${v.name}“ ist überschrieben.`)) vlWeg(vlAltIds(v));
+      else vlWeg(vlAnhangIds(daten));
+    } catch (err) { vlMeldung("Die Anhänge konnten nicht kopiert werden. Es wurde nichts geändert."); }
+    k.disabled = false;
   } else if (was === "umbenennen") {
     if (!darfV("vorlageBearbeiten")) return;
     const neu = (prompt("Neuer Name der Vorlage:", v.name) || "").trim().slice(0, 60);
@@ -2291,7 +2349,7 @@ $("vl-liste").addEventListener("click", async (ev) => {
   } else if (was === "loeschen") {
     if (!darfV("vorlageLoeschen")) return;
     if (!confirm(`Vorlage „${v.name}“ löschen? Das kann nicht rückgängig gemacht werden.`)) return;
-    await vlSchreiben({ [`${BASIS}/vorlagen/${id}`]: null }, `„${v.name}“ ist gelöscht.`);
+    if (await vlSchreiben({ [`${BASIS}/vorlagen/${id}`]: null }, `„${v.name}“ ist gelöscht.`)) vlWeg(vlAltIds(v));
   }
 });
 $("vl-reset").addEventListener("click", async () => {
