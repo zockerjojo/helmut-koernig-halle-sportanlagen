@@ -99,6 +99,7 @@ textarea{resize:vertical; line-height:1.35}
 .map.setzen{cursor:crosshair}
 .zoom{position:absolute; right:8px; bottom:8px; display:flex; flex-direction:column; gap:6px}
 .zb{width:44px; height:44px; border-radius:10px; border:1px solid var(--line); background:var(--panel); color:var(--ink); font:inherit; font-size:calc(22px + var(--schrift-plus,0px)); font-weight:600; line-height:1; display:flex; align-items:center; justify-content:center; cursor:pointer}
+.zb[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
 .zb.klein{font-size:calc(13px + var(--schrift-plus,0px)); font-weight:600}
 /* Etagenwahl: ein Schieber mit zwei Stellungen, oben Außen, unten Halle */
 .etagen{position:relative; width:44px; padding:3px; border:1px solid var(--line); border-radius:10px; background:var(--panel); display:flex; flex-direction:column; gap:0; margin-bottom:2px}
@@ -223,7 +224,8 @@ html.tablett #alle-zeigen{display:none !important}
 /* Ebene und Zoom liegen in einer Leiste unter dem Plan, nicht mehr darauf */
 #svg{top:0 !important; bottom:auto !important; height:calc(100% - 54px) !important}
 .zoom{left:0; right:0; bottom:0; top:auto; height:54px; flex-direction:row; justify-content:flex-end; align-items:center; gap:6px; padding:0 8px; border-top:1px solid var(--line); background:var(--panel)}
-.etagen{flex-direction:row; width:auto; margin:0 auto 0 0}
+.etagen{flex-direction:row; width:auto; margin:0}
+#z-erledigt{margin-right:auto}
 .etagen-knauf{left:3px; right:auto; top:3px; bottom:3px; width:calc(50% - 3px); height:auto; transform:translateX(100%)}
 .etagen[data-etage="aussen"] .etagen-knauf{transform:translateX(0)}
 .eb{width:44px; height:34px}
@@ -310,6 +312,7 @@ html.tablett #alle-zeigen{display:none !important}
         <button class="eb" id="e-aussen" type="button" aria-pressed="false" title="Ebene EG">EG</button>
         <button class="eb" id="e-halle" type="button" aria-pressed="true" title="Ebene UG">UG</button>
       </div>
+      <button class="zb" id="z-erledigt" type="button" aria-pressed="false" aria-label="Erledigte Aufgaben anzeigen" title="Erledigte Aufgaben anzeigen"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M9 12l2 2l4 -4" /></svg></button>
       <button class="zb" id="z-rein" type="button" aria-label="Näher heranzoomen" title="Näher heran">+</button>
       <button class="zb" id="z-raus" type="button" aria-label="Weiter weg zoomen" title="Weiter weg">−</button>
       <button class="zb klein" id="z-ganz" type="button" aria-label="Ganzen Plan zeigen" title="Ganzer Plan">Alles</button>
@@ -603,6 +606,7 @@ const S = {
   filter: "alle",
   tafel: "aus",
   /* Welche Etage gerade zu sehen ist, und wessen Einträge. Leer heißt: alle. */
+  zeigeErledigt: false,
   etage: "halle",
   nurPersonen: [],
   /* Das Häkchen „Alle Personen dürfen erledigen“ der Aufgabe, die gerade bearbeitet wird */
@@ -625,7 +629,8 @@ const etageBis = (e) => (istPfeil(e) ? (e?.etage2 === "aussen" ? "aussen" : e?.e
 const aufEtage = (e) => etageVon(e) === S.etage || etageBis(e) === S.etage;
 const passtZurPerson = (e) => S.nurPersonen.length === 0 ||
   (e.personen?.length ? e.personen.some((n) => S.nurPersonen.includes(n)) : S.nurPersonen.includes(OHNE));
-const sichtbar = (e) => aufEtage(e) && passtZurPerson(e);
+/* Erledigte Aufgaben stehen erst nach Druck auf den Knopf auf der Karte. Die gerade gewählte bleibt immer zu sehen. */
+const sichtbar = (e) => aufEtage(e) && passtZurPerson(e) && (S.zeigeErledigt || istOffen(e) || e.id === S.gewaehlt);
 /* Während eine Zeile in der Liste gezogen wird, wird die Liste nicht neu aufgebaut. */
 let ziehtGerade = false;
 
@@ -687,6 +692,11 @@ function zoomKnopf(faktor) {
 }
 $("z-rein").addEventListener("click", () => zoomKnopf(1.6));
 $("z-raus").addEventListener("click", () => zoomKnopf(1 / 1.6));
+$("z-erledigt").addEventListener("click", () => {
+  S.zeigeErledigt = !S.zeigeErledigt;
+  $("z-erledigt").setAttribute("aria-pressed", String(S.zeigeErledigt));
+  zeichnePlan();
+});
 $("z-ganz").addEventListener("click", () => { V.z = 1; V.cx = PLAN.x + PLAN.w / 2; V.cy = PLAN.y + PLAN.h / 2; ansichtSetzen(); zeichnePlan(); });
 
 /* ---- Etage ---- */

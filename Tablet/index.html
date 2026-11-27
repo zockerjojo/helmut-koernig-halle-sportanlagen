@@ -62,7 +62,7 @@ body{overflow:hidden}
 .wer{display:flex; align-items:center; gap:8px; min-width:0; font-weight:600; font-size:calc(17px + var(--schrift-plus,0px)); white-space:nowrap}
 .wer span:last-child{overflow:hidden; text-overflow:ellipsis; max-width:200px}
 .punkt{flex:none; width:16px; height:16px; border-radius:50%; border:2px solid var(--ink)}
-.frist{min-width:3.4em; text-align:right; font-variant-numeric:tabular-nums; font-weight:600; font-size:calc(17px + var(--schrift-plus,0px)); color:var(--ink-2)}
+.frist{min-width:3em; text-align:left; font-variant-numeric:tabular-nums; font-weight:600; font-size:calc(17px + var(--schrift-plus,0px)); color:inherit; padding-left:10px; border-left:1px solid currentColor}
 .konto-knopf{flex:none; display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:0 16px; border-radius:12px; border:1px solid var(--accent); background:var(--accent); color:var(--on-accent); font:inherit; font-weight:600; font-size:calc(17px + var(--schrift-plus,0px)); cursor:pointer; white-space:nowrap}
 .konto-knopf svg{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
 .konto-knopf.abmelden{background:#B3261E; border-color:#B3261E; color:#FFFFFF}
@@ -101,10 +101,10 @@ body{overflow:hidden}
     </nav>
     <div class="konto">
       <span class="wer" id="wer" hidden><span class="punkt" id="wer-punkt" aria-hidden="true"></span><span id="wer-name"></span></span>
-      <span class="frist" id="frist" title="Zeit bis zur automatischen Abmeldung" hidden>10:00</span>
       <button type="button" class="konto-knopf" id="anmelde-knopf" aria-haspopup="dialog" aria-expanded="false" title="Anmelden">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 8v-2a2 2 0 0 1 2 -2h7a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-7a2 2 0 0 1 -2 -2v-2" /><path d="M3 12h11" /><path d="M11 9l3 3l-3 3" /></svg>
         <span id="anmelde-text">Anmelden</span>
+        <span class="frist" id="frist" title="Zeit bis zur automatischen Abmeldung" hidden>10:00</span>
       </button>
     </div>
   </header>
@@ -148,9 +148,9 @@ body{overflow:hidden}
     </form>
   </div>
 </div>
-<script src="./js/qrcode.js?v=1795761685"></script>
+<script src="./js/qrcode.js?v=1795768370"></script>
 <script type="module">
-import { sitzung, tablettFreischalten, istRechteFehler, anmelden, abmelden, anmeldeFehler, anfrageSenden, anfrageLoeschen, aufAnmeldungWarten, db, ref, get } from "./js/zugang.js?v=1795761685";
+import { sitzung, tablettFreischalten, istRechteFehler, anmelden, abmelden, anmeldeFehler, anfrageSenden, anfrageLoeschen, aufAnmeldungWarten, db, ref, get } from "./js/zugang.js?v=1795768370";
 const $ = (id) => document.getElementById(id);
 const SONNE = `<path d="M8 12a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /> <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" />`, MOND = `<path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008" />`;
 const SEITEN = ["Reinigungsplan", "Arbeitsplan", "Veranstaltung", "Dienstplan"];
@@ -183,7 +183,7 @@ function rahmen(name) {
   f.className = "rahmen weg";
   f.title = name;
   f.setAttribute("allow", "fullscreen; screen-wake-lock");
-  f.src = `./Tablet/${name}.html?v=1795761685`;
+  f.src = `./Tablet/${name}.html?v=1795768370`;
   f.addEventListener("load", () => themaSetzen(dunkel(), false));
   $("rahmen-box").appendChild(f);
   wache(f, 0);
