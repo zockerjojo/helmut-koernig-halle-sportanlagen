@@ -284,7 +284,6 @@ async function neuAufbauen() {
   kontoZeigen(s);
   seite(decodeURIComponent(location.hash.slice(1)));
   vorladen();
-  if (s.tablett) anfrageLoeschen(s.uid);
 }
 function fristZeigen() {
   if (!person || ausgemeldet) return;
@@ -314,6 +313,7 @@ function kontoZeigen(s) {
   $("wer").hidden = !person;
   $("frist").hidden = !person;
   fristZeigen();
+  bereitschaft();
 }
 
 /* QR-Code: das Handy öffnet die Seite Anmelden.html und trägt die Anmeldung für dieses Tablett ein. */
@@ -349,13 +349,26 @@ function tafelOeffnen() {
   }, 2500);
   abbestellen = aufAnmeldungWarten(geraet.uid, () => { if (!codeAnmeldung) anmeldungFertig(); });
 }
+/* Bereitschaft für NFC-Sticker und QR-Code: solange niemand angemeldet ist, hält das Tablet seine Anfrage frisch.
+   Ein Handy, das den Link mit der Kennung dieses Tabletts öffnet, kann dann jederzeit die Anmeldung eintragen. */
+let bereitTakt = null, bereitAb = null;
+function bereitschaft() {
+  clearInterval(bereitTakt); bereitTakt = null;
+  if (bereitAb) { bereitAb(); bereitAb = null; }
+  if (!geraet) return;
+  if (person) { anfrageLoeschen(geraet.uid); return; }
+  const uid = geraet.uid;
+  anfrageSenden(uid).catch((err) => console.error(err));
+  bereitTakt = setInterval(() => { if (!person && geraet) anfrageSenden(geraet.uid).catch((err) => console.error(err)); }, 60000);
+  bereitAb = aufAnmeldungWarten(uid, () => { if (!codeAnmeldung) anmeldungFertig(); });
+}
 function tafelZu() {
   if (tafel.hidden) return;
   tafel.hidden = true;
   $("anmelde-knopf").setAttribute("aria-expanded", "false");
   clearInterval(anfrageTakt); anfrageTakt = null;
   if (abbestellen) { abbestellen(); abbestellen = null; }
-  if (geraet) anfrageLoeschen(geraet.uid);
+  bereitschaft();
   $("code-form").hidden = true;
   $("mit-code").hidden = false;
   $("anmelden-code").value = "";
@@ -450,8 +463,6 @@ $("form").addEventListener("submit", async (e) => {
 (async () => {
   let s = null;
   try { s = await sitzung(); } catch (err) { console.error(err); }
-  /* Eine alte Anfrage vom letzten Öffnen des QR-Codes wegräumen */
-  if (s?.tablett) anfrageLoeschen(s.uid);
   zeigen(s);
 })();
 </script>

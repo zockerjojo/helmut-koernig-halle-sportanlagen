@@ -970,12 +970,18 @@ function tabletsZeichnen() {
   const uids = Object.keys(tabletsStand).sort((x, y) => (tabletsStand[x]?.seit ?? 0) - (tabletsStand[y]?.seit ?? 0));
   $("tablets-leer").hidden = uids.length > 0;
   $("tablets-alle").hidden = uids.length === 0;
-  $("tablets-liste").innerHTML = uids.map((u, i) =>
-    `<div class="sz">
-      <span>${esc(tabletsStand[u]?.name ?? "Tablet")} ${i + 1} · seit ${esc(zeitText(tabletsStand[u]?.seit))}</span>
+  const basis = new URL("Anmelden.html", location.href).href;
+  $("tablets-liste").innerHTML = uids.map((u, i) => {
+    const link = `${basis}?t=${encodeURIComponent(u)}`;
+    return `<div class="sz" style="flex-wrap:wrap">
+      <span><b>${esc(tabletsStand[u]?.name ?? "Tablet")}</b> · seit ${esc(zeitText(tabletsStand[u]?.seit))}</span>
       <span class="wann">…${esc(u.slice(-4))}</span>
+      <button class="knopf klein" type="button" data-tablet-name="${esc(u)}">Umbenennen</button>
+      <button class="knopf klein" type="button" data-tablet-link="${esc(link)}">Link kopieren</button>
       <button class="knopf klein" type="button" data-tablet-ab="${esc(u)}">Abmelden</button>
-    </div>`).join("");
+      <input type="text" readonly value="${esc(link)}" aria-label="Anmelde-Link" style="flex:1 1 100%; font-size:12px" onclick="this.select()">
+    </div>`;
+  }).join("");
 }
 async function tabletsAbmelden(uids) {
   /* Erst der Geräteeintrag, dann die Freigabe: beides in einem Schritt, damit nichts halb stehen bleibt. */
@@ -1002,7 +1008,26 @@ function sicherFragen(k, frage, normal) {
   setTimeout(() => { if (k.isConnected) { k.dataset.sicher = ""; k.textContent = normal; k.classList.remove("gefahr"); } }, 6000);
   return false;
 }
-$("tablets-liste").addEventListener("click", (e) => {
+$("tablets-liste").addEventListener("click", async (e) => {
+  const n = e.target.closest("[data-tablet-name]");
+  if (n) {
+    const u = n.dataset.tabletName;
+    const name = (prompt("Name des Tablets (zum Beispiel Pausenraum):", tabletsStand[u]?.name ?? "") || "").trim().slice(0, 40);
+    if (!name) return;
+    try { await set(ref(db, `tabletts/${u}/name`), name); $("tablets-meldung").textContent = "Der Name ist gespeichert."; }
+    catch (err) { console.error(err); $("tablets-meldung").textContent = istRechteFehler(err) ? "Das darfst du nicht." : "Das hat nicht geklappt."; }
+    return;
+  }
+  const l = e.target.closest("[data-tablet-link]");
+  if (l) {
+    const text = l.dataset.tabletLink;
+    try { await navigator.clipboard.writeText(text); $("tablets-meldung").textContent = "Der Link ist kopiert."; }
+    catch (err) {
+      const feld = l.closest(".sz").querySelector("input"); feld.select();
+      $("tablets-meldung").textContent = "Der Link ist markiert. Bitte kopieren (Strg+C).";
+    }
+    return;
+  }
   const k = e.target.closest("[data-tablet-ab]");
   if (k && sicherFragen(k, "Wirklich abmelden?", "Abmelden")) tabletsAbmelden([k.dataset.tabletAb]);
 });
