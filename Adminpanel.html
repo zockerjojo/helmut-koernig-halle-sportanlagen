@@ -328,16 +328,13 @@ details.klapp > summary::-webkit-details-marker{display:none}
           <h2>Verlauf</h2>
           <p class="notfall">Verlauf der Aufgaben endgültig löschen.</p>
         </div>
-        <details class="sicher" id="verlauf-block">
-          <summary class="knopf klein">Verlauf öffnen</summary>
-          <div style="min-width:min(520px,78vw)">
-            <div class="aktionen">
-              <button class="knopf klein" id="verlauf-arbeitsplan" type="button">Verlauf Hallen Arbeiten löschen</button>
-              <button class="knopf klein" id="verlauf-veranstaltung" type="button">Verlauf Veranstaltung löschen</button>
-            </div>
-            <p class="meldung" id="verlauf-meldung" aria-live="polite"></p>
+        <div>
+          <div class="aktionen">
+            <button class="knopf klein" id="verlauf-arbeitsplan" type="button">Verlauf Aufgaben und Arbeitsplan löschen</button>
+            <button class="knopf klein" id="verlauf-veranstaltung" type="button">Verlauf Veranstaltung löschen</button>
           </div>
-        </details>
+          <p class="meldung" id="verlauf-meldung" aria-live="polite"></p>
+        </div>
       </div>
     </section>
   </section>
@@ -1039,7 +1036,7 @@ zeige("pruefung");
 starten().catch((err) => { console.error(err); zeige("anmeldung"); });
 
 /* ---- Verlauf löschen ---- */
-[["arbeitsplan", "Hallen Arbeiten"], ["veranstaltung", "Veranstaltung"]].forEach(([bereich, name]) => {
+[["arbeitsplan", "Aufgaben und Arbeitsplan"], ["veranstaltung", "Veranstaltung"]].forEach(([bereich, name]) => {
   $("verlauf-" + bereich).addEventListener("click", async () => {
     if (!confirm(`Den kompletten Verlauf von ${name} endgültig löschen? Das kann nicht rückgängig gemacht werden.`)) return;
     const m = $("verlauf-meldung");
