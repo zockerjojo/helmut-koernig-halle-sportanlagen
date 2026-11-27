@@ -235,7 +235,9 @@ html.tablett #alle-zeigen{display:none !important}
 .etagen[data-etage="aussen"] .etagen-knauf{transform:translateX(0)}
 .eb{width:44px; height:34px}
 .vl-zeile{display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between; padding:8px 0; border-top:1px solid var(--line)}
-.vl-offen{background:color-mix(in srgb, var(--accent) 10%, transparent)}
+.vl-offen{background:color-mix(in srgb, var(--accent) 10%, transparent); border-radius:12px; border-top-color:transparent}
+.vl-zeile{padding:10px 12px}
+.vl-zeile + .vl-offen, .vl-offen + .vl-zeile{border-top-color:transparent}
 .vl-name{font-weight:600; flex:1 1 140px; min-width:0; overflow-wrap:anywhere}
 .vl-info{display:block; font-weight:400; font-size:13px; color:var(--ink-2)}
 .vl-knoepfe{display:flex; flex-wrap:wrap; gap:6px}
@@ -2269,7 +2271,7 @@ const vlAnhangIds = (daten) => Object.values(daten).flatMap((e) => vlZeilen(e).f
 const vlNeueAnhangId = () => "v" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 /* Kopiert alle Anhänge der Einträge unter neue Nummern. eintragFuer(schluessel) sagt, zu welchem Eintrag
    die Kopie gehört. Geht etwas schief, werden die schon angelegten Kopien wieder gelöscht. */
-async function vlKopieren(daten, eintragFuer) {
+async function vlKopieren(daten, eintragFuer, cache) {
   const fertig = {}, angelegt = [];
   const gesamt = vlAnhangIds(daten).length;
   let n = 0;
@@ -2279,12 +2281,14 @@ async function vlKopieren(daten, eintragFuer) {
       const neu = [];
       for (const z of zeilen) {
         if (z?.art !== "anhang" || !ANHANG_ID.test(z.anhang || "")) { neu.push(z); continue; }
+        if (cache && cache[z.anhang]) { neu.push({ ...z, anhang: cache[z.anhang] }); continue; }
         const snap = await get(ref(db, `${ANHANG}/${z.anhang}`));
         if (!snap.exists()) continue;   // Datei gibt es nicht mehr
         vlMeldung(`Anhänge werden kopiert … ${++n} von ${gesamt}`);
         const id = vlNeueAnhangId();
         await set(ref(db, `${ANHANG}/${id}`), { ...snap.val(), eintrag: eintragFuer(schl), ts: Date.now(), von: ICH?.bid || "" });
         angelegt.push(id);
+        if (cache) cache[z.anhang] = id;
         neu.push({ ...z, anhang: id });
       }
       fertig[schl] = { ...e, zeilen: JSON.stringify(neu) };
@@ -2368,6 +2372,7 @@ $("vl-neu-knopf").addEventListener("click", async () => {
 /* Speichern: alle Aufgaben genau so, wie sie jetzt sind. */
 async function vlSpeichern(id, v, knopf) {
   const roh = vlSchnappschuss(true);
+  VLAUTO.kopie = {};
   knopf.disabled = true;
   try {
     const daten = await vlKopieren(roh, () => "vl_" + id);
@@ -2380,7 +2385,7 @@ async function vlSpeichern(id, v, knopf) {
 async function vlLaden(id, v, knopf) {
   let daten;
   try { daten = JSON.parse(v.daten); } catch (err) { vlMeldung("Diese Veranstaltung ist beschädigt."); return; }
-  if (!confirm(`„${v.name}“ laden? Die geöffnete Veranstaltung wird ersetzt. Nicht gespeicherte Änderungen gehen verloren.`)) return;
+  await vlAutoJetzt();
   const alteAnhaenge = vlAnhaengeVonBoard();
   const neuId = {};
   Object.keys(daten).forEach((k) => { neuId[k] = neueId(); });
@@ -2418,6 +2423,42 @@ async function vlKopierenNaechste(id, v, knopf) {
   } catch (err) { vlMeldung("Die Anhänge konnten nicht kopiert werden. Es wurde nichts angelegt."); }
   knopf.disabled = false;
 }
+/* Automatisch speichern: jede Änderung am Plan landet nach kurzer Zeit in der geöffneten Veranstaltung. */
+const vlStabil = (x) => JSON.stringify(x, (k, w) => (w && typeof w === "object" && !Array.isArray(w) ? Object.fromEntries(Object.entries(w).sort(([a], [b]) => (a < b ? -1 : 1))) : w));
+function vlSig(daten) {
+  return JSON.stringify(Object.values(daten).map((e) => {
+    const k = { ...e }; delete k.geloescht;
+    k.zeilen = vlZeilen(e).map((z) => (z?.art === "anhang" ? { ...z, anhang: "" } : z));
+    return vlStabil(k);
+  }).sort());
+}
+const VLAUTO = { zeit: null, laeuft: null, kopie: {} };
+function vlAutoPlanen() {
+  clearTimeout(VLAUTO.zeit);
+  VLAUTO.zeit = setTimeout(vlAutoJetzt, 2000);
+}
+async function vlAutoJetzt() {
+  clearTimeout(VLAUTO.zeit);
+  if (VLAUTO.laeuft) await VLAUTO.laeuft;
+  const a = vlAktiv(), v = a && VL.liste[a.id];
+  if (!v || !darfV("vorlageBearbeiten")) return;
+  let alt; try { alt = JSON.parse(v.daten); } catch (err) { return; }
+  if (VLAUTO.id !== a.id) { VLAUTO.id = a.id; VLAUTO.kopie = {}; }
+  const roh = vlSchnappschuss(true);
+  if (vlSig(roh) === vlSig(alt)) return;
+  VLAUTO.laeuft = (async () => {
+    try {
+      const daten = await vlKopieren(roh, () => "vl_" + a.id, VLAUTO.kopie);
+      const neu = new Set(vlAnhangIds(daten));
+      if (vlAktiv()?.id !== a.id) { vlWeg(vlAnhangIds(daten).filter((i) => !vlAltIds(v).includes(i))); return; }
+      if (await schreiben({ [`${BASIS}/vorlagen/${a.id}`]: { name: v.name, ts: Date.now(), von: S.ich, anzahl: Object.keys(daten).length, daten: JSON.stringify(daten) } })) {
+        vlWeg(vlAltIds(v).filter((i) => !neu.has(i)));
+        vlMeldung("Automatisch gespeichert.");
+      }
+    } catch (err) { console.error(err); }
+  })();
+  await VLAUTO.laeuft; VLAUTO.laeuft = null;
+}
 async function vlLoeschen(id, v) {
   if (!confirm(`Veranstaltung „${v.name}“ endgültig löschen? Das kann nicht rückgängig gemacht werden.`)) return;
   const werte = { [`${BASIS}/vorlagen/${id}`]: null };
@@ -2452,6 +2493,7 @@ function starteSync() {
   vlStarten();
   onValue(ref(db, `${BASIS}/eintraege`), (snap) => {
     S.roh = snap.val() ?? {};
+    vlAutoPlanen();
     S.eintraege = sauber(S.roh);
     zeilenUmstellen();
     $("live-text").textContent = "";
