@@ -148,9 +148,9 @@ body{overflow:hidden}
     </form>
   </div>
 </div>
-<script src="./js/qrcode.js?v=1795768370"></script>
+<script src="./js/qrcode.js?v=1795769125"></script>
 <script type="module">
-import { sitzung, tablettFreischalten, istRechteFehler, anmelden, abmelden, anmeldeFehler, anfrageSenden, anfrageLoeschen, aufAnmeldungWarten, db, ref, get } from "./js/zugang.js?v=1795768370";
+import { sitzung, tablettFreischalten, istRechteFehler, anmelden, abmelden, anmeldeFehler, anfrageSenden, anfrageLoeschen, aufAnmeldungWarten, db, ref, get } from "./js/zugang.js?v=1795769125";
 const $ = (id) => document.getElementById(id);
 const SONNE = `<path d="M8 12a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /> <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" />`, MOND = `<path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008" />`;
 const SEITEN = ["Reinigungsplan", "Arbeitsplan", "Veranstaltung", "Dienstplan"];
@@ -183,7 +183,7 @@ function rahmen(name) {
   f.className = "rahmen weg";
   f.title = name;
   f.setAttribute("allow", "fullscreen; screen-wake-lock");
-  f.src = `./Tablet/${name}.html?v=1795768370`;
+  f.src = `./Tablet/${name}.html?v=1795769125`;
   f.addEventListener("load", () => themaSetzen(dunkel(), false));
   $("rahmen-box").appendChild(f);
   wache(f, 0);

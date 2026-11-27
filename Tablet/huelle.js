@@ -8,7 +8,7 @@
 
   /* Das Logo steht schon oben in der Menüleiste der Hülle: auf den Seiten selbst nicht noch einmal. */
   var st = document.createElement("style");
-  st.textContent = "html body .hkh-kopf{display:none !important} html body header.kopf:not(:has(.kopf-knoepfe)){display:none !important} html body header.kopf{justify-content:flex-end !important}";
+  st.textContent = "html body .hkh-kopf{display:none !important} html body header.kopf:not(:has(.kopf-knoepfe)){display:none !important} html body .wrap{position:relative} html body header.kopf{position:absolute !important; top:12px; right:12px; padding:0 !important; margin:0 !important; z-index:5}";
   (document.head || document.documentElement).appendChild(st);
 
   function sag(name) {
