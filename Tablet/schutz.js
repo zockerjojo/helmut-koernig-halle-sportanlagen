@@ -20,19 +20,23 @@
     "html.tablett body:has(#listen-tafel) { overflow:hidden }",
     "html.tablett .wrap:has(#listen-tafel) { max-width:none !important; padding:12px !important }",
     "html.tablett .wrap:has(#listen-tafel) > .kopf, html.tablett #live-text, html.tablett #karten-hinweis { display:none !important }",
-    "html.tablett #panel:has(#listen-tafel):not([hidden]) { display:grid !important; grid-template-columns:minmax(0,1fr) minmax(340px,32%); grid-template-rows:auto auto minmax(0,1.25fr) minmax(0,1fr) auto; column-gap:12px; row-gap:10px; height:calc(100vh - 24px); padding-top:0 !important; margin:0 !important }",
+    "html.tablett #panel:has(#listen-tafel):not([hidden]) { display:grid !important; grid-template-columns:minmax(0,1fr) minmax(340px,32%); --r3:minmax(0,1.25fr); --r4:minmax(0,1fr); --rf:minmax(0,0fr); grid-template-rows:auto auto var(--r3) var(--r4) auto var(--rf); column-gap:12px; row-gap:10px; height:calc(100vh - 24px); padding-top:0 !important; margin:0 !important }",
     /* Überschriften auf dem Tablet wie beim Dienstplan ("Dienstplan HKH") */
     "html.tablett #panel:has(#listen-tafel) > h1, html.tablett #app .top h1 { font-family:Barlow, system-ui, -apple-system, 'Segoe UI', sans-serif !important; font-weight:500 !important; font-size:calc(28px + var(--schrift-plus,0px)) !important; line-height:1.15 !important; text-transform:none !important; letter-spacing:0 !important }",
     "html.tablett #panel:has(#listen-tafel) > h1 { grid-column:1 / -1; grid-row:1 }",
     /* Reinigungsplan: Logo und Hallenname unter der Leiste weg */
     "html.tablett #app .top .brand .hkh-kopf { display:none !important }",
     "html.tablett #panel:has(#listen-tafel) > * { margin:0 !important }",
-    "html.tablett #panel > #map { grid-column:1; grid-row:2 / span 4; position:relative !important; top:auto !important; height:100% !important; max-height:none !important; aspect-ratio:auto !important; min-height:0 }",
+    "html.tablett #panel > #map { grid-column:1; grid-row:2 / span 5; position:relative !important; top:auto !important; height:100% !important; max-height:none !important; aspect-ratio:auto !important; min-height:0 }",
     "html.tablett #panel > #tafel { grid-column:2; grid-row:2; max-height:45vh; overflow:auto }",
     "html.tablett #panel > #listen-tafel { grid-column:2; grid-row:3; max-height:none !important; height:100%; overflow:auto !important }",
     /* Erledigte und gelöschte Aufgaben stehen darunter, die Karte links geht über die ganze Höhe */
     "html.tablett #panel > #erledigt-tafel { grid-column:2; grid-row:4; max-height:none !important; height:100%; overflow:auto !important; position:static !important }",
     "html.tablett #panel > #geloescht-tafel { grid-column:2; grid-row:5; max-height:22vh !important; overflow:auto !important; position:static !important }",
+    /* Erledigte und gelöschte Aufgaben lassen sich zuklappen. Zugeklappte Kästchen brauchen nur ihre Kopfzeile, den Rest nehmen die offenen. */
+    "html.tablett #panel:has(#erledigt-tafel.zu) { --r3:minmax(0,1fr); --r4:auto }",
+    "html.tablett #panel:has(#listen-tafel.zu) { --r3:auto; --r4:minmax(0,1fr) }",
+    "html.tablett #panel:has(#listen-tafel.zu):has(#erledigt-tafel.zu) { --r3:auto; --r4:auto; --rf:minmax(0,1fr) }",
     "html.tablett #panel > #filter-tafel { display:none !important }",
     /* Reinigungsplan */
     "html.tablett .ctl .who, html.tablett #art-sl, html.tablett #dir-sw, html.tablett .ctl .seg,",
