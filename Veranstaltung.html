@@ -11,6 +11,17 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js">
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js">
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js">
+<link rel="modulepreload" href="./js/config.js">
+<link rel="modulepreload" href="./js/zugang.js">
+<link rel="modulepreload" href="./js/leiste.js">
+<link rel="modulepreload" href="./js/feier.js">
+<link rel="modulepreload" href="./js/archiv.js">
+<link rel="preload" as="image" href="./bilder/gelaende-aussen.webp">
+<link rel="preload" as="image" href="./bilder/hallenplan-ebene-4.svg">
 <style>
 :root{
   --bg:#E9EDEA; --panel:#F7F9F7; --ink:#000; --ink-2:#000; --line:#C3CCC6;
@@ -220,6 +231,11 @@ html.tablett #alle-zeigen{display:none !important}
 .vl-knoepfe{display:flex; flex-wrap:wrap; gap:6px}
 .vl-neu{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
 .vl-neu input{flex:1 1 160px; min-height:44px; padding:0 12px; border:1px solid var(--line); border-radius:10px; background:var(--bg); color:var(--ink); font:inherit}
+.listen-knoepfe{display:inline-flex; flex-wrap:wrap; gap:8px}
+.klapp-zahl{font-weight:400; color:var(--ink-2); font-size:.8em}
+html:not(.tablett) .tafel.zu > :not(.listen-kopf){display:none !important}
+html.tablett .klapp-knopf{display:none !important}
+@media print{.klapp-knopf{display:none !important}}
 </style>
 </head>
 <body>
@@ -401,14 +417,15 @@ html.tablett #alle-zeigen{display:none !important}
   <section class="tafel" id="listen-tafel">
     <div class="listen-kopf">
       <h2 id="listen-titel">Offene Aufgaben</h2>
-      <button class="knopf klein" id="alle-zeigen" type="button" disabled>Alle anzeigen</button>
+      <span class="listen-knoepfe"><button class="knopf klein" id="alle-zeigen" type="button" disabled>Alle anzeigen</button><button class="knopf klein klapp-knopf" type="button" data-klapp="listen-tafel" aria-expanded="true" aria-controls="alle-liste">Einklappen</button></span>
     </div>
     <ul class="verlauf" id="alle-liste" style="max-height:none"></ul>
     <p class="muted" id="alle-leer" hidden>Noch nichts eingetragen. Tippe oben auf „Aufgabe“ und dann auf den Plan.</p>
   </section>
-  <section class="tafel" id="erledigt-tafel">
+  <section class="tafel zu" id="erledigt-tafel">
     <div class="listen-kopf">
-      <h2 id="erledigt-titel">Erledigte Aufgaben</h2>
+      <h2 id="erledigt-titel">Erledigte Aufgaben <span class="klapp-zahl" id="erledigt-zahl"></span></h2>
+      <button class="knopf klein klapp-knopf" type="button" data-klapp="erledigt-tafel" aria-expanded="false">Anzeigen</button>
     </div>
     <ul class="verlauf" id="erledigt-liste" style="max-height:none"></ul>
     <p class="muted" id="erledigt-leer" hidden>Noch nichts erledigt.</p>
@@ -420,9 +437,10 @@ html.tablett #alle-zeigen{display:none !important}
       <p class="muted" id="archiv-leer" hidden>Noch nichts archiviert. Erledigte Aufgaben kommen nach 30 Tagen hierher.</p>
     </div>
   </section>
-  <section class="tafel" id="geloescht-tafel">
+  <section class="tafel zu" id="geloescht-tafel">
     <div class="listen-kopf">
-      <h2 id="geloescht-titel">Gelöschte Aufgaben</h2>
+      <h2 id="geloescht-titel">Gelöschte Aufgaben <span class="klapp-zahl" id="geloescht-zahl"></span></h2>
+      <button class="knopf klein klapp-knopf" type="button" data-klapp="geloescht-tafel" aria-expanded="false">Anzeigen</button>
     </div>
     <p class="muted">Gelöschte Aufgaben werden nach 30 Tagen endgültig entfernt.</p>
     <ul class="verlauf" id="geloescht-liste" style="max-height:none"></ul>
@@ -1859,6 +1877,19 @@ $("filter-personen").addEventListener("click", (e) => {
     : [...S.nurPersonen, wert];
   filterAnwenden();
 });
+/* Kästchen ein- und ausklappen. Erledigte und gelöschte Aufgaben sind erst zugeklappt, die offenen sind aufgeklappt. */
+function klappen(id, auf) {
+  const tafel = $(id);
+  tafel.classList.toggle("zu", !auf);
+  const k = tafel.querySelector("[data-klapp]");
+  k.setAttribute("aria-expanded", String(auf));
+  k.textContent = auf ? "Einklappen" : "Anzeigen";
+}
+document.querySelectorAll("[data-klapp]").forEach((k) => k.addEventListener("click", () => klappen(k.dataset.klapp, k.getAttribute("aria-expanded") !== "true")));
+/* Beim Drucken ist alles aufgeklappt. */
+let klappStand = null;
+window.addEventListener("beforeprint", () => { klappStand = ["listen-tafel", "erledigt-tafel", "geloescht-tafel"].map((id) => [id, !$(id).classList.contains("zu")]); klappStand.forEach(([id]) => klappen(id, true)); });
+window.addEventListener("afterprint", () => { (klappStand || []).forEach(([id, auf]) => klappen(id, auf)); klappStand = null; });
 $("filter-alle").addEventListener("click", () => { S.nurPersonen = []; filterAnwenden(); });
 $("filter-zu").addEventListener("click", () => { $("filter-tafel").hidden = true; });
 /* Die Überschrift der Liste zeigt, was gerade zu sehen ist. */
@@ -1911,6 +1942,7 @@ function alleZeichnen() {
     ? "Noch nichts eingetragen. Tippe oben auf „Aufgabe“ und dann auf den Plan."
     : gefiltert ? "Für diese Auswahl gibt es keine offenen Aufgaben." : "Keine offenen Aufgaben.";
   $("erledigt-leer").hidden = erledigtSichtbar.length > 0;
+  $("erledigt-zahl").textContent = erledigtSichtbar.length ? `(${erledigtSichtbar.length})` : "";
   $("erledigt-leer").textContent = erledigt.length ? "Für diese Auswahl ist nichts erledigt." : "Noch nichts erledigt.";
   geloeschtZeichnen();
   /* Ist das Archiv offen, folgt es der Auswahl der Personen. */
@@ -1936,6 +1968,7 @@ function geloeschtZeichnen() {
     return `<li><span class="farbe" style="background:${farbeVon(e.person)}"></span><span class="zeile"><span>${esc(titelVon(e))}</span><span class="wann">gelöscht ${esc(zeitText(geloeschtAm))}${esc(frist)}</span></span></li>`;
   }).join("");
   $("geloescht-leer").hidden = kopien.length > 0;
+  $("geloescht-zahl").textContent = kopien.length ? `(${kopien.length})` : "";
   $("geloescht-leer").textContent = Object.keys(S.geloescht).length ? "Für diese Auswahl ist nichts gelöscht." : "Nichts gelöscht.";
 }
 

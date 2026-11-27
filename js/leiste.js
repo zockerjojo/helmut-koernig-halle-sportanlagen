@@ -102,6 +102,15 @@ export function leisteStarten(sitz, aktiv = "") {
     <button class="hkh-schalter" type="button" aria-controls="hkh-band" aria-expanded="${offen}" aria-label="Personal-Leiste ein- oder ausklappen" title="Bereiche">${svg("apps")}</button>`;
   document.body.appendChild(leiste);
   document.body.classList.add("hkh-mit-leiste");
+  /* Wenn der Browser Zeit hat, werden die anderen Bereiche und ihre großen Bilder im Voraus geladen.
+     Beim Wechsel ist dann fast alles schon da. */
+  const vorladen = () => {
+    if (navigator.connection?.saveData) return;
+    const ziele = bereiche.filter((f) => f.id !== aktiv && f.id !== "admin").map((f) => f.seite);
+    if (bereiche.some((f) => f.id === "arbeitsplan" || f.id === "veranstaltung")) ziele.push("./bilder/gelaende-aussen.webp", "./bilder/hallenplan-ebene-4.svg");
+    ziele.forEach((z) => { const l = document.createElement("link"); l.rel = "prefetch"; l.href = z; document.head.appendChild(l); });
+  };
+  (window.requestIdleCallback || ((f) => setTimeout(f, 2500)))(vorladen, { timeout: 6000 });
 
   const schalter = leiste.querySelector(".hkh-schalter");
   const einst = leiste.querySelector(".hkh-einst");
