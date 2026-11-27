@@ -235,6 +235,7 @@ html.tablett #alle-zeigen{display:none !important}
 .etagen[data-etage="aussen"] .etagen-knauf{transform:translateX(0)}
 .eb{width:44px; height:34px}
 .vl-zeile{display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between; padding:8px 0; border-top:1px solid var(--line)}
+.vl-offen{background:color-mix(in srgb, var(--accent) 10%, transparent)}
 .vl-name{font-weight:600; flex:1 1 140px; min-width:0; overflow-wrap:anywhere}
 .vl-info{display:block; font-weight:400; font-size:13px; color:var(--ink-2)}
 .vl-knoepfe{display:flex; flex-wrap:wrap; gap:6px}
@@ -257,7 +258,7 @@ html.tablett #alle-zeigen{display:none !important}
     <span class="hkh-marke"><span>Helmut-Körnig-Halle</span><span>Personal</span></span>
   </a>
   <div class="kopf-knoepfe">
-    <button class="rund-knopf" id="vorlagen-knopf" type="button" aria-pressed="false" aria-label="Veranstaltung speichern und laden" title="Veranstaltung speichern und laden" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" /><path d="M10 14a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M14 4v4h-6v-4" /></svg></button>
+    <button class="rund-knopf" id="vorlagen-knopf" type="button" aria-pressed="false" aria-label="Veranstaltungen speichern und laden" title="Veranstaltungen speichern und laden" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" /><path d="M10 14a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M14 4v4h-6v-4" /></svg></button>
     <button class="rund-knopf" id="filter-knopf" type="button" aria-pressed="false" aria-label="Nach Person filtern" title="Nach Person filtern" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 5h18l-7 8.2V21l-4-2.2v-5.6z"/></svg></button>
     <button class="rund-knopf" id="verlauf-knopf" type="button" aria-pressed="false" aria-label="Verlauf anzeigen" title="Verlauf anzeigen" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button>
   </div>
@@ -282,7 +283,7 @@ html.tablett #alle-zeigen{display:none !important}
 </section>
 
 <section id="panel" class="stapel" hidden style="padding-top:16px">
-  <h1 class="va-kopf"><span class="va-label">Veranstaltung:</span><span class="va-name" id="va-name">Noch nicht gespeichert</span></h1>
+  <h1 class="va-kopf"><span class="va-label">Veranstaltung:</span><span class="va-name" id="va-name">Noch keine Veranstaltung</span></h1>
   <p class="muted" id="live-text"></p>
 
   <div class="feld">
@@ -298,21 +299,17 @@ html.tablett #alle-zeigen{display:none !important}
 
   <div class="tafel" id="vorlagen-tafel" style="margin-bottom:12px" hidden>
     <div class="stapel">
-      <h2>Veranstaltung speichern und laden</h2>
-      <div class="vl-neu" id="vl-aktuell">
-        <button class="knopf klein primaer" id="vl-speichern" type="button">Speichern</button>
-      </div>
-      <h3 class="vl-unter" id="vl-neu-titel">Neue Vorlage</h3>
+      <h2>Veranstaltungen</h2>
+      <h3 class="vl-unter" id="vl-neu-titel">Neue Veranstaltung</h3>
       <div class="vl-neu" id="vl-neu">
-        <input id="vl-name" type="text" maxlength="60" placeholder="Name der Vorlage" aria-label="Name der neuen Vorlage" autocomplete="off">
-        <button class="knopf klein" id="vl-leer-neu" type="button" title="Komplett neue, leere Vorlage ohne Aufgaben">Neue leere Vorlage</button>
-        <button class="knopf klein" id="vl-folge" type="button" title="Aufgaben der aktuellen Vorlage übernehmen, alle auf offen">Folgeveranstaltung</button>
+        <input id="vl-name" type="text" maxlength="60" placeholder="Name der Veranstaltung" aria-label="Name der neuen Veranstaltung" autocomplete="off">
+        <button class="knopf klein primaer" id="vl-neu-knopf" type="button">Anlegen</button>
       </div>
+      <h3 class="vl-unter" id="vl-liste-titel">Gespeicherte Veranstaltungen</h3>
       <div id="vl-liste"></div>
-      <p class="muted still" id="vl-leer" hidden>Es gibt noch keine Vorlage.</p>
+      <p class="muted still" id="vl-leer" hidden>Es gibt noch keine Veranstaltung.</p>
       <p class="muted" id="vl-meldung" role="status"></p>
       <div class="reihe">
-        <button class="knopf klein" id="vl-reset" type="button">Alles auf „nicht bearbeitet“ stellen</button>
         <button class="knopf klein" id="vl-zu" type="button">Schließen</button>
       </div>
     </div>
@@ -2245,16 +2242,19 @@ function zeilenUmstellen() {
   if (Object.keys(werte).length) update(ref(db), werte).catch((err) => console.error(err));
 }
 
-/* ---- Vorlagen: Veranstaltung speichern, laden, zurücksetzen ---- */
+/* ---- Veranstaltungen: neu anlegen, speichern, laden, kopieren, löschen ----
+   Jede gespeicherte Veranstaltung steht unter veranstaltung/vorlagen/<id>. Die geöffnete steht unter veranstaltung/aktiv. */
 const VL = { liste: {}, aktiv: null };
 const darfV = (recht) => darfZusatz(ICH, "veranstaltung", recht);
 const vlMeldung = (t) => { $("vl-meldung").textContent = t; };
-function vlSchnappschuss() {
+/* behalten: Zustand (erledigt, offen, in Bearbeitung) bleibt. Sonst steht alles auf offen. */
+function vlSchnappschuss(behalten) {
   const o = {};
   Object.entries(S.roh).forEach(([id, e]) => {
     if (!e || typeof e.text !== "string") return;
-    const k = { ...e, status: "offen" };
-    delete k.erledigtAm; delete k.bearbeitetAm; delete k.geloescht;
+    const k = { ...e };
+    delete k.geloescht;
+    if (!behalten) { k.status = "offen"; delete k.erledigtAm; delete k.bearbeitetAm; }
     if (typeof k.zeilen === "string") {
       try { JSON.parse(k.zeilen); } catch (err) { delete k.zeilen; }
     } else if (k.zeilen && typeof k.zeilen === "object") {
@@ -2298,27 +2298,7 @@ async function vlKopieren(daten, eintragFuer) {
 }
 const vlAltIds = (v) => { try { return vlAnhangIds(JSON.parse(v.daten)); } catch (err) { return []; } };
 const vlWeg = (ids) => (ids.length ? update(ref(db), Object.fromEntries(ids.map((id) => [`${ANHANG}/${id}`, null]))).catch((err) => console.error(err)) : null);
-function vlZeichnen() {
-  const ids = Object.keys(VL.liste).sort((a, b) => (VL.liste[a].name || "").localeCompare(VL.liste[b].name || "", "de"));
-  $("vl-leer").hidden = ids.length > 0;
-  const akt = vlAktiv();
-  $("vl-aktuell").hidden = !(akt ? darfV("vorlageBearbeiten") : darfV("vorlageSpeichern"));
-  $("vl-speichern").textContent = akt ? `„${akt.name}“ speichern` : "Als Vorlage speichern";
-  $("vl-neu").hidden = !darfV("vorlageSpeichern"); $("vl-neu-titel").hidden = $("vl-neu").hidden;
-  $("vl-leer-neu").hidden = !darfV("vorlageLaden");
-  vaNameZeigen();
-  $("vl-reset").hidden = !darfV("vorlageLoeschen");
-  $("vl-liste").innerHTML = ids.map((id) => {
-    const v = VL.liste[id];
-    const wann = v.ts ? new Date(v.ts).toLocaleDateString("de-DE") : "";
-    const k = [];
-    if (darfV("vorlageLaden")) k.push(`<button class="knopf klein primaer" type="button" data-vl="laden" data-id="${esc(id)}">Laden</button>`);
-    if (darfV("vorlageBearbeiten")) k.push(`<button class="knopf klein" type="button" data-vl="ueberschreiben" data-id="${esc(id)}">Mit jetzt überschreiben</button>`, `<button class="knopf klein" type="button" data-vl="umbenennen" data-id="${esc(id)}">Umbenennen</button>`);
-    if (darfV("vorlageLoeschen")) k.push(`<button class="knopf klein" type="button" data-vl="loeschen" data-id="${esc(id)}">Löschen</button>`);
-    return `<div class="vl-zeile"><span class="vl-name">${esc(v.name)}<span class="vl-info">${v.anzahl ?? ""} ${v.anzahl === 1 ? "Eintrag" : "Einträge"}${wann ? " · " + esc(wann) : ""}${v.von ? " · " + esc(v.von) : ""}</span></span><span class="vl-knoepfe">${k.join("")}</span></div>`;
-  }).join("");
-}
-/* Die aktive Vorlage ist die, mit der gerade gearbeitet wird. Sie steht unter veranstaltung/aktiv. */
+/* Die geöffnete Veranstaltung. Ist sie gelöscht, gibt es keine. */
 function vlAktiv() {
   const a = VL.aktiv;
   if (!a || typeof a.id !== "string") return null;
@@ -2326,8 +2306,31 @@ function vlAktiv() {
   return v ? { id: a.id, name: v.name } : null;
 }
 function vaNameZeigen() {
-  const a = vlAktiv() ?? (VL.aktiv && VL.aktiv.name ? { name: VL.aktiv.name } : null);
-  $("va-name").textContent = a ? a.name : "Noch nicht gespeichert";
+  const a = vlAktiv();
+  $("va-name").textContent = a ? a.name : "Noch keine Veranstaltung";
+}
+const vlAktivSatz = (id, name) => ({ [`${BASIS}/aktiv`]: { id, name, ts: Date.now() } });
+const vlNameLesen = () => $("vl-name").value.trim().slice(0, 60);
+const vlDoppelt = (name) => Object.values(VL.liste).some((v) => (v.name || "").toLowerCase() === name.toLowerCase());
+const vlAnhaengeVonBoard = () => Object.values(S.roh).flatMap((e) => vlZeilen(e).filter((z) => z?.art === "anhang" && ANHANG_ID.test(z.anhang || "")).map((z) => z.anhang));
+function vlZeichnen() {
+  const ids = Object.keys(VL.liste).sort((a, b) => (VL.liste[a].name || "").localeCompare(VL.liste[b].name || "", "de"));
+  const akt = vlAktiv();
+  $("vl-leer").hidden = ids.length > 0;
+  const neuDarf = darfV("vorlageSpeichern") && darfV("vorlageLaden");
+  $("vl-neu").hidden = !neuDarf; $("vl-neu-titel").hidden = !neuDarf;
+  $("vl-liste-titel").hidden = ids.length === 0;
+  $("vl-liste").innerHTML = ids.map((id) => {
+    const v = VL.liste[id];
+    const offen = akt && akt.id === id;
+    const k = [];
+    if (offen && darfV("vorlageBearbeiten")) k.push(`<button class="knopf klein primaer" type="button" data-vl="speichern" data-id="${esc(id)}">Speichern</button>`);
+    if (darfV("vorlageLaden")) k.push(`<button class="knopf klein" type="button" data-vl="laden" data-id="${esc(id)}">Laden</button>`);
+    if (offen && darfV("vorlageSpeichern")) k.push(`<button class="knopf klein" type="button" data-vl="kopieren" data-id="${esc(id)}">Vorlage in nächste Veranstaltung kopieren</button>`);
+    if (darfV("vorlageLoeschen")) k.push(`<button class="knopf klein" type="button" data-vl="loeschen" data-id="${esc(id)}">Löschen</button>`);
+    return `<div class="vl-zeile${offen ? " vl-offen" : ""}"><span class="vl-name">${esc(v.name)}${offen ? '<span class="vl-info">geöffnet</span>' : ""}</span><span class="vl-knoepfe">${k.join("")}</span></div>`;
+  }).join("");
+  vaNameZeigen();
 }
 function vlStarten() {
   onValue(ref(db, `${BASIS}/vorlagen`), (snap) => { VL.liste = snap.val() ?? {}; vlZeichnen(); }, () => {});
@@ -2348,12 +2351,23 @@ $("vorlagen-knopf").addEventListener("click", () => {
   tafel.scrollIntoView({ behavior: "smooth", block: "nearest" });
 });
 $("vl-zu").addEventListener("click", () => { $("vorlagen-tafel").hidden = true; $("vorlagen-knopf").setAttribute("aria-pressed", "false"); });
-const vlNameLesen = () => $("vl-name").value.trim().slice(0, 60);
-const vlDoppelt = (name) => Object.values(VL.liste).some((v) => (v.name || "").toLowerCase() === name.toLowerCase());
-const vlAktivSatz = (id, name) => ({ [`${BASIS}/aktiv`]: { id, name, ts: Date.now() } });
-/* Die aktuelle Vorlage mit dem jetzigen Stand überschreiben. */
-async function vlUeberschreiben(id, v, knopf) {
-  const roh = vlSchnappschuss();
+
+/* Neue Veranstaltung: leerer Plan, ohne Rückfrage. Nichts Vorhandenes wird übernommen. */
+$("vl-neu-knopf").addEventListener("click", async () => {
+  if (!darfV("vorlageSpeichern") || !darfV("vorlageLaden")) return;
+  const name = vlNameLesen();
+  if (!name) { vlMeldung("Bitte einen Namen eingeben."); $("vl-name").focus(); return; }
+  if (vlDoppelt(name)) { vlMeldung("Diesen Namen gibt es schon."); return; }
+  const alteAnhaenge = vlAnhaengeVonBoard();
+  const vid = neueId();
+  const werte = { [`${BASIS}/vorlagen/${vid}`]: { name, ts: Date.now(), von: S.ich, anzahl: 0, daten: "{}" }, ...vlAktivSatz(vid, name), ...verlaufPaar("vorlage", name, null) };
+  Object.keys(S.roh).forEach((alt) => { werte[`${BASIS}/eintraege/${alt}`] = null; });
+  if (await vlSchreiben(werte, `„${name}“ ist angelegt.`)) { vlWeg(alteAnhaenge); $("vl-name").value = ""; }
+});
+
+/* Speichern: alle Aufgaben genau so, wie sie jetzt sind. */
+async function vlSpeichern(id, v, knopf) {
+  const roh = vlSchnappschuss(true);
   knopf.disabled = true;
   try {
     const daten = await vlKopieren(roh, () => "vl_" + id);
@@ -2362,122 +2376,64 @@ async function vlUeberschreiben(id, v, knopf) {
   } catch (err) { vlMeldung("Die Anhänge konnten nicht kopiert werden. Es wurde nichts geändert."); }
   knopf.disabled = false;
 }
-$("vl-speichern").addEventListener("click", async () => {
-  const akt = vlAktiv();
-  if (akt) {
-    if (!darfV("vorlageBearbeiten")) return;
-    await vlUeberschreiben(akt.id, VL.liste[akt.id], $("vl-speichern"));
-    return;
-  }
-  /* Noch keine Vorlage: der Stand wird als neue Vorlage gespeichert und ist danach die aktive. */
-  if (!darfV("vorlageSpeichern")) return;
-  const name = vlNameLesen();
-  if (!name) { vlMeldung("Bitte unten einen Namen eingeben."); $("vl-name").focus(); return; }
-  if (vlDoppelt(name) && !confirm(`Es gibt schon eine Vorlage „${name}“. Trotzdem eine weitere speichern?`)) return;
-  const roh = vlSchnappschuss();
-  const vid = neueId();
-  $("vl-speichern").disabled = true;
+/* Laden: genau der gespeicherte Stand, auch erledigt und offen bleiben wie gespeichert. */
+async function vlLaden(id, v, knopf) {
+  let daten;
+  try { daten = JSON.parse(v.daten); } catch (err) { vlMeldung("Diese Veranstaltung ist beschädigt."); return; }
+  if (!confirm(`„${v.name}“ laden? Die geöffnete Veranstaltung wird ersetzt. Nicht gespeicherte Änderungen gehen verloren.`)) return;
+  const alteAnhaenge = vlAnhaengeVonBoard();
+  const neuId = {};
+  Object.keys(daten).forEach((k) => { neuId[k] = neueId(); });
+  knopf.disabled = true;
   try {
-    const daten = await vlKopieren(roh, () => "vl_" + vid);
-    if (await vlSchreiben({ [`${BASIS}/vorlagen/${vid}`]: { name, ts: Date.now(), von: S.ich, anzahl: Object.keys(daten).length, daten: JSON.stringify(daten) }, ...vlAktivSatz(vid, name) }, `Gespeichert als „${name}“.`)) $("vl-name").value = "";
-    else vlWeg(vlAnhangIds(daten));
-  } catch (err) { vlMeldung("Die Anhänge konnten nicht kopiert werden. Es wurde nichts gespeichert."); }
-  $("vl-speichern").disabled = false;
-});
-/* Option 1: komplett neue, leere Vorlage. Die jetzige Liste wird geleert. */
-$("vl-leer-neu").addEventListener("click", async () => {
-  if (!darfV("vorlageSpeichern") || !darfV("vorlageLaden")) return;
-  const name = vlNameLesen();
-  if (!name) { vlMeldung("Bitte einen Namen eingeben."); $("vl-name").focus(); return; }
-  if (vlDoppelt(name) && !confirm(`Es gibt schon eine Vorlage „${name}“. Trotzdem eine weitere anlegen?`)) return;
-  const jetzt = Object.keys(S.roh).length;
-  if (!confirm(`Neue leere Vorlage „${name}“ anlegen? Die ${jetzt} aktuellen Einträge werden entfernt. Speichere vorher, was du behalten willst.`)) return;
-  const alteAnhaenge = Object.values(S.roh).flatMap((e) => vlZeilen(e).filter((z) => z?.art === "anhang" && ANHANG_ID.test(z.anhang || "")).map((z) => z.anhang));
-  const vid = neueId();
-  const werte = { [`${BASIS}/vorlagen/${vid}`]: { name, ts: Date.now(), von: S.ich, anzahl: 0, daten: "{}" }, ...vlAktivSatz(vid, name), ...verlaufPaar("vorlage", name, null) };
-  Object.keys(S.roh).forEach((alt) => { werte[`${BASIS}/eintraege/${alt}`] = null; });
-  if (await vlSchreiben(werte, `Neue leere Vorlage „${name}“ ist angelegt.`)) { vlWeg(alteAnhaenge); $("vl-name").value = ""; }
-});
-/* Option 2: Vorlage für die Folgeveranstaltung. Die Aufgaben der aktuellen Vorlage werden übernommen und stehen auf offen. */
-$("vl-folge").addEventListener("click", async () => {
-  if (!darfV("vorlageSpeichern")) return;
-  const name = vlNameLesen();
-  if (!name) { vlMeldung("Bitte einen Namen eingeben."); $("vl-name").focus(); return; }
-  const roh = vlSchnappschuss();
+    const kopiert = await vlKopieren(daten, (schl) => neuId[schl]);
+    const werte = {};
+    Object.keys(S.roh).forEach((alt) => { werte[`${BASIS}/eintraege/${alt}`] = null; });
+    Object.entries(kopiert).forEach(([schl, e]) => { werte[`${BASIS}/eintraege/${neuId[schl]}`] = e; });
+    Object.assign(werte, verlaufPaar("vorlage", v.name, null), vlAktivSatz(id, v.name));
+    if (await vlSchreiben(werte, `„${v.name}“ ist geladen.`)) vlWeg(alteAnhaenge);
+    else vlWeg(vlAnhangIds(kopiert));
+  } catch (err) { vlMeldung("Die Anhänge konnten nicht kopiert werden. Es wurde nichts geändert."); }
+  knopf.disabled = false;
+}
+/* Vorlage in nächste Veranstaltung kopieren: alle Aufgaben der geöffneten Veranstaltung, alle auf offen. */
+async function vlKopierenNaechste(id, v, knopf) {
+  const name = (prompt("Wie soll die neue Veranstaltung heißen?", "") || "").trim().slice(0, 60);
+  if (!name) return;
+  if (vlDoppelt(name)) { vlMeldung("Diesen Namen gibt es schon."); return; }
+  const roh = vlSchnappschuss(false);
   const anzahl = Object.keys(roh).length;
-  if (!anzahl) { vlMeldung("Es gibt noch keine Aufgaben zum Übernehmen."); return; }
-  if (vlDoppelt(name) && !confirm(`Es gibt schon eine Vorlage „${name}“. Trotzdem eine weitere anlegen?`)) return;
-  const stellen = darfV("vorlageLaden");
-  if (!confirm(`Folgeveranstaltung „${name}“ anlegen? Die ${anzahl} Aufgaben werden übernommen${stellen ? " und stehen danach alle auf offen" : ""}.`)) return;
-  const vid = neueId();
-  $("vl-folge").disabled = true;
+  const nid = neueId();
+  knopf.disabled = true;
   try {
-    const daten = await vlKopieren(roh, () => "vl_" + vid);
-    const werte = { [`${BASIS}/vorlagen/${vid}`]: { name, ts: Date.now(), von: S.ich, anzahl, daten: JSON.stringify(daten) } };
-    if (stellen) {
-      Object.assign(werte, vlAktivSatz(vid, name), verlaufPaar("vorlage", name, null));
-      Object.entries(S.roh).forEach(([id, e]) => {
-        if (e && e.status && e.status !== "offen") { werte[`${BASIS}/eintraege/${id}/status`] = "offen"; werte[`${BASIS}/eintraege/${id}/erledigtAm`] = null; werte[`${BASIS}/eintraege/${id}/bearbeitetAm`] = null; }
+    const daten = await vlKopieren(roh, () => "vl_" + nid);
+    const werte = { [`${BASIS}/vorlagen/${nid}`]: { name, ts: Date.now(), von: S.ich, anzahl, daten: JSON.stringify(daten) } };
+    if (darfV("vorlageLaden")) {
+      Object.assign(werte, vlAktivSatz(nid, name), verlaufPaar("vorlage", name, null));
+      Object.entries(S.roh).forEach(([eid, e]) => {
+        if (e && e.status && e.status !== "offen") { werte[`${BASIS}/eintraege/${eid}/status`] = "offen"; werte[`${BASIS}/eintraege/${eid}/erledigtAm`] = null; werte[`${BASIS}/eintraege/${eid}/bearbeitetAm`] = null; }
       });
     }
-    if (await vlSchreiben(werte, `Folgeveranstaltung „${name}“ ist angelegt.`)) $("vl-name").value = "";
-    else vlWeg(vlAnhangIds(daten));
-  } catch (err) { vlMeldung("Die Anhänge konnten nicht kopiert werden. Es wurde nichts gespeichert."); }
-  $("vl-folge").disabled = false;
-});
+    if (!(await vlSchreiben(werte, `„${name}“ ist angelegt, alle Aufgaben stehen auf offen.`))) vlWeg(vlAnhangIds(daten));
+  } catch (err) { vlMeldung("Die Anhänge konnten nicht kopiert werden. Es wurde nichts angelegt."); }
+  knopf.disabled = false;
+}
+async function vlLoeschen(id, v) {
+  if (!confirm(`Veranstaltung „${v.name}“ endgültig löschen? Das kann nicht rückgängig gemacht werden.`)) return;
+  const werte = { [`${BASIS}/vorlagen/${id}`]: null };
+  if (VL.aktiv?.id === id) werte[`${BASIS}/aktiv`] = null;
+  if (await vlSchreiben(werte, `„${v.name}“ ist gelöscht.`)) vlWeg(vlAltIds(v));
+}
 $("vl-liste").addEventListener("click", async (ev) => {
   const k = ev.target.closest("[data-vl]");
   if (!k) return;
   const id = k.dataset.id, v = VL.liste[id];
   if (!v) return;
   const was = k.dataset.vl;
-  if (was === "laden") {
-    if (!darfV("vorlageLaden")) return;
-    let daten;
-    try { daten = JSON.parse(v.daten); } catch (err) { vlMeldung("Diese Vorlage ist beschädigt."); return; }
-    const jetzt = Object.keys(S.roh).length;
-    if (!confirm(`„${v.name}“ laden? Die ${jetzt} aktuellen Einträge werden ersetzt. Alles steht danach auf „nicht bearbeitet“.`)) return;
-    const alteAnhaenge = Object.values(S.roh).flatMap((e) => vlZeilen(e).filter((z) => z?.art === "anhang" && ANHANG_ID.test(z.anhang || "")).map((z) => z.anhang));
-    const neuId = {};
-    Object.keys(daten).forEach((k) => { neuId[k] = neueId(); });
-    k.disabled = true;
-    try {
-      const kopiert = await vlKopieren(daten, (schl) => neuId[schl]);
-      const werte = {};
-      Object.keys(S.roh).forEach((alt) => { werte[`${BASIS}/eintraege/${alt}`] = null; });
-      const t = Date.now();
-      Object.entries(kopiert).forEach(([schl, e], i) => { werte[`${BASIS}/eintraege/${neuId[schl]}`] = { ...e, status: "offen", ts: t + i }; });
-      Object.assign(werte, verlaufPaar("vorlage", v.name, null), vlAktivSatz(id, v.name));
-      if (await vlSchreiben(werte, `„${v.name}“ ist geladen.`)) {
-        vlWeg(alteAnhaenge);
-        $("vorlagen-tafel").hidden = true; $("vorlagen-knopf").setAttribute("aria-pressed", "false");
-      } else vlWeg(vlAnhangIds(kopiert));
-    } catch (err) { vlMeldung("Die Anhänge konnten nicht kopiert werden. Es wurde nichts geändert."); }
-    k.disabled = false;
-  } else if (was === "ueberschreiben") {
-    if (!darfV("vorlageBearbeiten")) return;
-    if (!confirm(`„${v.name}“ mit dem jetzigen Stand überschreiben?`)) return;
-    await vlUeberschreiben(id, v, k);
-  } else if (was === "umbenennen") {
-    if (!darfV("vorlageBearbeiten")) return;
-    const neu = (prompt("Neuer Name der Vorlage:", v.name) || "").trim().slice(0, 60);
-    if (!neu || neu === v.name) return;
-    await vlSchreiben({ [`${BASIS}/vorlagen/${id}`]: { ...v, name: neu } }, `Umbenannt in „${neu}“.`);
-  } else if (was === "loeschen") {
-    if (!darfV("vorlageLoeschen")) return;
-    if (!confirm(`Vorlage „${v.name}“ löschen? Das kann nicht rückgängig gemacht werden.`)) return;
-    if (await vlSchreiben({ [`${BASIS}/vorlagen/${id}`]: null, ...(VL.aktiv?.id === id ? { [`${BASIS}/aktiv`]: null } : {}) }, `„${v.name}“ ist gelöscht.`)) vlWeg(vlAltIds(v));
-  }
-});
-$("vl-reset").addEventListener("click", async () => {
-  if (!darfV("vorlageLoeschen")) return;
-  const ids = Object.entries(S.roh).filter(([, e]) => e && e.status && e.status !== "offen").map(([id]) => id);
-  if (!ids.length) { vlMeldung("Es ist schon alles auf „nicht bearbeitet“."); return; }
-  if (!confirm(`${ids.length} Aufgaben wieder auf „nicht bearbeitet“ stellen?`)) return;
-  const werte = {};
-  ids.forEach((id) => { werte[`${BASIS}/eintraege/${id}/status`] = "offen"; werte[`${BASIS}/eintraege/${id}/erledigtAm`] = null; werte[`${BASIS}/eintraege/${id}/bearbeitetAm`] = null; });
-  Object.assign(werte, verlaufPaar("zurueck", `${ids.length} Aufgaben`, null));
-  await vlSchreiben(werte, "Alles steht wieder auf „nicht bearbeitet“.");
+  if (was === "speichern" && darfV("vorlageBearbeiten")) await vlSpeichern(id, v, k);
+  else if (was === "laden" && darfV("vorlageLaden")) await vlLaden(id, v, k);
+  else if (was === "kopieren" && darfV("vorlageSpeichern")) await vlKopierenNaechste(id, v, k);
+  else if (was === "loeschen" && darfV("vorlageLoeschen")) await vlLoeschen(id, v);
 });
 
 function datenFehler(err) {

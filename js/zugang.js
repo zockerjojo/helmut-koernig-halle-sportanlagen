@@ -49,10 +49,10 @@ export const ZUSATZRECHTE = {
   veranstaltung: [
     { id: "prio", name: "Priorität ändern", zusatz: "Darf die Reihenfolge in „Alle Aufgaben“ umstellen." },
     { id: "vertreten", name: "Für andere Mitarbeiter eintragen", zusatz: "Kann umstellen, für wen Aufgaben angelegt werden." },
-    { id: "vorlageSpeichern", name: "Vorlage speichern", zusatz: "Darf die aktuelle Veranstaltung als neue Vorlage mit Namen speichern." },
-    { id: "vorlageLaden", name: "Vorlage laden", zusatz: "Darf eine Vorlage laden. Das ersetzt die aktuelle Veranstaltung." },
-    { id: "vorlageBearbeiten", name: "Vorlage ändern", zusatz: "Darf eine Vorlage umbenennen oder mit dem aktuellen Stand überschreiben." },
-    { id: "vorlageLoeschen", name: "Vorlage löschen und alles zurücksetzen", zusatz: "Darf gespeicherte Vorlagen löschen und alle Aufgaben mit einem Klick wieder auf „nicht bearbeitet“ stellen." },
+    { id: "vorlageSpeichern", name: "Veranstaltung neu anlegen und kopieren", zusatz: "Neue Veranstaltung mit leerem Plan anlegen und die Aufgaben in die nächste Veranstaltung kopieren." },
+    { id: "vorlageLaden", name: "Veranstaltung laden", zusatz: "Darf eine gespeicherte Veranstaltung laden. Das ersetzt die geöffnete." },
+    { id: "vorlageBearbeiten", name: "Veranstaltung speichern", zusatz: "Darf den Stand der geöffneten Veranstaltung speichern." },
+    { id: "vorlageLoeschen", name: "Veranstaltung löschen", zusatz: "Darf gespeicherte Veranstaltungen endgültig löschen." },
   ],
   arbeitsplan: [
     { id: "prio", name: "Priorität ändern", zusatz: "Darf die Reihenfolge in „Alle Aufgaben“ umstellen." },

@@ -600,7 +600,7 @@ function rechteZeichnen(rechte, gesperrt) {
       unter = AP_GRUPPEN.map(([titel, liste]) =>
         (titel ? `<h3 style="margin-top:4px">${esc(titel)}</h3>` : "") +
         liste.map(([id, name, zusatz]) => kreuz(`veranstaltung:${id}`, name, zusatz, tun[id] === true, gesperrt)).join("")
-      ).join("") + `<h3 style="margin-top:4px">Vorlagen</h3>` + (ZUSATZRECHTE.veranstaltung ?? []).filter((z) => z.id.startsWith("vorlage")).map((z) => kreuz(`veranstaltung:${z.id}`, z.name, z.zusatz, tun[z.id] === true, gesperrt)).join("")
+      ).join("") + `<h3 style="margin-top:4px">Veranstaltungen</h3>` + (ZUSATZRECHTE.veranstaltung ?? []).filter((z) => z.id.startsWith("vorlage")).map((z) => kreuz(`veranstaltung:${z.id}`, z.name, z.zusatz, tun[z.id] === true, gesperrt)).join("")
         + (ZUSATZRECHTE.veranstaltung ?? []).filter((z) => !z.id.startsWith("vorlage")).map((z) => kreuz(`veranstaltung:${z.id}`, z.name, z.zusatz, tun[z.id] === true, gesperrt)).join("");
     } else if (f.id === "admin") {
       unter = `<p class="muted" style="font-size:13px">Ein Admin hat überall alle Rechte, auch alle Unterrechte.</p>`;
