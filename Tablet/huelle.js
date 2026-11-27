@@ -23,7 +23,7 @@
   document.addEventListener("scroll", function () { sag("hkhAktiv"); }, true);
 
   /* Links: nur die drei Seiten, und zwar innerhalb der Hülle. Fremde Adressen bleiben stehen. */
-  var ERLAUBT = { "Dienstplan": 1, "Arbeitsplan": 1, "Reinigungsplan": 1 };
+  var ERLAUBT = { "Dienstplan": 1, "Arbeitsplan": 1, "Veranstaltung": 1, "Reinigungsplan": 1 };
   document.addEventListener("click", function (e) {
     var a = e.target.closest && e.target.closest("a[href]");
     if (!a) return;

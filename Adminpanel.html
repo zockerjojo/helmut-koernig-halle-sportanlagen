@@ -428,7 +428,7 @@ const geraeteVon = (bid) => Object.values(geraete).filter((g) => g && g.benutzer
 const sortiert = () => Object.entries(benutzer).map(([bid, b]) => ({ bid, ...b })).sort((a, b) => (a.name || "").localeCompare(b.name || "", "de"));
 
 /* Kurze Namen für die Marken in der zugeklappten Zeile */
-const KURZ = { reinigung: "Reinigung", sportanlagen: "Sportanlagen", arbeitsplan: "Arbeitsplan", dienstplan: "Dienstplan bearbeiten", admin: "Admin" };
+const KURZ = { reinigung: "Reinigung", sportanlagen: "Sportanlagen", arbeitsplan: "Arbeitsplan", veranstaltung: "Veranstaltung", dienstplan: "Dienstplan bearbeiten", admin: "Admin" };
 function marken(b) {
   const bereiche = BEREICHE.map((f) => {
     /* Beim Dienstplan zeigt die Marke, ob jemand bearbeiten darf (ansehen darf jeder). */
@@ -592,6 +592,12 @@ function rechteZeichnen(rechte, gesperrt) {
         (titel ? `<h3 style="margin-top:4px">${esc(titel)}</h3>` : "") +
         liste.map(([id, name, zusatz]) => kreuz(`arbeitsplan:${id}`, name, zusatz, tun[id] === true, gesperrt)).join("")
       ).join("") + (ZUSATZRECHTE.arbeitsplan ?? []).map((z) => kreuz(`arbeitsplan:${z.id}`, z.name, z.zusatz, tun[z.id] === true, gesperrt)).join("");
+    } else if (f.id === "veranstaltung") {
+      unter = AP_GRUPPEN.map(([titel, liste]) =>
+        (titel ? `<h3 style="margin-top:4px">${esc(titel)}</h3>` : "") +
+        liste.map(([id, name, zusatz]) => kreuz(`veranstaltung:${id}`, name, zusatz, tun[id] === true, gesperrt)).join("")
+      ).join("") + `<h3 style="margin-top:4px">Vorlagen</h3>` + (ZUSATZRECHTE.veranstaltung ?? []).filter((z) => z.id.startsWith("vorlage")).map((z) => kreuz(`veranstaltung:${z.id}`, z.name, z.zusatz, tun[z.id] === true, gesperrt)).join("")
+        + (ZUSATZRECHTE.veranstaltung ?? []).filter((z) => !z.id.startsWith("vorlage")).map((z) => kreuz(`veranstaltung:${z.id}`, z.name, z.zusatz, tun[z.id] === true, gesperrt)).join("");
     } else if (f.id === "admin") {
       unter = `<p class="muted" style="font-size:13px">Ein Admin hat überall alle Rechte, auch alle Unterrechte.</p>`;
     } else {
@@ -614,7 +620,7 @@ $("f-rechte").addEventListener("change", (e) => {
   if (unter) unter.hidden = !k.checked;
 });
 function rechteLesen() {
-  const rechte = { reinigung_tun: {}, sportanlagen_tun: {}, arbeitsplan_tun: {}, dienstplan_tun: {} };
+  const rechte = { reinigung_tun: {}, sportanlagen_tun: {}, arbeitsplan_tun: {}, veranstaltung_tun: {}, dienstplan_tun: {} };
   BEREICHE.forEach((f) => { rechte[f.id] = !!f.fuerAlle; });
   $("f-rechte").querySelectorAll("[data-recht]").forEach((k) => {
     const [bereich, recht] = k.dataset.recht.split(":");
@@ -623,7 +629,7 @@ function rechteLesen() {
   });
   return rechte;
 }
-const NEU_VORGABE = { arbeitsplan_tun: { erstellen: true, bearbeitenEigene: true, verschiebenEigene: true, loeschenEigene: true } };
+const NEU_VORGABE = { arbeitsplan_tun: { erstellen: true, bearbeitenEigene: true, verschiebenEigene: true, loeschenEigene: true }, veranstaltung_tun: { erstellen: true, bearbeitenEigene: true, verschiebenEigene: true, loeschenEigene: true } };
 /* ---- Feier beim Erledigen ----
    Die Einstellungen stehen unter feier/<Benutzer>, getrennt vom Benutzer selbst.
    Gespeichert wird nur, wenn im Block etwas geändert wurde. */
@@ -867,7 +873,7 @@ $("formular").addEventListener("submit", async (e) => {
 });
 
 /* ---- Sicherungen ---- */
-const BEREICHE_SICHERUNG = ["putzplan", "arbeitsplan", "matten", "dienstplan"];
+const BEREICHE_SICHERUNG = ["putzplan", "arbeitsplan", "veranstaltung", "matten", "dienstplan"];
 const datumSchluessel = (d) => new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Berlin" }).format(d);
 function zeitText(ts) {
   if (!ts) return "";

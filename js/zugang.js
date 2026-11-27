@@ -27,6 +27,7 @@ export const BEREICHE = [
   { id: "reinigung", name: "Hallenreinigung", seite: "./Reinigungsplan", zusatz: "Gereinigte Bereiche eintragen und einsehen" },
   { id: "sportanlagen", name: "Einstellungen Sportanlagen", seite: "./Sportanlagen", zusatz: "Status der Anlagen und der Tribüne einstellen" },
   { id: "arbeitsplan", name: "Aufgaben und Arbeitsplan", seite: "./Arbeitsplan", zusatz: "Aufgaben und Pfeile auf dem Hallenplan" },
+  { id: "veranstaltung", name: "Veranstaltung", seite: "./Veranstaltung", zusatz: "Aufgaben und Pfeile nur für Veranstaltungen, mit Vorlagen" },
   { id: "dienstplan", name: "Dienstplan", seite: "./Dienstplan", zusatz: "Ansehen und drucken kann jeder mit Code.", fuerAlle: true },
   { id: "admin", name: "Admin Panel", seite: "./Adminpanel", zusatz: "Benutzer, Codes, Rechte und Sicherungen" },
 ];
@@ -45,6 +46,14 @@ export const ZUSATZRECHTE = {
   dienstplan: [
     { id: "bearbeiten", name: "Dienstplan bearbeiten", zusatz: "Darf Namen, Schichten, Veranstaltungen, Zeilen und Spalten eintragen und ändern." },
   ],
+  veranstaltung: [
+    { id: "prio", name: "Priorität ändern", zusatz: "Darf die Reihenfolge in „Alle Aufgaben“ umstellen." },
+    { id: "vertreten", name: "Für andere Mitarbeiter eintragen", zusatz: "Kann umstellen, für wen Aufgaben angelegt werden." },
+    { id: "vorlageSpeichern", name: "Vorlage speichern", zusatz: "Darf die aktuelle Veranstaltung als neue Vorlage mit Namen speichern." },
+    { id: "vorlageLaden", name: "Vorlage laden", zusatz: "Darf eine Vorlage laden. Das ersetzt die aktuelle Veranstaltung." },
+    { id: "vorlageBearbeiten", name: "Vorlage ändern", zusatz: "Darf eine Vorlage umbenennen oder mit dem aktuellen Stand überschreiben." },
+    { id: "vorlageLoeschen", name: "Vorlage löschen und alles zurücksetzen", zusatz: "Darf gespeicherte Vorlagen löschen und alle Aufgaben mit einem Klick wieder auf „nicht bearbeitet“ stellen." },
+  ],
   arbeitsplan: [
     { id: "prio", name: "Priorität ändern", zusatz: "Darf die Reihenfolge in „Alle Aufgaben“ umstellen." },
     { id: "vertreten", name: "Für andere Mitarbeiter eintragen", zusatz: "Kann umstellen, für wen Aufgaben angelegt werden." },
@@ -60,8 +69,11 @@ export const AP_RECHTE = [
   "prio", "vertreten",
 ];
 
+export const VA_RECHTE = [...AP_RECHTE, "vorlageSpeichern", "vorlageLaden", "vorlageBearbeiten", "vorlageLoeschen"];
+
 const ALLES_ERLAUBT = {
-  reinigung: true, sportanlagen: true, arbeitsplan: true, dienstplan: true, admin: true,
+  reinigung: true, sportanlagen: true, arbeitsplan: true, veranstaltung: true, dienstplan: true, admin: true,
+  veranstaltung_tun: Object.fromEntries(VA_RECHTE.map((r) => [r, true])),
   reinigung_tun: { vertreten: true, uebermalen: true },
   sportanlagen_tun: { aushang: true },
   dienstplan_tun: { bearbeiten: true },
@@ -93,7 +105,7 @@ function ersterNutzer() {
 /* Pausenraum-Tablet: Seiten unter /Tablet/ laufen ohne Code und nur zum Ansehen.
    Ein Admin schaltet das Tablett einmal frei, dann steht es unter "tabletts". */
 export const TABLETT = /^\/Tablett?(\/|$)/.test(location.pathname) || globalThis.HKH_TABLETT === true;
-const NUR_ANSEHEN = { reinigung: true, arbeitsplan: true, dienstplan: true, reinigung_tun: {}, sportanlagen_tun: {}, arbeitsplan_tun: {}, dienstplan_tun: {} };
+const NUR_ANSEHEN = { reinigung: true, arbeitsplan: true, veranstaltung: true, dienstplan: true, reinigung_tun: {}, sportanlagen_tun: {}, arbeitsplan_tun: {}, veranstaltung_tun: {}, dienstplan_tun: {} };
 async function tablettSitzung(user) {
   let t = null;
   try {
@@ -150,7 +162,7 @@ async function personSitzung(user) {
     istAdmin: rechte.admin === true,
     name: b.name ?? "",
     farbe: b.farbe ?? "#55635C",
-    rechte: { ...rechte, arbeitsplan_tun: rechte.arbeitsplan_tun ?? {}, reinigung_tun: rechte.reinigung_tun ?? {}, sportanlagen_tun: rechte.sportanlagen_tun ?? {}, dienstplan_tun: rechte.dienstplan_tun ?? {} },
+    rechte: { ...rechte, arbeitsplan_tun: rechte.arbeitsplan_tun ?? {}, veranstaltung_tun: rechte.veranstaltung_tun ?? {}, reinigung_tun: rechte.reinigung_tun ?? {}, sportanlagen_tun: rechte.sportanlagen_tun ?? {}, dienstplan_tun: rechte.dienstplan_tun ?? {} },
   };
 }
 
@@ -185,11 +197,11 @@ export function darfVertreten(s, bereich) {
 }
 
 /* Darf sie das im Arbeitsplan? eigen sagt, ob es die eigene Aufgabe ist. */
-export function darfAufgabe(s, was, eigen, gemeinsam = false) {
+export function darfAufgabe(s, was, eigen, gemeinsam = false, bereich = "arbeitsplan") {
   if (!s) return false;
   if (s.istAdmin) return true;
-  if (s.rechte?.arbeitsplan !== true) return false;
-  const t = s.rechte?.arbeitsplan_tun ?? {};
+  if (s.rechte?.[bereich] !== true) return false;
+  const t = s.rechte?.[bereich + "_tun"] ?? {};
   if (was === "erstellen") return t.erstellen === true;
   if (was === "erledigen") return (eigen || gemeinsam === true) ? true : t.erledigenFremde === true;
   if (was === "prio") return t.prio === true;

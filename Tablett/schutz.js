@@ -57,7 +57,7 @@
 
   /* Links: nur die drei Seiten, und zwar innerhalb der Hülle. Alles andere bleibt stehen,
      auch Downloads (Anhänge, Bilder vom Plan). */
-  var ERLAUBT = { "Dienstplan": 1, "Arbeitsplan": 1, "Reinigungsplan": 1 };
+  var ERLAUBT = { "Dienstplan": 1, "Arbeitsplan": 1, "Veranstaltung": 1, "Reinigungsplan": 1 };
   document.addEventListener("click", function (e) {
     var a = e.target.closest && e.target.closest("a[href]");
     if (!a) return;

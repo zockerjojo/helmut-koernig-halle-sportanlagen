@@ -1,0 +1,2369 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="apple-mobile-web-app-title" content="helmut-körnig-halle-sportanlagen/Veranstaltung">
+<title>helmut-körnig-halle-sportanlagen/Veranstaltung</title>
+<link rel="icon" type="image/png" href="./bilder/favicon.png">
+<link rel="apple-touch-icon" href="./bilder/symbol.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9EDEA; --panel:#F7F9F7; --ink:#000; --ink-2:#000; --line:#C3CCC6;
+  --accent:#17694B; --on-accent:#FFFFFF; --fehler:#B3261E; --erledigt:#6B7770;
+  --plan-track:#DCE3DE; --weiss:#FFFFFF;
+  --display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --body:Barlow,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#0F1512; --panel:#18211C; --ink:#E7EEE9; --ink-2:#9BAAA1; --line:#33413A;
+  --accent:#4CC38A; --on-accent:#06150E; --fehler:#F2766B; --erledigt:#7F8D85;
+  --plan-track:#212D27;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); font-size:calc(16px + var(--schrift-plus,0px)); line-height:1.4}
+.wrap{max-width:900px; margin:0 auto; padding:0 20px 40px}
+.kopf{display:flex; justify-content:space-between; align-items:center; gap:12px 16px; flex-wrap:wrap; padding-top:24px}
+.marke{font-family:var(--display); font-weight:600; font-size:calc(24px + var(--schrift-plus,0px)); line-height:1; letter-spacing:.04em; text-transform:uppercase}
+.kopf-knoepfe{display:flex; gap:10px; flex:none}
+.rund-knopf{display:inline-flex; align-items:center; justify-content:center; flex:none; width:44px; height:44px; padding:0; border-radius:50%; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; touch-action:manipulation}
+.rund-knopf:hover{border-color:var(--ink)}
+.rund-knopf svg{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+#verlauf-knopf[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
+.rund-knopf .sonne{display:none}
+.knopf{font:inherit; font-size:calc(15px + var(--schrift-plus,0px)); font-weight:600; min-height:44px; padding:8px 18px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer}
+.knopf.primaer{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
+.knopf.gefahr{border-color:var(--fehler); color:var(--fehler); background:var(--panel)}
+.knopf.klein{min-height:36px; padding:6px 14px; font-size:calc(14px + var(--schrift-plus,0px))}
+.knopf:disabled{opacity:.5; cursor:not-allowed}
+button:focus-visible, input:focus-visible, a:focus-visible, textarea:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+h1{margin:0; font-family:var(--display); font-weight:600; font-size:calc(clamp(32px, 8vw, 44px) + var(--schrift-plus,0px)); line-height:1; text-wrap:balance}
+h2{margin:0; font-family:var(--display); font-weight:600; font-size:calc(26px + var(--schrift-plus,0px)); line-height:1.05; text-wrap:balance; overflow-wrap:anywhere}
+.muted{margin:0; font-size:calc(15px + var(--schrift-plus,0px)); color:var(--ink-2)}
+.meldung{margin:0; min-height:20px; font-size:calc(14px + var(--schrift-plus,0px)); color:var(--ink-2)}
+.meldung.fehler{color:var(--fehler)}
+.stapel{display:flex; flex-direction:column; gap:16px}
+.anmeldung{max-width:420px; margin:48px auto 0; display:flex; flex-direction:column; gap:16px}
+.feld{display:flex; flex-direction:column; gap:6px; font-size:calc(15px + var(--schrift-plus,0px)); color:var(--ink-2)}
+input[type="password"], input[type="text"], textarea{font:inherit; font-size:calc(16px + var(--schrift-plus,0px)); color:var(--ink); background:var(--panel); min-height:44px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; width:100%; min-width:0}
+textarea{resize:vertical; line-height:1.35}
+.feld-eingabe{position:relative; display:flex}
+.feld-eingabe input{padding-right:52px}
+.augen-knopf{position:absolute; top:0; right:0; bottom:0; width:48px; display:flex; align-items:center; justify-content:center; padding:0; border:0; border-radius:0 10px 10px 0; background:none; color:var(--ink-2); cursor:pointer}
+.augen-knopf:hover{color:var(--ink)}
+.augen-knopf svg{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+.augen-knopf .auge-zu{display:none}
+.augen-knopf[aria-pressed="true"] .auge-auf{display:none}
+.augen-knopf[aria-pressed="true"] .auge-zu{display:block}
+.logo-link{display:inline-flex; align-items:center; gap:10px; min-width:0; text-decoration:none; color:inherit; border-radius:6px}
+.logo-link img{flex:none; display:block; height:34px; width:auto}
+.logo-link:focus-visible{outline:3px solid var(--accent); outline-offset:3px}
+
+/* Werkzeuge: Ansehen, Aufgabe, Pfeil */
+.leiste{display:flex; gap:4px; padding:4px; border-radius:999px; background:var(--panel); border:1px solid var(--line)}
+.leiste button{flex:1; min-height:40px; padding:0 6px; border:0; border-radius:999px; background:transparent; color:var(--ink); font:inherit; font-size:calc(15px + var(--schrift-plus,0px)); font-weight:600; cursor:pointer}
+.leiste button[aria-pressed="true"]{background:var(--accent); color:var(--on-accent)}
+.leiste button svg, .sym-knopf svg{width:24px; height:24px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; vertical-align:middle}
+.leiste button{display:inline-flex; align-items:center; justify-content:center}
+.sym-knopf{width:48px; padding:0 !important; display:inline-flex; align-items:center; justify-content:center}
+/* Personen */
+.personen{display:flex; flex-wrap:wrap; gap:8px}
+.person{display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:0 14px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--ink); font:inherit; font-size:calc(15px + var(--schrift-plus,0px)); font-weight:600; cursor:pointer}
+.person[aria-pressed="true"]{border:2px solid var(--ink)}
+.frage-box{display:flex; flex-direction:column; gap:8px; padding:12px 14px; border-radius:14px; border:1px solid var(--line); background:var(--panel)}
+.frage-text{margin:0; font-weight:600; color:var(--ink)}
+.haken-zeile{display:flex; align-items:center; gap:10px; min-height:44px; margin:0; font-weight:500; color:var(--ink); cursor:pointer}
+.haken-zeile input{width:24px; height:24px; flex:none; margin:0; padding:0; accent-color:var(--accent)}
+.person .farbe{width:12px; height:12px; border-radius:50%; border:1px solid var(--ink); flex:none}
+/* Karte mit dem Plan */
+.map{position:relative; width:100%; aspect-ratio:793/525.1; min-height:220px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--panel); touch-action:none}
+#svg{position:absolute; inset:0; width:100%; height:100%; display:block; touch-action:none}
+.map.setzen{cursor:crosshair}
+.zoom{position:absolute; right:8px; bottom:8px; display:flex; flex-direction:column; gap:6px}
+.zb{width:44px; height:44px; border-radius:10px; border:1px solid var(--line); background:var(--panel); color:var(--ink); font:inherit; font-size:calc(22px + var(--schrift-plus,0px)); font-weight:600; line-height:1; display:flex; align-items:center; justify-content:center; cursor:pointer}
+.zb.klein{font-size:calc(13px + var(--schrift-plus,0px)); font-weight:600}
+/* Etagenwahl: ein Schieber mit zwei Stellungen, oben Außen, unten Halle */
+.etagen{position:relative; width:44px; padding:3px; border:1px solid var(--line); border-radius:10px; background:var(--panel); display:flex; flex-direction:column; gap:0; margin-bottom:2px}
+.etagen-knauf{position:absolute; left:3px; right:3px; height:calc(50% - 3px); border-radius:8px; background:var(--accent); transition:transform .18s ease; transform:translateY(100%); pointer-events:none}
+.etagen[data-etage="aussen"] .etagen-knauf{transform:translateY(0)}
+.eb{position:relative; z-index:1; height:30px; border:0; background:none; font:inherit; font-size:calc(12px + var(--schrift-plus,0px)); font-weight:600; color:var(--ink-2); cursor:pointer; border-radius:8px; padding:0; -webkit-tap-highlight-color:transparent}
+.eb[aria-pressed="true"]{color:var(--on-accent)}
+/* Filter nach Person */
+.filter-feld{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+.filter-feld .person{flex:none}
+#svg[data-etage="halle"] #ebene-aussen{display:none}
+#svg[data-etage="aussen"] #ebene-halle{display:none}
+/* Aufgaben und Pfeile im Plan */
+#punkte circle.kugel{stroke:#14201B; stroke-width:1.2}
+#punkte circle.kugel.gewaehlt{stroke-width:2.4}
+#punkte .nummer{font-family:var(--body); font-weight:700; pointer-events:none}
+#etiketten text{font-family:var(--body)}
+#etiketten rect{fill:#FFFFFF; stroke:#C3CCC6}
+#pfeile line.strich{stroke-linecap:round}
+/* Tafel unten: Hinweis, Details, Formular, Verlauf */
+.tafel{border:1px solid var(--line); border-radius:16px; background:var(--panel); padding:16px; display:flex; flex-direction:column; gap:12px}
+.tafel .kopfzeile{display:flex; flex-direction:column; gap:4px}
+.obertitel{margin:0; font-size:calc(13px + var(--schrift-plus,0px)); font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2)}
+.rueckfrage{display:flex; flex-direction:column; gap:8px; padding:12px; border:1px solid var(--fehler); border-radius:12px; background:var(--bg)}
+.reihe{display:flex; gap:10px; flex-wrap:wrap}
+.reihe > *{flex:1 1 140px}
+.aktionen{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+.textknopf{min-height:40px; border:0; background:none; color:var(--ink-2); font:inherit; font-size:calc(15px + var(--schrift-plus,0px)); font-weight:600; text-decoration:underline; cursor:pointer}
+/* Textzeilen in der Ansicht */
+.zeilen-ansicht{display:flex; flex-direction:column; gap:12px; padding-top:12px; border-top:1px solid var(--line)}
+.zeile-block{display:flex; flex-direction:column; gap:2px; min-width:0}
+.zeile-titel{margin:0; font-size:calc(15px + var(--schrift-plus,0px)); font-weight:600; overflow-wrap:anywhere}
+.zeile-text{margin:0; font-size:calc(15px + var(--schrift-plus,0px)); white-space:pre-wrap; overflow-wrap:anywhere}
+/* Textzeilen im Formular */
+.zeilen-liste{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px}
+.zeile-bearbeiten{display:flex; flex-direction:column; gap:6px; padding:8px; border:1px solid var(--line); border-radius:12px; background:var(--bg)}
+.zeile-kopf{display:flex; align-items:center; gap:6px}
+.zeile-kopf input{flex:1 1 auto}
+.zeile-weg{flex:none; min-height:36px; padding:0 6px; border:0; background:none; color:var(--ink-2); font:inherit; font-size:calc(14px + var(--schrift-plus,0px)); font-weight:600; text-decoration:underline; cursor:pointer}
+/* Griff zum Verschieben: anfassen und ziehen, oder kurz gedrückt halten */
+.griff{flex:none; width:36px; min-height:40px; display:inline-flex; align-items:center; justify-content:center; padding:0; border:0; border-radius:8px; background:none; color:var(--ink-2); cursor:grab; touch-action:none; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none}
+.griff:hover{color:var(--ink)}
+.griff:active{cursor:grabbing}
+.griff svg{width:12px; height:18px; fill:currentColor; pointer-events:none}
+.griff-platz{flex:none; width:36px}
+.zieht{position:relative; z-index:5; background:var(--panel); box-shadow:0 10px 24px rgba(0,0,0,.25); border-radius:10px}
+.ziel-oben{box-shadow:inset 0 3px 0 var(--accent)}
+.ziel-unten{box-shadow:inset 0 -3px 0 var(--accent)}
+/* Verlauf und Liste */
+.filter{display:flex; flex-wrap:wrap; gap:8px}
+.filter button{min-height:36px; padding:0 12px; border-radius:999px; border:1px solid var(--line); background:var(--bg); color:var(--ink); font:inherit; font-size:calc(14px + var(--schrift-plus,0px)); font-weight:600; cursor:pointer}
+.filter button[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
+.verlauf{display:flex; flex-direction:column; max-height:260px; overflow-y:auto; margin:0; padding:0; list-style:none}
+.verlauf li{display:flex; gap:10px; align-items:flex-start; padding:10px 0; border-bottom:1px solid var(--line)}
+.verlauf li:last-child{border-bottom:0}
+.verlauf .farbe{width:12px; height:12px; margin-top:5px; border-radius:50%; border:1px solid var(--ink); flex:none}
+.verlauf .zeile{display:flex; flex-direction:column; gap:2px; min-width:0}
+.verlauf .wann{font-size:calc(13px + var(--schrift-plus,0px)); color:var(--ink-2)}
+#alle-liste li{align-items:center}
+.listen-kopf{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 12px}
+html.tablett #alle-zeigen{display:none !important}
+@media print{#alle-zeigen{display:none !important}}
+#alle-liste .zeile{flex:1 1 auto}
+#archiv-inhalt{margin-top:12px}
+#archiv-jahre, #archiv-monate{margin-bottom:10px}
+.hin-knopf{flex:none; width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center; padding:0; border:1px solid var(--line); border-radius:10px; background:var(--panel); color:var(--ink); cursor:pointer}
+.hin-knopf:hover{border-color:var(--ink)}
+.hin-knopf svg{width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+.format-leiste{display:flex; gap:6px}
+.format-leiste button{width:36px; height:32px; display:inline-flex; align-items:center; justify-content:center; padding:0; border:1px solid var(--line); border-radius:8px; background:var(--panel); color:var(--ink); cursor:pointer}
+.format-leiste svg{width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+.zeile-text ul{margin:4px 0; padding-left:20px}
+.abzeichen{flex:none; width:28px; height:28px; border-radius:50%; border:1px solid var(--ink); display:inline-flex; align-items:center; justify-content:center; font-size:calc(13px + var(--schrift-plus,0px)); font-weight:700; line-height:1}
+/* Am PC: Karte links groß und beim Scrollen stehend, rechts Details, Filter und Liste */
+@media (min-width:1100px){
+  .wrap{max-width:1560px}
+  /* Die Karte läuft über drei Zeilen (5 bis 7). Leere Zeilen für Filter und Aufgabe bekommen Höhe 0,
+     sonst teilt die Karte ihnen Platz zu und die Liste rutscht nach unten. Der Abstand kommt aus den Rändern. */
+  #panel{display:grid; grid-template-columns:minmax(0,1fr) minmax(360px,420px); column-gap:24px; row-gap:0; align-items:start; grid-template-rows:repeat(4,auto) var(--zeile-filter,0px) var(--zeile-aufgabe,0px) auto auto}
+  #panel:has(> #filter-tafel:not([hidden])), #panel:has(> #vorlagen-tafel:not([hidden])){--zeile-filter:auto}
+  #panel:has(> #tafel:not([hidden])){--zeile-aufgabe:auto}
+  #panel > *{grid-column:1 / -1}
+  #panel > #live-text, #panel > .feld, #panel > .leiste, #panel > #map, #panel > #karten-hinweis, #panel > #filter-tafel, #panel > #vorlagen-tafel, #panel > #tafel, #panel > #listen-tafel, #panel > #erledigt-tafel, #panel > #geloescht-tafel{margin-top:12px}
+  #panel > #map{grid-column:1; grid-row:5 / span 3; position:sticky; top:12px; max-height:calc(100vh - 96px)}
+  #panel > #karten-hinweis{grid-column:1; grid-row:8}
+  #panel > #filter-tafel, #panel > #vorlagen-tafel{grid-column:2; grid-row:5; margin-bottom:0 !important}
+  #panel > #tafel{grid-column:2; grid-row:6}
+  #panel > #listen-tafel{grid-column:2; grid-row:7; max-height:calc(100vh - 96px); overflow:auto}
+  #panel > #erledigt-tafel{grid-column:2; grid-row:8; max-height:calc(100vh - 96px); overflow:auto}
+  #panel > #geloescht-tafel{grid-column:2; grid-row:9; max-height:calc(100vh - 96px); overflow:auto}
+}
+/* Einheitlicher Kopf auf allen Personalseiten: Logo, darunter-/daneben "Helmut-Körnig-Halle" und "Personal" wie auf der Startseite */
+.hkh-kopf{display:inline-flex !important; align-items:center; gap:10px; min-width:0; flex:none; text-decoration:none; color:inherit; border-radius:6px}
+.hkh-kopf img{flex:none; display:block; height:34px !important; width:auto}
+.hkh-marke{display:flex; flex-direction:column; gap:2px; margin:0; font-family:Barlow, system-ui, -apple-system, "Segoe UI", sans-serif; font-size:calc(13px + var(--schrift-plus,0px)); font-weight:500; line-height:1.15; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2)}
+.kopf{flex-wrap:nowrap}
+/* Anhänge: Bilder und Dateien in einer Aufgabe */
+.zeile-knoepfe{display:flex; flex-wrap:wrap; gap:8px}
+.zeile-knoepfe .knopf svg{width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; vertical-align:-4px; margin-right:4px}
+.anhang-zeile{display:flex; align-items:center; gap:10px; min-width:0}
+.anhang-mini{flex:none; width:64px; height:64px; border-radius:8px; border:1px solid var(--line); background:var(--panel); object-fit:cover; display:flex; align-items:center; justify-content:center; overflow:hidden}
+.anhang-mini svg{width:28px; height:28px; fill:none; stroke:var(--ink-2); stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round}
+.anhang-info{display:flex; flex-direction:column; gap:2px; min-width:0; font-size:calc(14px + var(--schrift-plus,0px))}
+.anhang-name{font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.anhang-stand{color:var(--ink-2)}
+.anhang-stand.fehler{color:var(--fehler)}
+.anhang-bild{display:block; width:100%; padding:0; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--bg); cursor:zoom-in; min-height:80px}
+.anhang-bild img{display:block; width:100%; max-height:420px; object-fit:contain}
+.anhang-datei{display:flex; align-items:center; gap:10px; width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:12px; background:var(--bg); color:var(--ink); font:inherit; text-align:left; cursor:pointer}
+.anhang-datei svg{flex:none; width:26px; height:26px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round}
+.anhang-laedt{font-size:calc(14px + var(--schrift-plus,0px)); color:var(--ink-2); padding:10px}
+.bild-gross{position:fixed; inset:0; z-index:90; background:rgba(8,12,10,.92); display:flex; flex-direction:column}
+.bild-gross[hidden]{display:none}
+.bild-gross-kopf{display:flex; align-items:center; gap:12px; padding:max(10px, env(safe-area-inset-top)) 14px 10px}
+.bild-gross-kopf p{flex:1 1 auto; margin:0; color:#FFFFFF; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.bild-gross-flaeche{flex:1 1 auto; min-height:0; overflow:auto; display:flex; align-items:center; justify-content:center; touch-action:pinch-zoom pan-x pan-y}
+.bild-gross-flaeche img{max-width:100%; max-height:100%; object-fit:contain}
+.anhang-marke{display:inline-flex; vertical-align:-3px; margin-left:4px}
+.anhang-marke svg{width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+/* Ebene und Zoom liegen in einer Leiste unter dem Plan, nicht mehr darauf */
+#svg{top:0 !important; bottom:auto !important; height:calc(100% - 54px) !important}
+.zoom{left:0; right:0; bottom:0; top:auto; height:54px; flex-direction:row; justify-content:flex-end; align-items:center; gap:6px; padding:0 8px; border-top:1px solid var(--line); background:var(--panel)}
+.etagen{flex-direction:row; width:auto; margin:0 auto 0 0}
+.etagen-knauf{left:3px; right:auto; top:3px; bottom:3px; width:calc(50% - 3px); height:auto; transform:translateX(100%)}
+.etagen[data-etage="aussen"] .etagen-knauf{transform:translateX(0)}
+.eb{width:44px; height:34px}
+.vl-zeile{display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between; padding:8px 0; border-top:1px solid var(--line)}
+.vl-name{font-weight:600; flex:1 1 140px; min-width:0; overflow-wrap:anywhere}
+.vl-info{display:block; font-weight:400; font-size:13px; color:var(--ink-2)}
+.vl-knoepfe{display:flex; flex-wrap:wrap; gap:6px}
+.vl-neu{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+.vl-neu input{flex:1 1 160px; min-height:44px; padding:0 12px; border:1px solid var(--line); border-radius:10px; background:var(--bg); color:var(--ink); font:inherit}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="kopf">
+  <a class="logo-link hkh-kopf" href="./" aria-label="Zur Startseite">
+    <img src="./bilder/logo.png" alt="Dortmunder Sportstätten" width="480" height="241">
+    <span class="hkh-marke"><span>Helmut-Körnig-Halle</span><span>Personal</span></span>
+  </a>
+  <div class="kopf-knoepfe">
+    <button class="rund-knopf" id="vorlagen-knopf" type="button" aria-pressed="false" aria-label="Veranstaltung speichern und laden" title="Veranstaltung speichern und laden" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" /><path d="M10 14a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M14 4v4h-6v-4" /></svg></button>
+    <button class="rund-knopf" id="filter-knopf" type="button" aria-pressed="false" aria-label="Nach Person filtern" title="Nach Person filtern" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 5h18l-7 8.2V21l-4-2.2v-5.6z"/></svg></button>
+    <button class="rund-knopf" id="verlauf-knopf" type="button" aria-pressed="false" aria-label="Verlauf anzeigen" title="Verlauf anzeigen" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button>
+  </div>
+</header>
+
+<p class="muted" id="pruefung" style="margin-top:48px">Einen Moment …</p>
+
+<section id="anmeldung" class="anmeldung" hidden>
+  <h1>Veranstaltung</h1>
+  <p class="muted">Für diesen Bereich gibt es einen eigenen Code. Der Code für Hallenreinigung und Sportanlagen passt hier nicht.</p>
+  <form id="formular" class="stapel" novalidate>
+    <div class="feld">
+      <label for="code">Code für die Veranstaltung</label>
+      <div class="feld-eingabe">
+        <input id="code" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" required>
+        <button class="augen-knopf" id="augen" type="button" aria-pressed="false" aria-label="Code anzeigen" title="Code anzeigen"><svg class="auge-auf" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg><svg class="auge-zu" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20C5 20 1 12 1 12a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg></button>
+      </div>
+    </div>
+    <button class="knopf primaer" id="anmelden-knopf" type="submit">Anmelden</button>
+    <p class="meldung fehler" id="anmeldung-fehler" role="alert"></p>
+  </form>
+</section>
+
+<section id="panel" class="stapel" hidden style="padding-top:16px">
+  <h1>Veranstaltung</h1>
+  <p class="muted" id="live-text">Aufgaben und Pfeile für die Veranstaltung. Alle sehen dasselbe.</p>
+
+  <div class="feld">
+    <span id="ich-text">Angemeldet als</span>
+    <div class="personen" id="ich-wahl"></div>
+  </div>
+
+  <div class="leiste" role="group" aria-label="Werkzeug">
+    <button type="button" id="w-ansehen" aria-pressed="true" title="Ansehen" aria-label="Ansehen"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.904 17.563a1.2 1.2 0 0 0 2.228 .308l2.09 -3.093l4.907 4.907a1.067 1.067 0 0 0 1.509 0l1.047 -1.047a1.067 1.067 0 0 0 0 -1.509l-4.907 -4.907l3.113 -2.09a1.2 1.2 0 0 0 -.309 -2.228l-13.582 -3.904l3.904 13.563" /></svg></button>
+    <button type="button" id="w-aufgabe" aria-pressed="false" title="Aufgabe setzen" aria-label="Aufgabe setzen"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /> <path d="M9 12h6" /> <path d="M12 9v6" /></svg></button>
+    <button type="button" id="w-pfeil" aria-pressed="false" title="Pfeil setzen" aria-label="Pfeil setzen"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 19a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /> <path d="M19 7a2 2 0 1 0 0 -4a2 2 0 0 0 0 4" /> <path d="M11 19h5.5a3.5 3.5 0 0 0 0 -7h-8a3.5 3.5 0 0 1 0 -7h4.5" /></svg></button>
+  </div>
+
+  <div class="tafel" id="vorlagen-tafel" style="margin-bottom:12px" hidden>
+    <div class="stapel">
+      <h2>Veranstaltung speichern und laden</h2>
+      <p class="muted">Speichere die Aufgaben und Pfeile als Vorlage und lade sie bei der nächsten Veranstaltung wieder. Beim Laden steht alles auf „nicht bearbeitet“. Dateianhänge werden nicht mitgespeichert.</p>
+      <div class="vl-neu" id="vl-neu">
+        <input id="vl-name" type="text" maxlength="60" placeholder="Name der Vorlage" aria-label="Name der Vorlage" autocomplete="off">
+        <button class="knopf klein primaer" id="vl-speichern" type="button">Als neue Vorlage speichern</button>
+      </div>
+      <div id="vl-liste"></div>
+      <p class="muted" id="vl-leer" hidden>Es gibt noch keine Vorlage.</p>
+      <p class="muted" id="vl-meldung" role="status"></p>
+      <div class="reihe">
+        <button class="knopf klein" id="vl-reset" type="button">Alles auf „nicht bearbeitet“ stellen</button>
+        <button class="knopf klein" id="vl-zu" type="button">Schließen</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tafel" id="filter-tafel" style="margin-bottom:12px" hidden>
+    <div class="stapel">
+      <h2>Nur Aufgaben von bestimmten Personen zeigen</h2>
+      <p class="muted">Tippe die Personen an, deren Aufgaben und Pfeile du sehen willst. Ist nichts ausgewählt, siehst du alles.</p>
+      <div class="filter-feld" id="filter-personen"></div>
+      <p class="muted" id="filter-stand">Es werden alle Einträge gezeigt.</p>
+      <div class="reihe">
+        <button class="knopf klein" id="filter-alle" type="button">Alle zeigen</button>
+        <button class="knopf klein" id="filter-zu" type="button">Schließen</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="map" id="map">
+    <svg id="svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Plan der Halle, Ebene -4, mit Aufgaben und Pfeilen">
+      <defs><filter id="etikett-schatten" x="-20%" y="-30%" width="140%" height="170%"><feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-opacity=".22"></feDropShadow></filter></defs>
+      <g id="world">
+        <g id="ebene-halle"><image id="gelaende" href="./bilder/gelaende-aussen.webp" x="86.56" y="65.2" width="704.16" height="452.85" aria-hidden="true"></image><image id="plan" href="./bilder/hallenplan-ebene-4.svg" x="30.6" y="23" width="793" height="525.1" aria-hidden="true"></image></g>
+        <g id="ebene-aussen"><image id="gelaende-voll" href="./bilder/gelaende-voll.webp" x="86.56" y="65.2" width="704.16" height="452.85" transform="rotate(180 438.64 291.625)" aria-hidden="true"></image></g>
+        <g id="pfeile"></g>
+        <g id="punkte"></g>
+        <g id="etiketten"></g>
+      </g>
+    </svg>
+    <div class="zoom">
+      <div class="etagen" id="etagen" role="group" aria-label="Ebene">
+        <span class="etagen-knauf" id="etagen-knauf" aria-hidden="true"></span>
+        <button class="eb" id="e-aussen" type="button" aria-pressed="false" title="Ebene EG">EG</button>
+        <button class="eb" id="e-halle" type="button" aria-pressed="true" title="Ebene UG">UG</button>
+      </div>
+      <button class="zb" id="z-rein" type="button" aria-label="Näher heranzoomen" title="Näher heran">+</button>
+      <button class="zb" id="z-raus" type="button" aria-label="Weiter weg zoomen" title="Weiter weg">−</button>
+      <button class="zb klein" id="z-ganz" type="button" aria-label="Ganzen Plan zeigen" title="Ganzer Plan">Alles</button>
+    </div>
+  </div>
+  <p class="meldung" id="karten-hinweis" aria-live="polite">Tippe auf einen Punkt oder Pfeil, um Details zu sehen.</p>
+
+  <section class="tafel" id="tafel" aria-live="polite">
+    <!-- Details zu einer Aufgabe oder einem Pfeil: nur lesen -->
+    <div id="t-detail" hidden>
+      <div class="kopfzeile">
+        <p class="obertitel" id="d-art">Aufgabe</p>
+        <h2 id="d-titel">—</h2>
+        <p class="muted" id="d-wer">—</p>
+      </div>
+      <div class="zeilen-ansicht" id="d-zeilen" hidden></div>
+      <div class="aktionen" style="margin-top:4px">
+        <button class="knopf klein sym-knopf" id="d-bearbeiten" type="button" title="Bearbeiten" aria-label="Bearbeiten"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /> <path d="M13.5 6.5l4 4" /></svg></button>
+        <button class="knopf klein sym-knopf" id="d-bearbeitung" type="button" title="In Bearbeitung setzen" aria-label="In Bearbeitung setzen"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /> <path d="M12 7v5l3 2" /></svg></button>
+        <button class="knopf klein sym-knopf" id="d-erledigt" type="button" title="Als erledigt markieren" aria-label="Als erledigt markieren"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12l5 5l10 -10" /></svg></button>
+        <button class="knopf klein gefahr sym-knopf" id="d-loeschen" type="button" title="Löschen" aria-label="Löschen"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7l16 0" /> <path d="M10 11l0 6" /> <path d="M14 11l0 6" /> <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /> <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg></button>
+      </div>
+      <div class="rueckfrage" id="d-rueckfrage" hidden>
+        <p class="muted" style="color:var(--ink)">Wirklich löschen? Das lässt sich nicht rückgängig machen.</p>
+        <div class="reihe">
+          <button class="knopf" id="d-loeschen-ja" type="button" style="background:var(--fehler); border-color:var(--fehler); color:#FFFFFF">Ja, löschen</button>
+          <button class="knopf" id="d-loeschen-nein" type="button">Nein</button>
+        </div>
+      </div>
+      <button class="textknopf" id="d-schliessen" type="button" style="margin-top:4px">Schließen</button>
+    </div>
+
+    <!-- Anlegen und Bearbeiten: ein Titel, dazu beliebig viele Textzeilen -->
+    <form id="t-formular" hidden>
+      <div class="stapel">
+        <h2 id="f-titel">Aufgabe an dieser Stelle</h2>
+        <div class="feld">
+          <label for="f-text" id="f-label">Was muss getan werden?</label>
+          <input type="text" id="f-text" maxlength="200" autocomplete="off" placeholder="Zum Beispiel: Netz am Ballfang prüfen">
+        </div>
+        <div class="feld">
+          <span id="f-wer-text">Wer macht das? Mehrere möglich, oder niemand.</span>
+          <div class="personen" role="group" aria-labelledby="f-wer-text" id="f-personen"></div>
+        </div>
+        <div class="frage-box" id="f-frage" hidden>
+          <p class="frage-text">Sollen alle ausgewählten Personen den Job als erledigt melden können?</p>
+          <label class="haken-zeile"><input type="checkbox" id="f-alle-erledigen"><span>Alle Personen in diesem Job dürfen den Job als erledigt melden</span></label>
+        </div>
+        <div class="feld" style="gap:8px">
+          <span id="f-zeilen-text">Textzeilen, Bilder und Dateien (optional)</span>
+          <ul class="zeilen-liste" id="f-zeilen" aria-labelledby="f-zeilen-text"></ul>
+          <p class="muted" id="f-zeilen-leer">Noch nichts dabei. Mit „+ Textzeile“ oder „+ Bild oder Datei“ kommt etwas dazu.</p>
+          <div class="zeile-knoepfe">
+            <button class="knopf klein" id="f-zeile-neu" type="button">+ Textzeile</button>
+            <button class="knopf klein" id="f-anhang-neu" type="button"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5" /></svg>+ Bild oder Datei</button>
+            <input type="file" id="f-anhang-datei" multiple hidden>
+          </div>
+        </div>
+        <p class="muted" id="f-hinweis">Bleibt die Person frei, gilt die Aufgabe für das ganze Personal.</p>
+        <p class="meldung fehler" id="f-fehler" role="alert"></p>
+        <div class="reihe">
+          <button class="knopf" id="f-abbrechen" type="button">Abbrechen</button>
+          <button class="knopf primaer" id="f-speichern" type="submit">Speichern</button>
+        </div>
+      </div>
+    </form>
+
+    <!-- Verlauf -->
+    <div id="t-verlauf" hidden>
+      <div class="stapel">
+        <h2>Verlauf</h2>
+        <p class="muted">Wer hat was erstellt, bearbeitet, verschoben, erledigt oder gelöscht?</p>
+        <div class="filter" role="group" aria-label="Verlauf filtern" id="v-filter"></div>
+        <ul class="verlauf" id="v-liste"></ul>
+        <p class="muted" id="v-leer" hidden>Keine Einträge in dieser Auswahl.</p>
+        <button class="knopf" id="v-zurueck" type="button">Zurück zur Karte</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="tafel" id="listen-tafel">
+    <div class="listen-kopf">
+      <h2 id="listen-titel">Offene Aufgaben</h2>
+      <button class="knopf klein" id="alle-zeigen" type="button" disabled>Alle anzeigen</button>
+    </div>
+    <ul class="verlauf" id="alle-liste" style="max-height:none"></ul>
+    <p class="muted" id="alle-leer" hidden>Noch nichts eingetragen. Tippe oben auf „Aufgabe“ und dann auf den Plan.</p>
+  </section>
+  <section class="tafel" id="erledigt-tafel">
+    <div class="listen-kopf">
+      <h2 id="erledigt-titel">Erledigte Aufgaben</h2>
+    </div>
+    <ul class="verlauf" id="erledigt-liste" style="max-height:none"></ul>
+    <p class="muted" id="erledigt-leer" hidden>Noch nichts erledigt.</p>
+    <button class="knopf klein" id="archiv-knopf" type="button" aria-expanded="false" aria-controls="archiv-inhalt">Aufgaben-Archiv</button>
+    <div id="archiv-inhalt" hidden>
+      <div class="filter" id="archiv-jahre" role="group" aria-label="Jahr im Archiv"></div>
+      <div class="filter" id="archiv-monate" role="group" aria-label="Monat im Archiv"></div>
+      <ul class="verlauf" id="archiv-liste"></ul>
+      <p class="muted" id="archiv-leer" hidden>Noch nichts archiviert. Erledigte Aufgaben kommen nach 30 Tagen hierher.</p>
+    </div>
+  </section>
+  <section class="tafel" id="geloescht-tafel">
+    <div class="listen-kopf">
+      <h2 id="geloescht-titel">Gelöschte Aufgaben</h2>
+    </div>
+    <p class="muted">Gelöschte Aufgaben werden nach 30 Tagen endgültig entfernt.</p>
+    <ul class="verlauf" id="geloescht-liste" style="max-height:none"></ul>
+    <p class="muted" id="geloescht-leer" hidden>Nichts gelöscht.</p>
+  </section>
+</section>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getDatabase, ref, get, set, update, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { firebaseConfig } from "./js/config.js";
+import { sitzung, anmelden as zugangAnmelden, abmelden, darf, darfAufgabe as darfAufgabeBereich, darfVertreten, darfZusatz, TABLETT, namen as namenLaden } from "./js/zugang.js";
+import { leisteStarten } from "./js/leiste.js";
+import { feierAnzeigen, feierBereinigt, feierSpielen } from "./js/feier.js";
+import { archivWeg, endetAm, istUeberFrist, monatsName } from "./js/archiv.js";
+
+const $ = (id) => document.getElementById(id);
+const darfAufgabe = (s, was, eigen, gemeinsam = false) => darfAufgabeBereich(s, was, eigen, gemeinsam, "veranstaltung");
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
+/* Die Personen stehen in der Datenbank und werden nach der Anmeldung geholt.
+   Bei einer Aufgabe steht weiterhin der Name, damit alte Einträge gültig bleiben. */
+let PERSONEN = [];
+/* Der Plan: Ebene -4 aus dem Fluchtwegeplan, ohne Fluchtzeichen, rote Linien und Feuermelder.
+   Der Rand um das Gebäude gehört dazu, damit man auch draußen etwas eintragen kann. */
+const PLAN = { x: 30.6, y: 23, w: 793, h: 525.1 };
+/* Symbol zum Verschieben: sechs Punkte. */
+const GRIFF_SVG = '<svg viewBox="0 0 12 18" aria-hidden="true" focusable="false"><circle cx="3" cy="3" r="1.7"/><circle cx="9" cy="3" r="1.7"/><circle cx="3" cy="9" r="1.7"/><circle cx="9" cy="9" r="1.7"/><circle cx="3" cy="15" r="1.7"/><circle cx="9" cy="15" r="1.7"/></svg>';
+
+/* Farben aus dem Farbschema der Seite. Ohne Person gilt die Aufgabe für das ganze Personal. */
+const wurzel = document.documentElement;
+const stilWert = (name, ersatz) => getComputedStyle(wurzel).getPropertyValue(name).trim() || ersatz;
+const farbeVon = (name) => PERSONEN.find((p) => p.n === name)?.c ?? stilWert("--ink", "#14201B");
+
+/* Farbschema: dieselbe Einstellung wie auf den anderen Seiten. Umgeschaltet wird
+   über die Einstellungen in der Personal-Leiste; danach zeichnet die Karte neu. */
+let gemerkt = null;
+try { gemerkt = localStorage.getItem("hkh-thema"); } catch (e) {}
+wurzel.dataset.theme = (gemerkt ? gemerkt === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+window.addEventListener("hkh-thema", () => { try { zeichnePlan(); alleZeichnen(); verlaufZeichnen(); } catch (err) {} });
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+const BASIS = "veranstaltung";
+/* Anhänge (Bilder und Dateien) liegen getrennt unter "veranstaltung_anhaenge/<id>". */
+const ANHANG = "veranstaltung_anhaenge";
+const ANHANG_ID = /^[A-Za-z0-9_-]{4,40}$/;
+const MAX_DATEI = 7 * 1024 * 1024;
+const DATEI_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /></svg>`;
+const istBild = (typ) => /^image\/(png|jpe?g|gif|webp|bmp|avif)$/i.test(typ || "");
+function groesseText(b) {
+  if (!b) return "";
+  return b >= 1048576 ? (b / 1048576).toFixed(1).replace(".", ",") + " MB" : Math.max(1, Math.round(b / 1024)) + " KB";
+}
+
+const istRechteFehler = (err) => /PERMISSION_DENIED/.test(`${err?.code ?? ""} ${err?.message ?? ""}`);
+function anmeldeFehler(err) {
+  if (istRechteFehler(err)) return "Der Code stimmt nicht.";
+  switch (err?.code) {
+    case "auth/network-request-failed": return "Keine Verbindung zum Server.";
+    case "auth/too-many-requests": return "Zu viele Versuche. Bitte warte einen Moment.";
+    default: return "Anmeldung hat nicht geklappt. Bitte noch einmal versuchen.";
+  }
+}
+/* Lehnt die Datenbank die Veranstaltung ab, heißt das fast immer: für den Zweig "veranstaltung"
+   fehlen noch die Regeln. Das ist kein abgelaufener Zugang, also bleibt das Gerät angemeldet. */
+const NICHT_FREI = "Kein Zugriff auf die Veranstaltung. Entweder gilt der Code nicht mehr, oder in der Datenbank fehlt der Zugang für die Veranstaltung.";
+
+let anmeldungLaeuft = false;
+function zeigeBereich(angemeldet) {
+  $("pruefung").hidden = true;
+  $("anmeldung").hidden = angemeldet;
+  $("panel").hidden = !angemeldet;
+  $("verlauf-knopf").hidden = !angemeldet;
+  $("filter-knopf").hidden = !angemeldet;
+  $("vorlagen-knopf").hidden = !angemeldet;
+  if (!angemeldet) $("vorlagen-tafel").hidden = true;
+  if (!angemeldet) $("filter-tafel").hidden = true;
+}
+/* Wer angemeldet ist, sieht diese Seite nur mit dem Recht für die Veranstaltung. */
+let ICH = null;
+/* Name der Person, für die gerade eingetragen wird. Ohne das Recht "Für andere
+   eintragen" immer die eigene. Wird bewusst nicht gemerkt: nach dem Neuladen
+   trägt wieder jeder für sich selbst ein. */
+let ALS = "";
+/* Die Feier-Einstellungen der angemeldeten Person, live: eine Änderung im Admin-Panel gilt sofort.
+   Ohne Eintrag oder ohne Leserecht bleibt die Standardfeier. */
+let FEIER = feierBereinigt(null);
+function feierBeobachten(si) {
+  if (!si?.bid || si.tablett) return;
+  onValue(ref(db, `feier/${si.bid}`),
+    (snap) => { FEIER = feierBereinigt(snap.val()); },
+    () => { FEIER = feierBereinigt(null); });
+}
+async function seiteStarten() {
+  let si = null;
+  try { si = await sitzung(); } catch (err) { console.error(err); }
+  if (!si) { zeigeBereich(false); return; }
+  if (!darf(si, "veranstaltung")) {
+    zeigeBereich(false);
+    $("anmeldung-fehler").textContent = "Dieser Zugang darf die Veranstaltung nicht sehen.";
+    return;
+  }
+  ICH = si;
+  feierBeobachten(si);
+  S.ich = si.name;
+  leisteStarten(si, "veranstaltung");
+  ALS = si.name;
+  const liste = await namenLaden();
+  PERSONEN = Object.entries(liste).map(([bid, n]) => ({ bid, n: n.name, c: n.farbe })).sort((x, y) => x.n.localeCompare(y.n, "de"));
+  if (!PERSONEN.some((x) => x.n === si.name)) PERSONEN.unshift({ bid: si.bid, n: si.name, c: si.farbe });
+  zeigeBereich(true);
+  rechteAnwenden();
+  /* Von Anfang an gefiltert: die eigenen Aufgaben und die für alle. "Alle zeigen" hebt das auf.
+     Der Admin sieht von Anfang an alle Aufgaben, ebenso das Tablet, auch wenn dort jemand angemeldet ist. */
+  if (!TABLETT && !si.tablett && !si.istAdmin) S.nurPersonen = [si.name, OHNE];
+  filterPersonenZeichnen();
+  starteSync();
+}
+/* Blendet aus, was dieser Zugang nicht darf. Die Datenbank prüft es zusätzlich. */
+function rechteAnwenden() {
+  const darfNeu = darfAufgabe(ICH, "erstellen");
+  $("w-aufgabe").disabled = !darfNeu;
+  $("w-pfeil").disabled = !darfNeu;
+  $("w-aufgabe").title = darfNeu ? "Aufgabe setzen" : "Dieser Zugang darf keine Aufgaben erstellen.";
+  $("w-pfeil").title = darfNeu ? "Pfeil setzen" : $("w-aufgabe").title;
+}
+const istMeine = (e) => !!e && !!ICH && (ICH.istAdmin || (!!e.ersteller && e.ersteller === ICH.bid));
+
+function augenTaste(knopfId, feldId) {
+  const knopf = $(knopfId);
+  const feld = $(feldId);
+  const setzen = (sichtbar) => {
+    feld.type = sichtbar ? "text" : "password";
+    knopf.setAttribute("aria-pressed", String(sichtbar));
+    const text = sichtbar ? "Code verbergen" : "Code anzeigen";
+    knopf.setAttribute("aria-label", text);
+    knopf.title = text;
+  };
+  knopf.addEventListener("click", () => { setzen(feld.type === "password"); feld.focus(); });
+  return () => setzen(false);
+}
+const codeVerbergen = augenTaste("augen", "code");
+
+$("formular").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const feld = $("code");
+  const knopf = $("anmelden-knopf");
+  const fehler = $("anmeldung-fehler");
+  const code = feld.value.trim();
+  fehler.textContent = "";
+  if (!code) { fehler.textContent = "Bitte den Zugangscode eingeben."; return; }
+  anmeldungLaeuft = true;
+  knopf.disabled = true;
+  try {
+    await zugangAnmelden(code);
+    feld.value = "";
+    codeVerbergen();
+    await seiteStarten();
+  } catch (err) {
+    console.error(err);
+    fehler.textContent = anmeldeFehler(err);
+    await abmelden().catch(() => {});
+  } finally {
+    anmeldungLaeuft = false;
+    knopf.disabled = false;
+  }
+});
+
+/* ---- Zustand ---- */
+const S = {
+  modus: "ansehen",
+  ich: "",   /* kommt aus der Anmeldung */
+  eintraege: {},
+  verlauf: {},
+  gewaehlt: null,
+  entwurf: null,
+  start: null,
+  verschiebt: null,
+  bearbeiten: null,
+  personen: [],
+  zeilen: [],
+  filter: "alle",
+  tafel: "aus",
+  /* Welche Etage gerade zu sehen ist, und wessen Einträge. Leer heißt: alle. */
+  etage: "halle",
+  nurPersonen: [],
+  /* Das Häkchen „Alle Personen dürfen erledigen“ der Aufgabe, die gerade bearbeitet wird */
+  alleErl: false,
+  /* Die Einträge, wie die Datenbank sie hat (für Kopien und das Archiv), und die Kästen unten */
+  roh: {},
+  geloescht: {},
+  geloeschtRoh: {},
+  archivRoh: null,
+  archivJahr: null,
+  archivMonat: null,
+};
+/* Die Frage erscheint nur bei mehreren Personen. Dann dürfen alle eingetragenen Personen die Aufgabe erledigen. */
+const alleErledigen = () => S.personen.length > 1 && S.alleErl;
+const ETAGEN = { halle: "UG", aussen: "EG" };
+const OHNE = "\u0000ohne";   /* steht im Filter für Einträge ohne Person */
+/* Eine Aufgabe gehört zu einer Etage, ein Pfeil kann von einer in die andere gehen. */
+const etageVon = (e) => (e?.etage === "aussen" ? "aussen" : "halle");
+const etageBis = (e) => (istPfeil(e) ? (e?.etage2 === "aussen" ? "aussen" : e?.etage2 === "halle" ? "halle" : etageVon(e)) : etageVon(e));
+const aufEtage = (e) => etageVon(e) === S.etage || etageBis(e) === S.etage;
+const passtZurPerson = (e) => S.nurPersonen.length === 0 ||
+  (e.personen?.length ? e.personen.some((n) => S.nurPersonen.includes(n)) : S.nurPersonen.includes(OHNE));
+const sichtbar = (e) => aufEtage(e) && passtZurPerson(e);
+/* Während eine Zeile in der Liste gezogen wird, wird die Liste nicht neu aufgebaut. */
+let ziehtGerade = false;
+
+const NS = "http://www.w3.org/2000/svg";
+const svg = $("svg");
+const welt = $("world");
+const map = $("map");
+const ebenePfeile = $("pfeile");
+const ebenePunkte = $("punkte");
+const ebeneEtiketten = $("etiketten");
+const neu = (name, werte) => { const el = document.createElementNS(NS, name); for (const k in werte) el.setAttribute(k, werte[k]); return el; };
+const leeren = (el) => { while (el.firstChild) el.removeChild(el.firstChild); };
+
+/* ---- Ansicht: Zoom und Verschieben ---- */
+const V = { z: 1, cx: PLAN.x + PLAN.w / 2, cy: PLAN.y + PLAN.h / 2 };
+const klemm = (w, min, max) => Math.min(max, Math.max(min, w));
+/* Zoom bis halb heraus, damit der Bereich um den Plan sichtbar und antippbar ist. Die Mitte darf
+   eine ganze Planbreite über den Rand hinauswandern. */
+const ZOOM_MIN = 0.5, ZOOM_MAX = 8, UMGEBUNG = 1;
+let sicht = { x: PLAN.x, y: PLAN.y, w: PLAN.w, h: PLAN.h };
+function ansichtSetzen() {
+  const r = svg.getBoundingClientRect();
+  if (r.width < 2 || r.height < 2) return;
+  const ca = r.width / r.height, wa = PLAN.w / PLAN.h;
+  let bw, bh;
+  if (ca > wa) { bh = PLAN.h * 1.03; bw = bh * ca; } else { bw = PLAN.w * 1.03; bh = bw / ca; }
+  V.z = klemm(V.z, ZOOM_MIN, ZOOM_MAX);
+  const w = bw / V.z, h = bh / V.z;
+  V.cx = klemm(V.cx, PLAN.x - UMGEBUNG * PLAN.w, PLAN.x + (1 + UMGEBUNG) * PLAN.w);
+  V.cy = klemm(V.cy, PLAN.y - UMGEBUNG * PLAN.h, PLAN.y + (1 + UMGEBUNG) * PLAN.h);
+  sicht = { x: V.cx - w / 2, y: V.cy - h / 2, w: w, h: h };
+  svg.setAttribute("viewBox", `${sicht.x.toFixed(2)} ${sicht.y.toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)}`);
+}
+/* Wie viele Planeinheiten sind ein Bildschirmpixel? Daraus ergeben sich Trefferflächen und Schriftgrößen. */
+function proPixel() {
+  const r = svg.getBoundingClientRect();
+  return r.width > 2 ? sicht.w / r.width : 1;
+}
+function zuWelt(klientX, klientY) {
+  const m = welt.getScreenCTM();
+  if (!m) return { x: 0, y: 0 };
+  const p = svg.createSVGPoint();
+  p.x = klientX; p.y = klientY;
+  const q = p.matrixTransform(m.inverse());
+  return { x: q.x, y: q.y };
+}
+function zoomAuf(klientX, klientY, z) {
+  const a = zuWelt(klientX, klientY);
+  V.z = klemm(z, ZOOM_MIN, ZOOM_MAX);
+  ansichtSetzen();
+  const b = zuWelt(klientX, klientY);
+  V.cx += a.x - b.x; V.cy += a.y - b.y;
+  ansichtSetzen();
+  zeichnePlan();
+}
+function zoomKnopf(faktor) {
+  const r = svg.getBoundingClientRect();
+  zoomAuf(r.left + r.width / 2, r.top + r.height / 2, V.z * faktor);
+}
+$("z-rein").addEventListener("click", () => zoomKnopf(1.6));
+$("z-raus").addEventListener("click", () => zoomKnopf(1 / 1.6));
+$("z-ganz").addEventListener("click", () => { V.z = 1; V.cx = PLAN.x + PLAN.w / 2; V.cy = PLAN.y + PLAN.h / 2; ansichtSetzen(); zeichnePlan(); });
+
+/* ---- Etage ---- */
+/* Halle und Außenbereich liegen deckungsgleich übereinander. Beim Umschalten
+   bleiben darum Ausschnitt und Zoom stehen: Wer einen Pfeil in der Halle
+   anfängt, wechselt die Etage und tippt das Ziel draußen an, und der Pfeil
+   behält beide Enden genau dort, wo sie gesetzt wurden. */
+function etageSetzen(etage, sagen) {
+  S.etage = etage === "aussen" ? "aussen" : "halle";
+  svg.dataset.etage = S.etage;
+  $("etagen").dataset.etage = S.etage;
+  $("e-halle").setAttribute("aria-pressed", String(S.etage === "halle"));
+  $("e-aussen").setAttribute("aria-pressed", String(S.etage === "aussen"));
+  svg.setAttribute("aria-label", `Plan der Ebene ${ETAGEN[S.etage]}, mit Aufgaben und Pfeilen`);
+  zeichnePlan();
+  if (!sagen) return;
+  if (S.start) hinweisSetzen(`Der Anfang liegt auf Ebene ${ETAGEN[etageVon(S.start)]}. Tippe das Ziel an, der Pfeil geht dann über beide Ebenen.`);
+  else hinweisSetzen(`Ebene ${ETAGEN[S.etage]}`);
+}
+$("e-halle").addEventListener("click", () => etageSetzen("halle", true));
+$("e-aussen").addEventListener("click", () => etageSetzen("aussen", true));
+/* Mausrad und Trackpad: kraeftiges Scrollen zoomt staerker. deltaMode rechnet Zeilen und Seiten um. */
+svg.addEventListener("wheel", (e) => {
+  e.preventDefault();
+  const einheit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1;
+  const schritt = klemm((e.deltaY * einheit) / 100, -6, 6);
+  zoomAuf(e.clientX, e.clientY, V.z * Math.pow(1.15, -schritt));
+}, { passive: false });
+window.addEventListener("resize", () => { ansichtSetzen(); zeichnePlan(); });
+/* Ändert sich der Platz der Karte (Tablet-Hülle, Leiste, Seitenwechsel), wird der Ausschnitt neu berechnet.
+   Sonst bliebe die Karte so klein, wie sie beim ersten Zeichnen gerechnet wurde. */
+try {
+  let kartenGroesse = "";
+  let kartenFrame = 0;
+  new ResizeObserver(() => {
+    const r = svg.getBoundingClientRect();
+    const g = Math.round(r.width) + "x" + Math.round(r.height);
+    if (g === kartenGroesse || kartenFrame) return;
+    kartenGroesse = g;
+    kartenFrame = requestAnimationFrame(() => { kartenFrame = 0; ansichtSetzen(); zeichnePlan(); });
+  }).observe(map);
+} catch (e) {}
+
+/* Zeiger auf der Karte: ein Finger schiebt die Karte, zwei Finger zoomen, und wer einen Eintrag
+   kurz gedrueckt haelt, nimmt ihn auf und kann ihn versetzen. Kurzes Tippen oeffnet ihn. */
+const HALTEN_KARTE = 350;
+const zeiger = new Map();
+let geste = null;
+
+function zweiFinger() {
+  const [a, b] = [...zeiger.values()];
+  return { d: Math.hypot(a.x - b.x, a.y - b.y), mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 };
+}
+svg.addEventListener("pointerdown", (e) => {
+  if (e.pointerType === "mouse" && e.button !== 0) return;
+  zeiger.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  try { svg.setPointerCapture(e.pointerId); } catch (err) {}
+  if (zeiger.size === 2) {
+    /* Der zweite Finger beendet alles andere: ab jetzt wird gezoomt. */
+    if (geste) clearTimeout(geste.uhr);
+    if (S.verschiebt) { S.verschiebt = null; hinweisZurueck(); }
+    const z = zweiFinger();
+    geste = { art: "zoom", d0: Math.max(z.d, 1), z0: V.z, welt0: zuWelt(z.mx, z.my), uhr: 0 };
+    zeichnePlan();
+    return;
+  }
+  if (zeiger.size > 2) return;
+  const welt = zuWelt(e.clientX, e.clientY);
+  geste = { art: "karte", id: e.pointerId, x: e.clientX, y: e.clientY, cx: V.cx, cy: V.cy, bewegt: false, uhr: 0 };
+  /* Aufnehmen geht nur beim Ansehen, nicht waehrend man etwas Neues setzt. */
+  if (S.modus === "ansehen" && S.tafel !== "formular" && S.tafel !== "verlauf") {
+    const griff = griffBei(welt);
+    if (griff && darfAufgabe(ICH, "verschieben", istMeine(griff.e))) {
+      geste.uhr = setTimeout(() => {
+        if (!geste || geste.art !== "karte" || geste.bewegt) return;
+        geste = { art: "eintrag", id: e.pointerId, welt0: welt, uhr: 0 };
+        S.verschiebt = { id: griff.e.id, teil: griff.teil, dx: 0, dy: 0 };
+        hinweisSetzen(istPfeil(griff.e)
+          ? (griff.teil === "ganz" ? "Pfeil ziehen und loslassen." : "Pfeilende ziehen und loslassen.")
+          : "Aufgabe ziehen und loslassen.");
+        zeichnePlan();
+      }, HALTEN_KARTE);
+    }
+  }
+});
+svg.addEventListener("pointermove", (e) => {
+  if (!zeiger.has(e.pointerId)) return;
+  zeiger.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (!geste) return;
+  if (geste.art === "zoom") {
+    if (zeiger.size < 2) return;
+    const z = zweiFinger();
+    V.z = klemm(geste.z0 * (z.d / geste.d0), ZOOM_MIN, ZOOM_MAX);
+    ansichtSetzen();
+    /* Die Stelle zwischen den Fingern bleibt unter den Fingern stehen. */
+    const jetzt = zuWelt(z.mx, z.my);
+    V.cx += geste.welt0.x - jetzt.x;
+    V.cy += geste.welt0.y - jetzt.y;
+    ansichtSetzen();
+    zeichnePlan();
+    return;
+  }
+  if (e.pointerId !== geste.id) return;
+  if (geste.art === "eintrag") {
+    const jetzt = zuWelt(e.clientX, e.clientY);
+    S.verschiebt.dx = jetzt.x - geste.welt0.x;
+    S.verschiebt.dy = jetzt.y - geste.welt0.y;
+    zeichnePlan();
+    return;
+  }
+  const dx = e.clientX - geste.x, dy = e.clientY - geste.y;
+  if (!geste.bewegt) {
+    if (Math.hypot(dx, dy) < 7) return;
+    geste.bewegt = true;
+    clearTimeout(geste.uhr);
+  }
+  const p = proPixel();
+  V.cx = geste.cx - dx * p;
+  V.cy = geste.cy - dy * p;
+  ansichtSetzen();
+});
+const zeigerWeg = (e) => {
+  if (!zeiger.delete(e.pointerId)) return;
+  try { svg.releasePointerCapture(e.pointerId); } catch (err) {}
+  if (!geste) return;
+  if (geste.art === "zoom") {
+    /* Bleibt ein Finger liegen, schiebt er weiter die Karte; das Loslassen gilt nicht als Tippen. */
+    if (zeiger.size === 1) {
+      const [id] = [...zeiger.keys()];
+      const q = zeiger.get(id);
+      geste = { art: "karte", id, x: q.x, y: q.y, cx: V.cx, cy: V.cy, bewegt: true, uhr: 0 };
+    } else if (zeiger.size === 0) {
+      geste = null;
+    }
+    zeichnePlan();
+    return;
+  }
+  if (e.pointerId !== geste.id) return;
+  const war = geste;
+  geste = null;
+  clearTimeout(war.uhr);
+  if (war.art === "eintrag") { versetzenSpeichern(); return; }
+  if (war.bewegt) { zeichnePlan(); return; }
+  planGetippt(zuWelt(e.clientX, e.clientY));
+};
+svg.addEventListener("pointerup", zeigerWeg);
+svg.addEventListener("pointercancel", zeigerWeg);
+
+/* Nur die geaenderten Koordinaten schreiben. Ein Aufnehmen ohne Bewegung aendert nichts. */
+async function versetzenSpeichern() {
+  const v = S.verschiebt;
+  S.verschiebt = null;
+  hinweisZurueck();
+  zeichnePlan();
+  if (!v) return;
+  const e = S.eintraege[v.id];
+  if (!e) return;
+  if (Math.abs(v.dx) < 0.3 && Math.abs(v.dy) < 0.3) return;
+  const pfad = `${BASIS}/eintraege/${v.id}`;
+  const werte = {};
+  if (istPfeil(e)) {
+    if (v.teil === "anfang" || v.teil === "ganz") { werte[`${pfad}/x1`] = r2(e.x1 + v.dx); werte[`${pfad}/y1`] = r2(e.y1 + v.dy); }
+    if (v.teil === "ende" || v.teil === "ganz") { werte[`${pfad}/x2`] = r2(e.x2 + v.dx); werte[`${pfad}/y2`] = r2(e.y2 + v.dy); }
+  } else {
+    werte[`${pfad}/x`] = r2(e.x + v.dx);
+    werte[`${pfad}/y`] = r2(e.y + v.dy);
+  }
+  await schreiben({ ...werte, ...verlaufPaar("versetzt", titelVon(e), e.person ?? null) });
+}
+
+/* ---- Einträge, Reihenfolge und Anzeige ---- */
+const istPfeil = (e) => e.art === "pfeil";
+const istOffen = (e) => e.status !== "erledigt";
+/* Der Titel ist die Aufgabe selbst. Die Textzeilen stehen nur in der Ansicht und im Formular. */
+const titelVon = (e) => e.text;
+/* Wann die Aufgabe in Bearbeitung gesetzt und wann sie erledigt wurde. */
+const zeitenVon = (e) => [
+  e.bearbeitetAm ? `in Bearbeitung seit ${zeitText(e.bearbeitetAm)}` : null,
+  e.erledigtAm && !istOffen(e) ? `erledigt ${zeitText(e.erledigtAm)}` : null,
+].filter(Boolean).join(" · ");
+const untertitelVon = (e) => {
+  const wer = e.personen.join(", ");
+  if (!istOffen(e)) return `✓ ${wer ? wer + " · " : ""}${zeitenVon(e) || "erledigt"}`;
+  const stand = e.status === "bearbeitung" ? (zeitenVon(e) || "in Bearbeitung") : "offen";
+  return wer ? `${wer} · ${stand}` : `Für alle · ${stand}`;
+};
+const punktFarbe = (e) => (istOffen(e) ? farbeVon(e.person) : stilWert("--erledigt", "#6B7770"));
+/* Die Karte bleibt immer weiß, auch im Dunkelmodus. Ihre Farben sind darum fest. Die Liste nimmt die Themenfarben. */
+const KARTE_DUNKEL = "#14201B", KARTE_ERLEDIGT = "#6B7770";
+const kartenFarbe = (e) => (istOffen(e) ? (e.person ? farbeVon(e.person) : KARTE_DUNKEL) : KARTE_ERLEDIGT);
+/* Schrift im Kreis: dunkel auf hellen Farben, hell auf dunklen. */
+const kontrast = (hex) => {
+  const text = String(hex);
+  if (text.length !== 7 || !/^#[0-9a-fA-F]{6}$/.test(text)) return "#14201B";
+  const n = parseInt(text.slice(1), 16);
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  return 0.299 * r + 0.587 * g + 0.114 * b > 150 ? "#14201B" : "#FFFFFF";
+};
+/* Reihenfolge: je kleiner der Schlüssel, desto höher steht der Eintrag. Alte Einträge ohne Schlüssel
+   werden nach dem Zeitpunkt ihres Eintrags eingeordnet. */
+const schluessel = (e) => (typeof e.reihe === "number" ? e.reihe : e.ts || 0);
+const sortiert = () => Object.entries(S.eintraege).map(([id, e]) => ({ id, ...e })).sort((a, b) => schluessel(a) - schluessel(b));
+const offene = () => sortiert().filter(istOffen);
+const neueReihe = () => Math.max(Date.now(), ...Object.values(S.eintraege).map(schluessel)) + 1000;
+/* Prio 1 steht ganz oben unter den offenen Einträgen. Erledigte bekommen keine Prio. */
+const nummerVon = (id) => {
+  const i = offene().findIndex((e) => e.id === id);
+  return i < 0 ? null : i + 1;
+};
+
+function pfeilZeichnen(ziel, x1, y1, x2, y2, farbe, p, gestrichelt) {
+  const dx = x2 - x1, dy = y2 - y1;
+  const laenge = Math.hypot(dx, dy) || 1;
+  const ux = dx / laenge, uy = dy / laenge;
+  const spitze = 9 * p;
+  const bx = x2 - ux * spitze, by = y2 - uy * spitze;
+  const linie = neu("line", { x1: x1, y1: y1, x2: bx, y2: by, stroke: farbe, "stroke-width": 4 * p, class: "strich" });
+  if (gestrichelt) linie.setAttribute("stroke-dasharray", `${6 * p} ${4 * p}`);
+  ziel.appendChild(linie);
+  const ax = bx - uy * spitze * 0.55, ay = by + ux * spitze * 0.55;
+  const cx = bx + uy * spitze * 0.55, cy = by - ux * spitze * 0.55;
+  ziel.appendChild(neu("polygon", { points: `${x2},${y2} ${ax},${ay} ${cx},${cy}`, fill: farbe }));
+}
+
+/* Kreis mit Prio-Zahl: bei einer Aufgabe der Punkt, bei einem Pfeil der Anfang. */
+function kreisZeichnen(ziel, x, y, e, nummer, p, gewaehlt) {
+  const farbe = kartenFarbe(e);
+  const mehrere = istOffen(e) && e.personen?.length > 1;
+  if (mehrere) {
+    const r = 8 * p, n = e.personen.length;
+    e.personen.forEach((name, i) => {
+      const a0 = -Math.PI / 2 + (i / n) * 2 * Math.PI, a1 = -Math.PI / 2 + ((i + 1) / n) * 2 * Math.PI;
+      const gross = a1 - a0 > Math.PI ? 1 : 0;
+      ziel.appendChild(neu("path", {
+        d: `M${x},${y} L${x + r * Math.cos(a0)},${y + r * Math.sin(a0)} A${r},${r} 0 ${gross} 1 ${x + r * Math.cos(a1)},${y + r * Math.sin(a1)} Z`,
+        fill: farbeVon(name),
+      }));
+    });
+  }
+  ziel.appendChild(neu("circle", {
+    cx: x, cy: y, r: 8 * p, fill: mehrere ? "none" : farbe,
+    class: "kugel" + (gewaehlt ? " gewaehlt" : ""),
+    "stroke-width": (gewaehlt ? 2.4 : 1.2) * p,
+  }));
+  if (!nummer) return;
+  const t = neu("text", { x: x, y: y + 3.6 * p, "text-anchor": "middle", "font-size": 10 * p, fill: kontrast(farbe), class: "nummer" });
+  t.textContent = String(nummer);
+  ziel.appendChild(t);
+}
+
+/* Waehrend des Versetzens zeigt die Karte den Eintrag schon an der neuen Stelle. */
+function mitVersatz(e) {
+  const v = S.verschiebt;
+  if (!v || v.id !== e.id) return e;
+  if (!istPfeil(e)) return { ...e, x: e.x + v.dx, y: e.y + v.dy };
+  const a = v.teil === "anfang" || v.teil === "ganz";
+  const b = v.teil === "ende" || v.teil === "ganz";
+  return { ...e, x1: e.x1 + (a ? v.dx : 0), y1: e.y1 + (a ? v.dy : 0), x2: e.x2 + (b ? v.dx : 0), y2: e.y2 + (b ? v.dy : 0) };
+}
+/* Ein weicher Ring zeigt, dass der Eintrag aufgenommen ist. */
+function haloZeichnen(alle, p) {
+  const e = alle.find((x) => x.id === S.verschiebt.id);
+  if (!e) return;
+  const t = S.verschiebt.teil;
+  const x = !istPfeil(e) ? e.x : t === "ende" ? e.x2 : t === "ganz" ? (e.x1 + e.x2) / 2 : e.x1;
+  const y = !istPfeil(e) ? e.y : t === "ende" ? e.y2 : t === "ganz" ? (e.y1 + e.y2) / 2 : e.y1;
+  ebenePunkte.appendChild(neu("circle", { cx: x, cy: y, r: 16 * p, fill: kartenFarbe(e), "fill-opacity": ".22" }));
+}
+
+function zeichnePlan() {
+  leeren(ebenePfeile); leeren(ebenePunkte); leeren(ebeneEtiketten);
+  const p = proPixel();
+  const zeigeText = V.z >= 1.8;
+  const nummern = new Map(offene().map((e, i) => [e.id, i + 1]));
+  /* Prio bleibt die Prio aller Aufgaben. Gefiltert wird nur, was gezeichnet wird. */
+  const alle = sortiert().filter(sichtbar).map(mitVersatz);
+  if (S.verschiebt) haloZeichnen(alle, p);
+  alle.filter(istPfeil).forEach((e) => {
+    pfeilZeichnen(ebenePfeile, e.x1, e.y1, e.x2, e.y2, kartenFarbe(e), p, false);
+    if (e.id === S.gewaehlt) {
+      ebenePfeile.appendChild(neu("line", { x1: e.x1, y1: e.y1, x2: e.x2, y2: e.y2, stroke: kartenFarbe(e), "stroke-width": 9 * p, "stroke-linecap": "round", "stroke-opacity": ".3" }));
+    }
+  });
+  alle.forEach((e) => {
+    const x = istPfeil(e) ? e.x1 : e.x, y = istPfeil(e) ? e.y1 : e.y;
+    kreisZeichnen(ebenePunkte, x, y, e, nummern.get(e.id), p, e.id === S.gewaehlt);
+  });
+  if (zeigeText) {
+    const schatten = $("etikett-schatten")?.firstElementChild;
+    if (schatten) { schatten.setAttribute("dy", 1 * p); schatten.setAttribute("stdDeviation", 1.2 * p); }
+    const belegt = [];
+    alle.forEach((e) => {
+      etikettZeichnen(istPfeil(e) ? e.x1 : e.x, istPfeil(e) ? e.y1 : e.y, titelVon(e), p, belegt);
+    });
+  }
+  if (S.start) {
+    ebenePunkte.appendChild(neu("circle", { cx: S.start.x, cy: S.start.y, r: 8 * p, fill: "none", stroke: S.personen.length ? farbeVon(S.personen[0]) : KARTE_DUNKEL, "stroke-width": 2.5 * p, "stroke-dasharray": `${4 * p} ${3 * p}` }));
+  }
+  if (S.entwurf) {
+    const f = S.personen.length ? farbeVon(S.personen[0]) : KARTE_DUNKEL;
+    if (S.entwurf.art === "pfeil") pfeilZeichnen(ebenePfeile, S.entwurf.x1, S.entwurf.y1, S.entwurf.x2, S.entwurf.y2, f, p, true);
+    else ebenePunkte.appendChild(neu("circle", { cx: S.entwurf.x, cy: S.entwurf.y, r: 8 * p, fill: f, stroke: "#FFFFFF", "stroke-width": 2 * p, "fill-opacity": ".85" }));
+  }
+}
+
+/* Nur der Titel steht in einer Box neben dem Punkt. Die Breite ergibt sich erst nach dem Messen,
+   deshalb wird zuerst gezeichnet und danach die Box gesetzt. */
+function etikettZeichnen(x, y, titel, p, belegt) {
+  const g = neu("g", {});
+  const kasten = neu("rect", { rx: 3 * p, ry: 3 * p, "stroke-width": p, filter: "url(#etikett-schatten)" });
+  const t = neu("text", { "font-size": 11 * p, "font-weight": "600", fill: KARTE_DUNKEL });
+  t.textContent = titel;
+  g.appendChild(kasten); g.appendChild(t);
+  ebeneEtiketten.appendChild(g);
+
+  /* Sehr langer Titel würde über die halbe Karte laufen und wird gekürzt. */
+  const platz = sicht.w * 0.45;
+  if (t.getComputedTextLength() > platz) {
+    let text = titel;
+    while (text.length > 6 && t.getComputedTextLength() > platz) {
+      text = text.slice(0, -2);
+      t.textContent = text + "…";
+    }
+  }
+  const breite = t.getComputedTextLength() + 11 * p;
+  const hoehe = 19 * p;
+  /* Die Box steht rechts vom Punkt. Passt sie dort nicht mehr ins Bild, springt sie nach links. */
+  const rechtsRand = sicht.x + sicht.w;
+  const passtRechts = x + 12 * p + breite <= rechtsRand;
+  const passtLinks = x - 12 * p - breite >= sicht.x;
+  const rechts = passtRechts || !passtLinks;
+  const bx = rechts ? x + 12 * p : x - 12 * p - breite;
+  let by = y - hoehe / 2;
+  /* Zwei Boxen übereinander wären unlesbar: die zweite rutscht nach unten. */
+  for (let versuch = 0; versuch < 4; versuch++) {
+    const stoesst = belegt.some((r) => bx < r.x + r.b && bx + breite > r.x && by < r.y + r.h && by + hoehe > r.y);
+    if (!stoesst) break;
+    by += hoehe + 2 * p;
+  }
+  by = Math.min(Math.max(by, sicht.y + 2 * p), sicht.y + sicht.h - hoehe - 2 * p);
+  belegt.push({ x: bx, y: by, b: breite, h: hoehe });
+  kasten.setAttribute("x", bx); kasten.setAttribute("y", by);
+  kasten.setAttribute("width", breite); kasten.setAttribute("height", hoehe);
+  t.setAttribute("x", bx + 5.5 * p); t.setAttribute("y", by + 13.2 * p);
+}
+
+/* Abstand eines Punktes zu einer Strecke, für das Antippen von Pfeilen. */
+function abstandStrecke(px, py, x1, y1, x2, y2) {
+  const dx = x2 - x1, dy = y2 - y1;
+  const n = dx * dx + dy * dy;
+  const t = n ? klemm(((px - x1) * dx + (py - y1) * dy) / n, 0, 1) : 0;
+  return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy));
+}
+function trefferBei(punkt, pixel) {
+  const grenze = pixel * proPixel();
+  let beste = null, bester = Infinity;
+  sortiert().forEach((e) => {
+    const d = istPfeil(e)
+      ? abstandStrecke(punkt.x, punkt.y, e.x1, e.y1, e.x2, e.y2)
+      : Math.hypot(punkt.x - e.x, punkt.y - e.y);
+    if (d <= grenze && d < bester) { bester = d; beste = e; }
+  });
+  return beste;
+}
+
+/* Welcher Teil liegt unter dem Finger? Die Enden eines Pfeils gehen vor seiner Linie. */
+function griffBei(punkt) {
+  const grenze = 16 * proPixel();
+  let beste = null, bester = Infinity;
+  sortiert().forEach((e) => {
+    if (istPfeil(e)) {
+      const da = Math.hypot(punkt.x - e.x1, punkt.y - e.y1);
+      const db = Math.hypot(punkt.x - e.x2, punkt.y - e.y2);
+      if (da <= grenze && da < bester) { bester = da; beste = { e, teil: "anfang" }; }
+      if (db <= grenze && db < bester) { bester = db; beste = { e, teil: "ende" }; }
+      if (da > grenze && db > grenze) {
+        const dl = abstandStrecke(punkt.x, punkt.y, e.x1, e.y1, e.x2, e.y2);
+        if (dl <= grenze && dl < bester) { bester = dl; beste = { e, teil: "ganz" }; }
+      }
+    } else {
+      const d = Math.hypot(punkt.x - e.x, punkt.y - e.y);
+      if (d <= grenze && d < bester) { bester = d; beste = { e, teil: "punkt" }; }
+    }
+  });
+  return beste;
+}
+
+function planGetippt(punkt) {
+  if (S.tafel === "formular" && !S.bearbeiten && S.modus === "aufgabe") {
+    /* Noch im Anlegen: ein weiterer Tipp verschiebt die Stelle. */
+    S.entwurf = { art: "aufgabe", x: punkt.x, y: punkt.y, etage: S.etage };
+    zeichnePlan();
+    return;
+  }
+  if (S.tafel === "formular" || S.tafel === "verlauf") return;
+  /* Wer auf einen bestehenden Eintrag tippt, öffnet ihn. Im Ansehen-Modus reicht ein größerer Bereich. */
+  const treffer = trefferBei(punkt, S.modus === "ansehen" ? 22 : 12);
+  if (treffer) { waehle(treffer.id); return; }
+  if (S.modus === "ansehen") { abwaehlen(); return; }
+  if (S.modus === "aufgabe") {
+    S.gewaehlt = null;
+    S.entwurf = { art: "aufgabe", x: punkt.x, y: punkt.y, etage: S.etage };
+    formularOeffnen(null);
+    return;
+  }
+  if (!S.start) {
+    S.gewaehlt = null;
+    S.start = { x: punkt.x, y: punkt.y, etage: S.etage };
+    S.entwurf = null;
+    hinweisSetzen("Start gesetzt. Jetzt das Ziel antippen.");
+    zeichnePlan();
+    return;
+  }
+  if (Math.hypot(punkt.x - S.start.x, punkt.y - S.start.y) < 12) return;
+  S.entwurf = { art: "pfeil", x1: S.start.x, y1: S.start.y, x2: punkt.x, y2: punkt.y, etage: S.start.etage ?? S.etage, etage2: S.etage };
+  S.start = null;
+  formularOeffnen(null);
+}
+
+/* ---- Tafel unten ---- */
+const HINWEISE = {
+  ansehen: "Tippen öffnet einen Punkt oder Pfeil. Gedrückt halten und ziehen versetzt ihn. Zoomen mit zwei Fingern oder dem Mausrad.",
+  aufgabe: "Tippe auf den Plan, auch draußen. Dort entsteht eine neue Aufgabe.",
+  pfeil: "Tippe erst auf den Start, dann auf das Ziel.",
+};
+function hinweisSetzen(text) { $("karten-hinweis").textContent = text; }
+function hinweisZurueck() { hinweisSetzen(HINWEISE[S.modus]); }
+function tafelZeigen(welche) {
+  S.tafel = welche;
+  $("t-detail").hidden = welche !== "detail";
+  $("t-formular").hidden = welche !== "formular";
+  $("t-verlauf").hidden = welche !== "verlauf";
+  $("tafel").hidden = welche === "aus";
+  $("verlauf-knopf").setAttribute("aria-pressed", String(welche === "verlauf"));
+  map.classList.toggle("setzen", welche !== "formular" && welche !== "verlauf" && S.modus !== "ansehen");
+}
+
+/* Nur lesen: Titel, Textzeilen und Stand. Bearbeiten geht erst über den Knopf „Bearbeiten“. */
+function waehle(id) {
+  const e = S.eintraege[id];
+  if (!e) { abwaehlen(); return; }
+  S.gewaehlt = id;
+  S.entwurf = null; S.start = null; S.bearbeiten = null;
+  $("d-rueckfrage").hidden = true;
+  $("d-art").textContent = istPfeil(e) ? "Pfeil" : "Aufgabe";
+  $("d-titel").textContent = titelVon(e);
+  const nr = nummerVon(id);
+  $("d-wer").textContent = untertitelVon(e) + (nr ? ` · Prio ${nr}` : "");
+  const erlText = istOffen(e) ? "Als erledigt markieren" : "Wieder öffnen";
+  $("d-erledigt").innerHTML = istOffen(e) ? '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12l5 5l10 -10" /></svg>' : '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19.95 11a8 8 0 1 0 -.5 4m.5 5v-5h-5" /></svg>';
+  $("d-erledigt").title = erlText; $("d-erledigt").setAttribute("aria-label", erlText);
+  const meine = istMeine(e);
+  /* Ist die Aufgabe für mehrere Personen mit Häkchen, dürfen die eingetragenen Personen sie erledigen. */
+  const gemeinsam = e.alleDuerfenErledigen === true && !!ICH && (e.personen ?? []).includes(ICH.name);
+  $("d-bearbeiten").disabled = !darfAufgabe(ICH, "bearbeiten", meine);
+  $("d-erledigt").disabled = !darfAufgabe(ICH, "erledigen", meine, gemeinsam);
+  const inArbeit = e.status === "bearbeitung";
+  const bearbText = inArbeit ? "Zurück auf offen" : "In Bearbeitung setzen";
+  $("d-bearbeitung").title = bearbText; $("d-bearbeitung").setAttribute("aria-label", bearbText);
+  $("d-bearbeitung").classList.toggle("primaer", inArbeit);
+  $("d-bearbeitung").disabled = !istOffen(e) || !darfAufgabe(ICH, "erledigen", meine, gemeinsam);
+  $("d-loeschen").disabled = !darfAufgabe(ICH, "loeschen", meine);
+  $("d-bearbeiten").title = $("d-bearbeiten").disabled ? "Diese Aufgabe darfst du nicht bearbeiten." : "Bearbeiten";
+  $("d-loeschen").title = $("d-loeschen").disabled ? "Diese Aufgabe darfst du nicht löschen." : "Löschen";
+  zeilenAnsichtZeichnen(e);
+  tafelZeigen("detail");
+  hinweisZurueck();
+  zeichnePlan();
+}
+function abwaehlen() {
+  S.gewaehlt = null; S.entwurf = null; S.start = null; S.bearbeiten = null;
+  $("d-rueckfrage").hidden = true;
+  tafelZeigen("aus");
+  hinweisZurueck();
+  zeichnePlan();
+}
+$("d-schliessen").addEventListener("click", abwaehlen);
+
+function zeilenAnsichtZeichnen(e) {
+  const zeilen = e.zeilen ?? [];
+  $("d-zeilen").innerHTML = zeilen.map((z) => {
+    const titel = z.titel ? `<p class="zeile-titel">${esc(z.titel)}</p>` : "";
+    if (z.art !== "anhang") return `<div class="zeile-block">${titel}<div class="zeile-text">${formatiert(z.text)}</div></div>`;
+    if (istBild(z.typ)) {
+      return `<div class="zeile-block">${titel}<button class="anhang-bild" type="button" data-bild="${esc(z.anhang)}" data-titel="${esc(z.titel || z.name)}" aria-label="Bild groß ansehen"><span class="anhang-laedt">Bild wird geladen …</span></button></div>`;
+    }
+    return `<div class="zeile-block">${titel}<button class="anhang-datei" type="button" data-datei="${esc(z.anhang)}" data-name="${esc(z.name)}" data-typ="${esc(z.typ)}">${DATEI_SVG}<span class="anhang-info"><span class="anhang-name">${esc(z.name)}</span><span class="anhang-stand">${esc(groesseText(z.groesse))} · Antippen zum Öffnen</span></span></button></div>`;
+  }).join("");
+  $("d-zeilen").hidden = zeilen.length === 0;
+  /* Bilder erst jetzt laden: so bleibt der Plan schnell, und nur wer die Aufgabe öffnet, lädt sie. */
+  $("d-zeilen").querySelectorAll("[data-bild]").forEach((knopf) => {
+    anhangLaden(knopf.dataset.bild).then((a) => {
+      if (!knopf.isConnected) return;
+      knopf.innerHTML = `<img src="${a.url}" alt="${esc(knopf.dataset.titel)}">`;
+    }).catch(() => { knopf.innerHTML = `<span class="anhang-laedt">Das Bild konnte nicht geladen werden.</span>`; });
+  });
+}
+$("d-zeilen").addEventListener("click", async (ev) => {
+  const bild = ev.target.closest("[data-bild]");
+  if (bild) {
+    try { const a = await anhangLaden(bild.dataset.bild); bildGrossZeigen(a.url, bild.dataset.titel); } catch (err) {}
+    return;
+  }
+  const datei = ev.target.closest("[data-datei]");
+  if (!datei) return;
+  /* PDFs öffnen sich in einem neuen Tab, alles andere wird heruntergeladen. Das Fenster wird
+     sofort geöffnet, sonst blockiert der Browser es nach dem Laden. */
+  const pdf = datei.dataset.typ === "application/pdf";
+  const fenster = pdf ? window.open("", "_blank") : null;
+  const stand = datei.querySelector(".anhang-stand");
+  const alt = stand?.textContent;
+  if (stand) stand.textContent = "Wird geladen …";
+  try {
+    const a = await anhangLaden(datei.dataset.datei);
+    if (fenster) { fenster.location.href = a.url; }
+    else {
+      const link = document.createElement("a");
+      link.href = a.url; link.download = datei.dataset.name || "Datei";
+      document.body.appendChild(link); link.click(); link.remove();
+    }
+    if (stand) stand.textContent = alt;
+  } catch (err) {
+    if (fenster) fenster.close();
+    if (stand) stand.textContent = "Konnte nicht geladen werden.";
+  }
+});
+function bildGrossZeigen(url, titel) {
+  $("bild-gross-img").src = url;
+  $("bild-gross-img").alt = titel || "";
+  $("bild-gross-titel").textContent = titel || "";
+  $("bild-gross").hidden = false;
+  $("bild-gross-zu").focus();
+}
+function bildGrossZu() { $("bild-gross").hidden = true; $("bild-gross-img").removeAttribute("src"); }
+$("bild-gross-zu").addEventListener("click", bildGrossZu);
+$("bild-gross").addEventListener("click", (ev) => { if (ev.target.id === "bild-gross" || ev.target.classList.contains("bild-gross-flaeche")) bildGrossZu(); });
+document.addEventListener("keydown", (ev) => { if (ev.key === "Escape" && !$("bild-gross").hidden) bildGrossZu(); });
+
+/* ---- Anhänge: Bilder und Dateien. Sie liegen getrennt unter "anhaenge/<id>", damit der Plan
+   sie nicht mitlädt. In der Aufgabe steht nur ein Verweis mit Name, Art und Größe. ---- */
+const anhangCache = new Map();
+function anhangLaden(aid) {
+  if (!anhangCache.has(aid)) {
+    anhangCache.set(aid, get(ref(db, `${ANHANG}/${aid}`)).then(async (snap) => {
+      const v = snap.val();
+      if (!v || typeof v.daten !== "string") throw new Error("fehlt");
+      const typ = typeof v.typ === "string" && v.typ ? v.typ : "application/octet-stream";
+      const blob = await (await fetch(`data:${typ};base64,${v.daten}`)).blob();
+      return { url: URL.createObjectURL(blob), typ, name: v.name };
+    }).catch((err) => { anhangCache.delete(aid); throw err; }));
+  }
+  return anhangCache.get(aid);
+}
+/* Fotos vom Handy sind oft mehrere MB groß. Sie werden auf höchstens 1600 Pixel verkleinert. */
+async function bildVerkleinern(datei) {
+  if (!/^image\/(jpe?g|png|webp|bmp)$/i.test(datei.type)) return datei;
+  try {
+    const bild = await createImageBitmap(datei);
+    const f = Math.min(1, 1600 / Math.max(bild.width, bild.height));
+    const c = document.createElement("canvas");
+    c.width = Math.round(bild.width * f); c.height = Math.round(bild.height * f);
+    const g = c.getContext("2d");
+    g.fillStyle = "#FFFFFF"; g.fillRect(0, 0, c.width, c.height);
+    g.drawImage(bild, 0, 0, c.width, c.height);
+    const blob = await new Promise((ok) => c.toBlob(ok, "image/jpeg", 0.82));
+    if (!blob || blob.size >= datei.size) return datei;
+    return new File([blob], datei.name.replace(/\.[^.]+$/, "") + ".jpg", { type: "image/jpeg" });
+  } catch (err) { return datei; }
+}
+const alsBase64 = (blob) => new Promise((ok, fehler) => {
+  const r = new FileReader();
+  r.onload = () => ok(String(r.result).replace(/^data:[^,]*,/, ""));
+  r.onerror = () => fehler(r.error);
+  r.readAsDataURL(blob);
+});
+async function anhangHochladen(z, datei) {
+  try {
+    const klein = await bildVerkleinern(datei);
+    if (klein.size > MAX_DATEI) throw Object.assign(new Error("zu groß"), { code: "gross" });
+    z.typ = klein.type || "application/octet-stream";
+    z.name = klein.name.slice(0, 200);
+    z.groesse = klein.size;
+    if (istBild(z.typ)) z.vorschau = URL.createObjectURL(klein);
+    zeilenLesen(); zeilenZeichnen();
+    const daten = await alsBase64(klein);
+    await set(ref(db, `${ANHANG}/${z.anhang}`), {
+      daten, typ: z.typ, name: z.name, groesse: z.groesse,
+      eintrag: S.bearbeiten || S.neuId, ts: Date.now(), von: ICH?.bid || "",
+    });
+    z.status = "fertig";
+  } catch (err) {
+    console.error(err);
+    z.status = "fehler";
+    z.fehler = err?.code === "gross" ? "Zu groß (höchstens 7 MB)." : istRechteFehler(err) ? "Keine Berechtigung." : "Hochladen hat nicht geklappt.";
+  }
+  zeilenLesen(); zeilenZeichnen();
+}
+$("f-anhang-neu").addEventListener("click", () => $("f-anhang-datei").click());
+$("f-anhang-datei").addEventListener("change", (ev) => {
+  const dateien = [...ev.target.files];
+  ev.target.value = "";
+  if (!dateien.length) return;
+  zeilenLesen();
+  dateien.forEach((datei) => {
+    const z = { id: neueId(), art: "anhang", titel: "", anhang: neueId(), name: datei.name, typ: datei.type, groesse: datei.size, status: "laedt", neu: true };
+    S.zeilen.push(z);
+    z.laeuft = anhangHochladen(z, datei);
+  });
+  zeilenZeichnen();
+  const letzte = $("f-zeilen").querySelector("li:last-child [data-feld='titel']");
+  if (letzte) { letzte.focus(); letzte.scrollIntoView({ block: "center", behavior: "smooth" }); }
+});
+/* Neu hochgeladene, aber nicht gespeicherte Anhänge wieder löschen. */
+function anhaengeVerwerfen(liste) {
+  const weg = {};
+  liste.forEach((z) => { if (z.art === "anhang" && z.anhang) weg[`${ANHANG}/${z.anhang}`] = null; });
+  if (Object.keys(weg).length) update(ref(db), weg).catch((err) => console.error(err));
+}
+
+/* Einfache Auszeichnung in Textzeilen: **fett**, __unterstrichen__, Zeilen mit "- " sind Stichpunkte.
+   Erst wird alles maskiert, dann werden nur diese Zeichen in HTML umgesetzt. */
+function formatiert(text) {
+  const inline = (s) => esc(s)
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/__(.+?)__/g, "<u>$1</u>");
+  const raus = [];
+  let liste = null;
+  String(text || "").split("\n").forEach((zeile) => {
+    const m = zeile.match(/^\s*[-•]\s+(.*)$/);
+    if (m) { (liste ??= []).push(`<li>${inline(m[1])}</li>`); return; }
+    if (liste) { raus.push(`<ul>${liste.join("")}</ul>`); liste = null; }
+    raus.push(zeile.trim() ? `<p>${inline(zeile)}</p>` : "");
+  });
+  if (liste) raus.push(`<ul>${liste.join("")}</ul>`);
+  return raus.join("");
+}
+$("f-zeilen").addEventListener("click", (e) => {
+  const k = e.target.closest("[data-format]");
+  if (!k) return;
+  const feld = k.closest("li")?.querySelector('[data-feld="text"]');
+  if (!feld) return;
+  const a = feld.selectionStart, b = feld.selectionEnd, v = feld.value;
+  if (k.dataset.format === "punkt") {
+    /* Jede markierte Zeile (oder die aktuelle) wird zum Stichpunkt, ein zweiter Druck nimmt ihn weg. */
+    const anf = v.lastIndexOf("\n", a - 1) + 1, endeRoh = v.indexOf("\n", b), ende = endeRoh < 0 ? v.length : endeRoh;
+    const block = v.slice(anf, ende).split("\n");
+    const alle = block.every((z) => /^\s*-\s/.test(z));
+    const neu = block.map((z) => (alle ? z.replace(/^\s*-\s/, "") : (/^\s*-\s/.test(z) ? z : "- " + z))).join("\n");
+    feld.value = v.slice(0, anf) + neu + v.slice(ende);
+    feld.setSelectionRange(anf, anf + neu.length);
+  } else {
+    const zeichen = k.dataset.format === "fett" ? "**" : "__";
+    const wort = v.slice(a, b) || (k.dataset.format === "fett" ? "fett" : "unterstrichen");
+    feld.value = v.slice(0, a) + zeichen + wort + zeichen + v.slice(b);
+    feld.setSelectionRange(a + 2, a + 2 + wort.length);
+  }
+  feld.focus();
+  feld.dispatchEvent(new Event("input", { bubbles: true }));
+});
+
+/* ---- Formular: ein Titel, dazu Textzeilen mit Überschrift und Text ---- */
+function formularOeffnen(id) {
+  const e = id ? S.eintraege[id] : null;
+  S.bearbeiten = id;
+  const pfeil = e ? istPfeil(e) : S.entwurf?.art === "pfeil";
+  /* Neue Einträge gehen an die Person, für die gerade eingetragen wird. */
+  S.personen = e ? [...e.personen] : (ALS && PERSONEN.some((p) => p.n === ALS) ? [ALS] : []);
+  S.alleErl = e ? e.alleDuerfenErledigen === true : false;
+  S.zeilen = e ? (e.zeilen ?? []).map((z) => z.art === "anhang"
+    ? { id: z.id, art: "anhang", titel: z.titel ?? "", anhang: z.anhang, name: z.name, typ: z.typ, groesse: z.groesse, status: "fertig" }
+    : { id: z.id, titel: z.titel ?? "", text: z.text ?? "" }) : [];
+  S.neuId = e ? null : neueId();
+  S.anhangWeg = [];
+  $("f-titel").textContent = e
+    ? (pfeil ? "Pfeil bearbeiten" : "Aufgabe bearbeiten")
+    : (pfeil ? "Pfeil: dorthin bringen" : "Aufgabe an dieser Stelle");
+  $("f-label").textContent = pfeil ? "Was soll dorthin gebracht werden?" : "Was muss getan werden?";
+  $("f-text").placeholder = pfeil ? "Zum Beispiel: Matten" : "Zum Beispiel: Netz am Ballfang prüfen";
+  $("f-text").value = e ? e.text : "";
+  $("f-hinweis").textContent = pfeil
+    ? "Bleibt die Person frei, gilt der Pfeil für das ganze Personal. Mit Person bekommt er deren Farbe."
+    : "Bleibt die Person frei, gilt die Aufgabe für das ganze Personal. Mit Person bekommt sie deren Farbe.";
+  $("f-fehler").textContent = "";
+  personenZeichnen();
+  zeilenZeichnen();
+  tafelZeigen("formular");
+  hinweisSetzen(e ? "Ändere den Titel, die Textzeilen oder die Person." : "Trage den Titel ein. Mit „+ Textzeile“ kommen weitere Zeilen dazu.");
+  zeichnePlan();
+  setTimeout(() => { try { $("f-text").focus(); } catch (err) {} }, 50);
+}
+function formularSchliessen() {
+  const war = S.bearbeiten;
+  anhaengeVerwerfen(S.zeilen.filter((z) => z.neu));
+  S.entwurf = null; S.start = null; S.bearbeiten = null; S.personen = []; S.zeilen = [];
+  if (war) waehle(war); else abwaehlen();
+}
+$("f-abbrechen").addEventListener("click", formularSchliessen);
+
+function anhangZeileHtml(z) {
+  const stand = z.status === "laedt" ? "Wird hochgeladen …" : z.status === "fehler" ? (z.fehler || "Fehler") : groesseText(z.groesse);
+  const mini = istBild(z.typ)
+    ? `<img class="anhang-mini" data-mini="${esc(z.anhang)}" alt=""${z.vorschau ? ` src="${z.vorschau}"` : ""}>`
+    : `<span class="anhang-mini">${DATEI_SVG}</span>`;
+  return `
+    <li class="zeile-bearbeiten" data-id="${esc(z.id)}">
+      <div class="zeile-kopf">
+        <button class="griff" type="button" aria-label="Verschieben: nach oben oder unten ziehen" title="Zum Verschieben ziehen">${GRIFF_SVG}</button>
+        <input type="text" data-feld="titel" maxlength="80" placeholder="Überschrift, zum Beispiel: Foto vom Schaden" value="${esc(z.titel)}" aria-label="Überschrift des Anhangs">
+        <button class="zeile-weg" type="button" data-weg="${esc(z.id)}">Entfernen</button>
+      </div>
+      <div class="anhang-zeile">${mini}<span class="anhang-info"><span class="anhang-name">${esc(z.name || "Datei")}</span><span class="anhang-stand${z.status === "fehler" ? " fehler" : ""}">${esc(stand)}</span></span></div>
+    </li>`;
+}
+function zeilenZeichnen() {
+  $("f-zeilen").innerHTML = S.zeilen.map((z) => z.art === "anhang" ? anhangZeileHtml(z) : `
+    <li class="zeile-bearbeiten" data-id="${esc(z.id)}">
+      <div class="zeile-kopf">
+        <button class="griff" type="button" aria-label="Textzeile verschieben: nach oben oder unten ziehen" title="Zum Verschieben ziehen">${GRIFF_SVG}</button>
+        <input type="text" data-feld="titel" maxlength="80" placeholder="Überschrift, zum Beispiel: Material" value="${esc(z.titel)}" aria-label="Überschrift der Textzeile">
+        <button class="zeile-weg" type="button" data-weg="${esc(z.id)}">Entfernen</button>
+      </div>
+      <div class="format-leiste" role="toolbar" aria-label="Text formatieren">
+        <button type="button" data-format="fett" title="Fett" aria-label="Fett"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h6a3.5 3.5 0 0 1 0 7h-6l0 -7" /> <path d="M13 12h1a3.5 3.5 0 0 1 0 7h-7v-7" /></svg></button>
+        <button type="button" data-format="unter" title="Unterstrichen" aria-label="Unterstrichen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v5a5 5 0 0 0 10 0v-5" /> <path d="M5 19h14" /></svg></button>
+        <button type="button" data-format="punkt" title="Stichpunkte" aria-label="Stichpunkte"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l11 0" /> <path d="M9 12l11 0" /> <path d="M9 18l11 0" /> <path d="M5 6l0 .01" /> <path d="M5 12l0 .01" /> <path d="M5 18l0 .01" /></svg></button>
+      </div>
+      <textarea data-feld="text" rows="2" maxlength="1000" placeholder="Was soll in dieser Zeile stehen?" aria-label="Text der Textzeile">${esc(z.text)}</textarea>
+    </li>`).join("");
+  $("f-zeilen-leer").hidden = S.zeilen.length > 0;
+  /* Vorschau gespeicherter Bilder nachladen */
+  $("f-zeilen").querySelectorAll("img[data-mini]:not([src])").forEach((img) => {
+    anhangLaden(img.dataset.mini).then((a) => { if (img.isConnected) img.src = a.url; }).catch(() => {});
+  });
+}
+/* Liest die Felder direkt aus der Anzeige. Noetig vor jedem Neuaufbau der Liste: ginge ein
+   Eingabe-Ereignis verloren, waere sonst das Getippte weg. */
+function zeilenLesen() {
+  $("f-zeilen").querySelectorAll("li[data-id]").forEach((li) => {
+    const z = S.zeilen.find((x) => x.id === li.dataset.id);
+    if (!z) return;
+    const t = li.querySelector('[data-feld="titel"]');
+    const x = li.querySelector('[data-feld="text"]');
+    if (t) z.titel = t.value;
+    if (x) z.text = x.value;
+  });
+}
+/* Eingaben werden sofort im Speicher der Seite festgehalten. Gespeichert wird erst beim Knopf „Speichern“. */
+$("f-zeilen").addEventListener("input", (e) => {
+  const feld = e.target.dataset?.feld;
+  if (!feld) return;
+  const id = e.target.closest("[data-id]")?.dataset.id;
+  const z = S.zeilen.find((x) => x.id === id);
+  if (z) z[feld] = e.target.value;
+});
+$("f-zeilen").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && e.target.dataset?.feld === "titel") e.preventDefault();
+});
+$("f-zeilen").addEventListener("click", (e) => {
+  const weg = e.target.closest("[data-weg]");
+  if (!weg) return;
+  zeilenLesen();
+  const z = S.zeilen.find((x) => x.id === weg.dataset.weg);
+  /* Neu Hochgeladenes kommt sofort weg, schon Gespeichertes erst beim Speichern (Abbrechen bleibt möglich). */
+  if (z?.art === "anhang") { if (z.neu) anhaengeVerwerfen([z]); else S.anhangWeg.push(z); }
+  S.zeilen = S.zeilen.filter((x) => x.id !== weg.dataset.weg);
+  zeilenZeichnen();
+});
+$("f-zeile-neu").addEventListener("click", () => {
+  zeilenLesen();
+  const z = { id: neueId(), titel: "", text: "" };
+  S.zeilen.push(z);
+  zeilenZeichnen();
+  const feld = $("f-zeilen").querySelector(`[data-id="${z.id}"] [data-feld="titel"]`);
+  if (feld) { feld.focus(); feld.scrollIntoView({ block: "center", behavior: "smooth" }); }
+});
+sortierbar($("f-zeilen"), ".griff", (von, nach) => {
+  zeilenLesen();
+  if (von !== nach) {
+    const [z] = S.zeilen.splice(von, 1);
+    S.zeilen.splice(nach, 0, z);
+  }
+  zeilenZeichnen();
+});
+/* Leere Zeilen werden beim Speichern nicht übernommen. Nummern ergeben sich aus der Reihenfolge. */
+function zeilenFuerSpeichern() {
+  zeilenLesen();
+  const ausgabe = [];
+  S.zeilen.forEach((z) => {
+    const titel = (z.titel || "").trim().slice(0, 80);
+    if (z.art === "anhang") {
+      if (z.status === "fertig") ausgabe.push({ art: "anhang", titel, anhang: z.anhang, name: z.name, typ: z.typ, groesse: z.groesse });
+      return;
+    }
+    const text = (z.text || "").trimEnd().replace(/^\s*\n/, "").slice(0, 1000);
+    if (!titel && !text.trim()) return;
+    ausgabe.push({ titel, text });
+  });
+  return ausgabe.length ? JSON.stringify(ausgabe) : null;
+}
+
+$("t-formular").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const titel = $("f-text").value.trim();
+  if (!titel) { $("f-fehler").textContent = "Bitte den Titel eintragen."; $("f-text").focus(); return; }
+  const knopf = $("f-speichern");
+  knopf.disabled = true;
+  try {
+    /* Erst speichern, wenn alle Anhänge oben sind. */
+    if (S.zeilen.some((z) => z.status === "laedt")) {
+      $("f-fehler").textContent = "Anhänge werden noch hochgeladen …";
+      await Promise.all(S.zeilen.map((z) => z.laeuft).filter(Boolean));
+      $("f-fehler").textContent = "";
+    }
+    if (S.zeilen.some((z) => z.art === "anhang" && z.status === "fehler")) {
+      $("f-fehler").textContent = "Ein Anhang konnte nicht hochgeladen werden. Bitte entfernen oder noch einmal hinzufügen.";
+      return;
+    }
+    const zeilen = zeilenFuerSpeichern();
+    const wegAnhaenge = {};
+    (S.anhangWeg || []).forEach((z) => { wegAnhaenge[`${ANHANG}/${z.anhang}`] = null; });
+    if (S.bearbeiten) {
+      const id = S.bearbeiten;
+      if (!S.eintraege[id]) { formularSchliessen(); return; }
+      /* Nur die geänderten Felder schreiben, damit nichts anderes überschrieben wird. */
+      const ok = await schreiben({
+        [`${BASIS}/eintraege/${id}/text`]: titel,
+        [`${BASIS}/eintraege/${id}/person`]: S.personen[0] ?? null,
+        [`${BASIS}/eintraege/${id}/personen`]: S.personen.length ? S.personen.join("|") : null,
+        [`${BASIS}/eintraege/${id}/alleDuerfenErledigen`]: alleErledigen() ? true : null,
+        [`${BASIS}/eintraege/${id}/zeilen`]: zeilen,
+        ...verlaufPaar("bearbeitet", titel, S.personen[0] ?? null),
+      });
+      if (ok && Object.keys(wegAnhaenge).length) update(ref(db), wegAnhaenge).catch((err) => console.error(err));
+      if (!ok) return;
+      S.bearbeiten = null; S.personen = []; S.zeilen = []; S.anhangWeg = [];
+      waehle(id);
+    } else {
+      const id = S.neuId || neueId();
+      /* Wer für jemand anderen einträgt, legt die Aufgabe in dessen Namen an:
+         sie gehört dann dieser Person, als hätte sie sie selbst erstellt. */
+      const vertreten = ALS && ICH && ALS !== ICH.name && darfVertreten(ICH, "veranstaltung");
+      const ersteller = vertreten ? (PERSONEN.find((x) => x.n === ALS)?.bid || ICH?.bid || "") : (ICH?.bid || "");
+      const basis = { text: titel, status: "offen", ts: Date.now(), reihe: neueReihe(), ersteller };
+      if (S.personen.length) { basis.person = S.personen[0]; basis.personen = S.personen.join("|"); }
+      if (alleErledigen()) basis.alleDuerfenErledigen = true;
+      if (zeilen) basis.zeilen = zeilen;
+      /* Die Etage steht beim Entwurf fest: ein Pfeil merkt sich die Etage seines
+         Anfangs und die seines Endes, darum kann er von drinnen nach draußen gehen. */
+      const eintrag = S.entwurf.art === "pfeil"
+        ? { art: "pfeil", ...basis, x1: r2(S.entwurf.x1), y1: r2(S.entwurf.y1), x2: r2(S.entwurf.x2), y2: r2(S.entwurf.y2),
+            etage: S.entwurf.etage ?? S.etage, etage2: S.entwurf.etage2 ?? S.etage }
+        : { art: "aufgabe", ...basis, x: r2(S.entwurf.x), y: r2(S.entwurf.y), etage: S.entwurf.etage ?? S.etage };
+      const ok = await schreiben({
+        [`${BASIS}/eintraege/${id}`]: eintrag,
+        ...verlaufPaar("erstellt", titel, eintrag.person),
+      });
+      if (!ok) return;
+      S.entwurf = null; S.personen = []; S.zeilen = []; S.neuId = null;
+      abwaehlen();
+      hinweisSetzen("Gespeichert. Die Karte zeigt es jetzt.");
+    }
+  } finally {
+    knopf.disabled = false;
+  }
+});
+
+$("d-bearbeiten").addEventListener("click", () => { if (S.gewaehlt) formularOeffnen(S.gewaehlt); });
+
+/* Die Zeitpunkte stehen in einem eigenen Schreibvorgang. So klappt das Abhaken auch dann,
+   wenn die Regeln für die neuen Felder noch nicht veröffentlicht sind. */
+function zeitenSetzen(pfad, werte) {
+  return update(ref(db, pfad), werte).catch((err) => console.error(err));
+}
+$("d-bearbeitung").addEventListener("click", async () => {
+  const id = S.gewaehlt;
+  const e = id && S.eintraege[id];
+  if (!e || !istOffen(e)) return;
+  const wirdBearbeitet = e.status !== "bearbeitung";
+  const pfad = `${BASIS}/eintraege/${id}`;
+  const ok = await schreiben({
+    [`${pfad}/status`]: wirdBearbeitet ? "bearbeitung" : "offen",
+    ...verlaufPaar(wirdBearbeitet ? "bearbeitung" : "geoeffnet", titelVon(e), e.person ?? null),
+  });
+  if (ok) await zeitenSetzen(pfad, wirdBearbeitet ? { bearbeitetAm: Date.now(), erledigtAm: null } : { bearbeitetAm: null, erledigtAm: null });
+  waehle(id);
+});
+
+$("d-erledigt").addEventListener("click", async () => {
+  const id = S.gewaehlt;
+  const e = id && S.eintraege[id];
+  if (!e) return;
+  const wirdErledigt = istOffen(e);
+  /* Die Feier startet sofort, nicht erst nach dem Speichern: unterwegs kann die Verbindung fehlen. */
+  if (wirdErledigt && FEIER.aktiv && feierAnzeigen()) feierSpielen(FEIER);
+  const pfad = `${BASIS}/eintraege/${id}`;
+  const ok = await schreiben({
+    [`${pfad}/status`]: wirdErledigt ? "erledigt" : "offen",
+    ...verlaufPaar(wirdErledigt ? "erledigt" : "geoeffnet", titelVon(e), e.person ?? null),
+  });
+  if (ok) await zeitenSetzen(pfad, wirdErledigt ? { erledigtAm: Date.now() } : { erledigtAm: null, bearbeitetAm: null });
+  waehle(id);
+});
+
+$("d-loeschen").addEventListener("click", () => { $("d-rueckfrage").hidden = false; $("d-loeschen-ja").focus(); });
+$("d-loeschen-nein").addEventListener("click", () => { $("d-rueckfrage").hidden = true; $("d-loeschen").focus(); });
+/* ---- Löschen und Aufräumen ----
+   Löschen geht in zwei Schritten: erst die Kopie unter „geloescht“, dann das Original weg.
+   Nach 30 Tagen verschwindet die Kopie ganz (mit den Anhängen). Erledigte Aufgaben kommen nach
+   30 Tagen ins Archiv: erst die Kopie unter „archiv“, dann das Original weg. Jeder Schritt lässt
+   sich wiederholen, falls einer nach einem Fehler stehen bleibt. */
+async function gelingt(schritt) {
+  try {
+    await schritt();
+    return true;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
+}
+$("d-loeschen-ja").addEventListener("click", async () => {
+  const id = S.gewaehlt;
+  const e = id && S.eintraege[id];
+  const roh = id && S.roh[id];
+  if (!e || !roh) return;
+  /* Die Kopie zuerst. Gibt es sie schon, weil ein früherer Versuch halb geklappt hat, entfällt dieser Schritt. */
+  if (!S.geloescht[id]) {
+    const kopie = { ...roh, geloescht: Date.now(), geloeschtVon: S.ich };
+    const ok = await schreiben({
+      [`${BASIS}/geloescht/${id}`]: kopie,
+      ...verlaufPaar("geloescht", titelVon(e), e.person ?? null),
+    });
+    if (!ok) return;
+  }
+  const weg = await gelingt(() => set(ref(db, `${BASIS}/eintraege/${id}`), null));
+  abwaehlen();
+  hinweisSetzen(weg
+    ? "Gelöscht. Die Aufgabe steht 30 Tage im Kasten „Gelöschte Aufgaben“."
+    : "Die Aufgabe steht im Kasten „Gelöschte Aufgaben“, ist aber noch nicht ganz weg. Bitte noch einmal löschen.");
+});
+
+/* Das Aufräumen läuft beim Öffnen einmal, und nur, wenn beide Listen geladen sind.
+   Wer fremde Aufgaben löschen darf, räumt auf; alle anderen lassen alles stehen. */
+let eintraegeDa = false, geloeschtDa = false, aufgeraeumt = false;
+function aufraeumenStarten() {
+  if (aufgeraeumt || !eintraegeDa || !geloeschtDa || !ICH) return;
+  aufgeraeumt = true;
+  if (!darfZusatz(ICH, "veranstaltung", "loeschenFremde")) return;
+  aufraeumen().catch((err) => console.error(err));
+}
+async function aufraeumen() {
+  const jetzt = Date.now();
+  /* Gelöschte: Ist das Original nach einem Fehler noch da, kommt es jetzt weg. Nach 30 Tagen geht die Kopie. */
+  for (const [id, kopie] of Object.entries(S.geloeschtRoh)) {
+    if (S.roh[id]) await gelingt(() => set(ref(db, `${BASIS}/eintraege/${id}`), null));
+    if (istUeberFrist(kopie?.geloescht, jetzt)
+      && await gelingt(() => set(ref(db, `${BASIS}/geloescht/${id}`), null))) {
+      anhaengeVerwerfen(S.geloescht[id]?.zeilen ?? []);
+    }
+  }
+  /* Erledigte: Ohne Datum bekommt die Aufgabe jetzt eins, damit die 30 Tage laufen. Nach 30 Tagen ins Archiv. */
+  for (const [id, e] of Object.entries(S.eintraege)) {
+    if (e.status !== "erledigt" || S.geloeschtRoh[id]) continue;
+    if (!e.erledigtAm) {
+      await gelingt(() => update(ref(db, `${BASIS}/eintraege/${id}`), { erledigtAm: jetzt }));
+      continue;
+    }
+    if (!istUeberFrist(e.erledigtAm, jetzt)) continue;
+    const kopie = { ...S.roh[id], archiviertAm: jetzt };
+    if (await gelingt(() => set(ref(db, `${BASIS}/archiv/${archivWeg(e.erledigtAm, id)}`), kopie))) {
+      await gelingt(() => set(ref(db, `${BASIS}/eintraege/${id}`), null));
+    }
+  }
+}
+
+/* ---- Prio: Reihenfolge der offenen Einträge ändern ---- */
+/* Verschiebt einen Eintrag von Platz „von“ nach Platz „nach“ (0 = ganz oben). Geschrieben wird nur
+   der neue Schlüssel des verschobenen Eintrags, außer die Zwischenräume sind aufgebraucht. */
+async function reihenfolgeAendern(von, nach) {
+  const liste = offene();
+  const e0 = liste[von];
+  if (e0 && !darfAufgabe(ICH, "prio")) {
+    hinweisSetzen("Die Priorität darfst du nicht ändern.");
+    alleZeichnen();
+    return;
+  }
+  if (von < 0 || nach < 0 || von >= liste.length || nach >= liste.length || von === nach) { alleZeichnen(); return; }
+  const [e] = liste.splice(von, 1);
+  liste.splice(nach, 0, e);
+  const davor = liste[nach - 1], danach = liste[nach + 1];
+  let neuerSchluessel;
+  if (davor && danach) neuerSchluessel = (schluessel(davor) + schluessel(danach)) / 2;
+  else if (davor) neuerSchluessel = schluessel(davor) + 1000;
+  else if (danach) neuerSchluessel = schluessel(danach) - 1000;
+  else neuerSchluessel = schluessel(e);
+  const werte = {};
+  if (davor && danach && !(schluessel(davor) < neuerSchluessel && neuerSchluessel < schluessel(danach))) {
+    liste.forEach((x, i) => { werte[`${BASIS}/eintraege/${x.id}/reihe`] = (i + 1) * 1000; });
+  } else {
+    werte[`${BASIS}/eintraege/${e.id}/reihe`] = neuerSchluessel;
+  }
+  await schreiben({
+    ...werte,
+    ...verlaufPaar("verschoben", `${e.text} · Prio ${nach + 1}`, e.person ?? null),
+  });
+  alleZeichnen();
+}
+
+/* ---- Speichern und Verlauf ---- */
+const neueId = () => "e" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const r2 = (n) => Math.round(n * 100) / 100;
+function verlaufPaar(was, titel, person) {
+  return { [`${BASIS}/verlauf/${neueId()}`]: { wer: S.ich, was: was, titel: String(titel).slice(0, 200), person: person ?? null, ts: Date.now() } };
+}
+async function schreiben(werte) {
+  try {
+    await update(ref(db), werte);
+    return true;
+  } catch (err) {
+    console.error(err);
+    hinweisSetzen(istRechteFehler(err) ? NICHT_FREI : "Das konnte nicht gespeichert werden. Bitte noch einmal versuchen.");
+    return false;
+  }
+}
+/* Der Verlauf wird nie automatisch gekürzt: einmal Eingetragenes bleibt stehen.
+   Angezeigt werden die neuesten 100 Einträge. */
+
+/* ---- Personen ---- */
+function personenZeichnen() {
+  if (!ICH) { $("ich-wahl").innerHTML = ""; }
+  else if (!darfVertreten(ICH, "veranstaltung")) {
+    $("ich-wahl").innerHTML = `<span class="person" aria-pressed="true"><span class="farbe" style="background:${esc(ICH.farbe)}"></span>${esc(ICH.name)}</span>`;
+  } else {
+    /* Mit dem Recht "Für andere eintragen" lässt sich umstellen, in wessen Namen
+       eingetragen wird. An den eigenen Rechten ändert das nichts. */
+    $("ich-wahl").innerHTML = PERSONEN.map((p) =>
+      `<button class="person" type="button" data-als="${esc(p.n)}" aria-pressed="${ALS === p.n}"><span class="farbe" style="background:${p.c}"></span>${esc(p.n)}${ALS === p.n ? " ✓" : ""}</button>`
+    ).join("");
+  }
+  $("f-personen").innerHTML = PERSONEN.map((p) =>
+    `<button class="person" type="button" data-person="${esc(p.n)}" aria-pressed="${S.personen.includes(p.n)}"><span class="farbe" style="background:${p.c}"></span>${esc(p.n)}${S.personen.includes(p.n) ? " ✓" : ""}</button>`
+  ).join("");
+  /* Mehrere Personen: die Frage, ob alle die Aufgabe erledigen dürfen */
+  $("f-frage").hidden = S.personen.length < 2;
+  $("f-alle-erledigen").checked = S.alleErl;
+}
+$("ich-wahl").addEventListener("click", (e) => {
+  const knopf = e.target.closest("[data-als]");
+  if (!knopf) return;
+  ALS = knopf.dataset.als;
+  S.ich = ALS;
+  $("ich-text").textContent = ICH && ALS === ICH.name ? "Angemeldet als" : "Eingetragen wird für";
+  personenZeichnen();
+  hinweisSetzen(`Neue Einträge gehen jetzt auf ${ALS}.`);
+});
+$("f-personen").addEventListener("click", (e) => {
+  const knopf = e.target.closest("[data-person]");
+  if (!knopf) return;
+  const n = knopf.dataset.person;
+  S.personen = S.personen.includes(n) ? S.personen.filter((x) => x !== n) : [...S.personen, n];
+  personenZeichnen();
+  zeichnePlan();
+});
+$("f-alle-erledigen").addEventListener("change", (e) => {
+  S.alleErl = e.target.checked;
+});
+
+/* ---- Verlauf anzeigen ---- */
+const FILTER = [["alle", "Alle"], ["erstellt", "erstellt"], ["bearbeitet", "bearbeitet"], ["erledigt", "erledigt"], ["geloescht", "gelöscht"]];
+const WORT = { erstellt: "erstellt", bearbeitet: "bearbeitet", erledigt: "erledigt", geoeffnet: "wieder geöffnet", bearbeitung: "in Bearbeitung gesetzt", geloescht: "gelöscht", verschoben: "verschoben", versetzt: "auf der Karte versetzt", vorlage: "die Vorlage geladen", zurueck: "zurückgesetzt auf nicht bearbeitet" };
+function zeitText(ts) {
+  if (!ts) return "";
+  const d = new Date(ts);
+  const uhr = d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+  const tag = (x) => new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Berlin" }).format(x);
+  const heute = tag(new Date());
+  const gestern = tag(new Date(Date.now() - 86400000));
+  if (tag(d) === heute) return `Heute, ${uhr}`;
+  if (tag(d) === gestern) return `Gestern, ${uhr}`;
+  return `${d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" })}, ${uhr}`;
+}
+function filterZeichnen() {
+  $("v-filter").innerHTML = FILTER.map(([wert, text]) =>
+    `<button type="button" data-filter="${wert}" aria-pressed="${S.filter === wert}">${esc(text)}</button>`
+  ).join("");
+}
+$("v-filter").addEventListener("click", (e) => {
+  const knopf = e.target.closest("[data-filter]");
+  if (!knopf) return;
+  S.filter = knopf.dataset.filter;
+  filterZeichnen();
+  verlaufZeichnen();
+});
+function verlaufZeichnen() {
+  const passt = (v) => S.filter === "alle" || v.was === S.filter || (S.filter === "bearbeitet" && (v.was === "geoeffnet" || v.was === "bearbeitung"));
+  const reihe = Object.values(S.verlauf).filter((v) => v && v.titel && passt(v)).sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, 100);
+  $("v-liste").innerHTML = reihe.map((v) =>
+    `<li><span class="farbe" style="background:${farbeVon(v.person)}"></span><span class="zeile"><span><strong>${esc(v.wer || "?")}</strong> hat ${esc(WORT[v.was] || v.was)}: ${esc(v.titel)}</span><span class="wann">${esc(zeitText(v.ts))}</span></span></li>`
+  ).join("");
+  $("v-leer").hidden = reihe.length > 0;
+}
+$("verlauf-knopf").addEventListener("click", () => {
+  if (S.tafel === "verlauf") { S.gewaehlt ? waehle(S.gewaehlt) : abwaehlen(); return; }
+  S.entwurf = null; S.start = null;
+  filterZeichnen();
+  verlaufZeichnen();
+  tafelZeigen("verlauf");
+  zeichnePlan();
+});
+$("v-zurueck").addEventListener("click", () => { S.gewaehlt ? waehle(S.gewaehlt) : abwaehlen(); });
+
+/* Zur Aufgabe springen: Etage wechseln, heranzoomen, auswählen. */
+function zuEintragSpringen(id) {
+  const e = S.eintraege[id];
+  if (!e) return;
+  if (!aufEtage(e)) etageSetzen(etageVon(e));
+  const x = istPfeil(e) ? (e.x1 + e.x2) / 2 : e.x, y = istPfeil(e) ? (e.y1 + e.y2) / 2 : e.y;
+  V.z = Math.max(V.z, 2.4); V.cx = x; V.cy = y;
+  ansichtSetzen();
+  waehle(id);
+  map.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+/* ---- Nach Person filtern ---- */
+/* Der Filter blendet nur aus. Er ändert nichts an den Einträgen und nichts an
+   der Prio-Reihenfolge; die bleibt die Reihenfolge aller Aufgaben. */
+function filterPersonenZeichnen() {
+  const ohneDa = Object.values(S.eintraege).some((e) => !e.personen?.length);
+  const knopf = (wert, name, farbe, extra) =>
+    `<button class="person" type="button" ${extra} aria-pressed="${S.nurPersonen.includes(wert)}"><span class="farbe" style="background:${farbe}"></span>${esc(name)}</button>`;
+  $("filter-personen").innerHTML =
+    PERSONEN.map((p) => knopf(p.n, p.n, p.c, `data-filter="${esc(p.n)}"`)).join("") +
+    (ohneDa ? knopf(OHNE, "Ohne Person", "#9AA6A0", 'data-filter-ohne="1"') : "");
+  const gewaehlt = S.nurPersonen.map((x) => (x === OHNE ? "ohne Person" : x));
+  $("filter-stand").textContent = gewaehlt.length === 0
+    ? "Es werden alle Einträge gezeigt."
+    : `Gezeigt werden nur: ${gewaehlt.join(", ")}.`;
+  $("filter-knopf").setAttribute("aria-pressed", String(S.nurPersonen.length > 0));
+  /* Überschrift der Liste und der Knopf "Alle anzeigen" folgen dem Filter. */
+  $("listen-titel").textContent = listenTitel();
+  $("alle-zeigen").disabled = S.nurPersonen.length === 0;
+}
+function filterAnwenden() {
+  filterPersonenZeichnen();
+  zeichnePlan();
+  alleZeichnen();
+}
+$("filter-knopf").addEventListener("click", () => {
+  const tafel = $("filter-tafel");
+  if (!tafel.hidden) { tafel.hidden = true; return; }
+  $("vorlagen-tafel").hidden = true; $("vorlagen-knopf").setAttribute("aria-pressed", "false");
+  filterPersonenZeichnen();
+  tafel.hidden = false;
+  tafel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+});
+$("filter-personen").addEventListener("click", (e) => {
+  const knopf = e.target.closest("[data-filter], [data-filter-ohne]");
+  if (!knopf) return;
+  const wert = knopf.hasAttribute("data-filter-ohne") ? OHNE : knopf.dataset.filter;
+  S.nurPersonen = S.nurPersonen.includes(wert)
+    ? S.nurPersonen.filter((x) => x !== wert)
+    : [...S.nurPersonen, wert];
+  filterAnwenden();
+});
+$("filter-alle").addEventListener("click", () => { S.nurPersonen = []; filterAnwenden(); });
+$("filter-zu").addEventListener("click", () => { $("filter-tafel").hidden = true; });
+/* Die Überschrift der Liste zeigt, was gerade zu sehen ist. */
+function listenTitel() {
+  if (S.nurPersonen.length === 0) return "Offene Aufgaben";
+  const namen = S.nurPersonen.filter((x) => x !== OHNE);
+  const ohne = S.nurPersonen.includes(OHNE);
+  if (namen.length === 0) return "Offene Aufgaben für alle";
+  if (ICH && ohne && namen.length === 1 && namen[0] === ICH.name) return "Meine offenen Aufgaben";
+  return "Offene Aufgaben von " + namen.join(", ") + (ohne ? " und für alle" : "");
+}
+/* "Alle anzeigen" wirkt nur, solange ein Filter aktiv ist. */
+$("alle-zeigen").addEventListener("click", () => {
+  if (S.nurPersonen.length === 0) return;
+  S.nurPersonen = [];
+  filterAnwenden();
+});
+
+/* ---- Listen: offene Aufgaben, erledigte Aufgaben, gelöschte Aufgaben, Archiv ---- */
+const datumText = (ts) => (typeof ts === "number"
+  ? new Date(ts).toLocaleDateString("de-DE", { timeZone: "Europe/Berlin", day: "2-digit", month: "2-digit", year: "numeric" })
+  : "");
+/* Eine Zeile mit Griff, Nummer und Knopf für die Karte. Erledigte Aufgaben haben keine Nummer und keinen Griff. */
+function zeileHtml(e, nr, mitGriff) {
+  const farbe = punktFarbe(e);
+  const griff = mitGriff
+    ? `<button class="griff" type="button" data-griff="${esc(e.id)}" aria-label="Priorität ändern: nach oben oder unten ziehen" title="Zum Ändern der Priorität ziehen">${GRIFF_SVG}</button>`
+    : `<span class="griff-platz" aria-hidden="true"></span>`;
+  return `<li class="${istOffen(e) ? "offen" : "erledigt"}" data-id="${esc(e.id)}">${griff}<span class="abzeichen" style="background:${farbe}; color:${kontrast(farbe)}">${nr ?? ""}</span><span class="zeile"><button class="textknopf" type="button" data-zeigen="${esc(e.id)}" style="text-align:left; color:var(--ink); min-height:auto">${esc(titelVon(e))}</button><span class="wann">${esc(untertitelVon(e))}${(e.zeilen ?? []).some((z) => z.art === "anhang") ? `<span class="anhang-marke" title="Mit Anhang" aria-label="Mit Anhang"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5" /></svg></span>` : ""}</span></span><button class="hin-knopf" type="button" data-hin="${esc(e.id)}" aria-label="Auf der Karte zeigen" title="Auf der Karte zeigen"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 12a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /> <path d="M4 12a8 8 0 1 0 16 0a8 8 0 1 0 -16 0" /> <path d="M12 2l0 2" /> <path d="M12 20l0 2" /> <path d="M20 12l2 0" /> <path d="M2 12l2 0" /></svg></button></li>`;
+}
+/* Offene Aufgaben nach Prio. Erledigte stehen im eigenen Kasten, neueste zuerst. */
+function alleZeichnen() {
+  if (ziehtGerade) return;
+  /* Gelöschte Aufgaben erscheinen nur im Kasten dafür. */
+  const alle = sortiert().filter((e) => !S.geloescht[e.id]);
+  const offen = alle.filter(istOffen);
+  const erledigt = alle.filter((e) => !istOffen(e)).sort((a, b) => (b.erledigtAm ?? b.ts) - (a.erledigtAm ?? a.ts));
+  const nummern = new Map(offen.map((e, i) => [e.id, i + 1]));
+  /* Gefiltert wird nur die Anzeige. Solange gefiltert ist, bleibt der Griff weg:
+     Verschieben in einer Teilliste würde die Prio der versteckten Aufgaben verdrehen. */
+  const gefiltert = S.nurPersonen.length > 0;
+  const offenSichtbar = offen.filter(passtZurPerson);
+  const erledigtSichtbar = erledigt.filter(passtZurPerson);
+  $("alle-liste").innerHTML = offenSichtbar.map((e) => zeileHtml(e, nummern.get(e.id), !gefiltert && darfAufgabe(ICH, "prio"))).join("");
+  $("erledigt-liste").innerHTML = erledigtSichtbar.map((e) => zeileHtml(e, null, false)).join("");
+  /* Leere Listen sagen, ob die Liste überhaupt leer ist oder nur die Auswahl. */
+  $("alle-leer").hidden = offenSichtbar.length > 0;
+  const nochNichts = !alle.length && !Object.keys(S.geloescht).length;
+  $("alle-leer").textContent = nochNichts
+    ? "Noch nichts eingetragen. Tippe oben auf „Aufgabe“ und dann auf den Plan."
+    : gefiltert ? "Für diese Auswahl gibt es keine offenen Aufgaben." : "Keine offenen Aufgaben.";
+  $("erledigt-leer").hidden = erledigtSichtbar.length > 0;
+  $("erledigt-leer").textContent = erledigt.length ? "Für diese Auswahl ist nichts erledigt." : "Noch nichts erledigt.";
+  geloeschtZeichnen();
+  /* Ist das Archiv offen, folgt es der Auswahl der Personen. */
+  if (!$("archiv-inhalt").hidden) archivZeichnen();
+}
+for (const liste of ["alle-liste", "erledigt-liste"]) {
+  $(liste).addEventListener("click", (e) => {
+    const knopf = e.target.closest("[data-zeigen], [data-hin]");
+    if (!knopf) return;
+    zuEintragSpringen(knopf.dataset.zeigen || knopf.dataset.hin);
+  });
+}
+
+/* Gelöschte Aufgaben: neueste zuerst. Sie sind nur zum Lesen, auf der Karte stehen sie nicht mehr. */
+function geloeschtZeichnen() {
+  const kopien = Object.keys(S.geloescht)
+    .sort((a, b) => (S.geloeschtRoh[b]?.geloescht ?? 0) - (S.geloeschtRoh[a]?.geloescht ?? 0))
+    .map((id) => ({ id, ...S.geloescht[id] }))
+    .filter(passtZurPerson);
+  $("geloescht-liste").innerHTML = kopien.map((e) => {
+    const geloeschtAm = S.geloeschtRoh[e.id]?.geloescht;
+    const frist = typeof geloeschtAm === "number" ? ` · endgültig am ${datumText(endetAm(geloeschtAm))}` : "";
+    return `<li><span class="farbe" style="background:${farbeVon(e.person)}"></span><span class="zeile"><span>${esc(titelVon(e))}</span><span class="wann">gelöscht ${esc(zeitText(geloeschtAm))}${esc(frist)}</span></span></li>`;
+  }).join("");
+  $("geloescht-leer").hidden = kopien.length > 0;
+  $("geloescht-leer").textContent = Object.keys(S.geloescht).length ? "Für diese Auswahl ist nichts gelöscht." : "Nichts gelöscht.";
+}
+
+/* ---- Aufgaben-Archiv: erst beim Knopfdruck laden, dann Jahr, Monat, Liste ---- */
+$("archiv-knopf").addEventListener("click", async () => {
+  const oeffnen = $("archiv-inhalt").hidden;
+  $("archiv-inhalt").hidden = !oeffnen;
+  $("archiv-knopf").setAttribute("aria-expanded", String(oeffnen));
+  if (!oeffnen) return;
+  if (S.archivRoh === null) {
+    try {
+      S.archivRoh = (await get(ref(db, `${BASIS}/archiv`))).val() ?? {};
+    } catch (err) {
+      console.error(err);
+      $("archiv-leer").textContent = "Das Archiv konnte nicht geladen werden. Bitte noch einmal öffnen.";
+      $("archiv-leer").hidden = false;
+      return;
+    }
+  }
+  archivZeichnen();
+});
+$("archiv-jahre").addEventListener("click", (e) => {
+  const knopf = e.target.closest("[data-jahr]");
+  if (!knopf) return;
+  S.archivJahr = knopf.dataset.jahr;
+  S.archivMonat = null;
+  archivZeichnen();
+});
+$("archiv-monate").addEventListener("click", (e) => {
+  const knopf = e.target.closest("[data-monat]");
+  if (!knopf) return;
+  S.archivMonat = knopf.dataset.monat;
+  archivZeichnen();
+});
+function archivZeichnen() {
+  /* Vor dem Laden nichts anfassen, sonst überschreibt die Anzeige eine Ladefehlermeldung. */
+  if (S.archivRoh === null) return;
+  const roh = S.archivRoh;
+  /* Gezählt und angezeigt wird nur, was die Personenauswahl zeigt. Jahre und Monate ohne Treffer entfallen. */
+  const treffer = (monatRoh) => Object.values(sauber(monatRoh ?? {})).filter(passtZurPerson).length;
+  const jahre = Object.keys(roh).sort().filter((j) => Object.values(roh[j] ?? {}).some((m) => treffer(m) > 0));
+  const knopfHtml = (anzeige, aktiv, attribut) => `<button type="button" aria-pressed="${aktiv}" ${attribut}>${esc(anzeige)}</button>`;
+  $("archiv-jahre").innerHTML = jahre.map((j) => knopfHtml(j, S.archivJahr === j, `data-jahr="${esc(j)}"`)).join("");
+  const monate = S.archivJahr && jahre.includes(S.archivJahr)
+    ? Object.keys(roh[S.archivJahr]).sort().filter((m) => treffer(roh[S.archivJahr][m]) > 0)
+    : [];
+  $("archiv-monate").innerHTML = monate.map((m) =>
+    knopfHtml(`${monatsName(m)} (${treffer(roh[S.archivJahr][m])})`, S.archivMonat === m, `data-monat="${esc(m)}"`)).join("");
+  const monatOffen = Boolean(S.archivJahr && S.archivMonat && roh[S.archivJahr]?.[S.archivMonat]);
+  const eintraege = monatOffen ? sauber(roh[S.archivJahr][S.archivMonat]) : {};
+  const liste = Object.entries(eintraege).map(([id, e]) => ({ id, ...e }))
+    .filter(passtZurPerson)
+    .sort((a, b) => (b.erledigtAm ?? b.ts) - (a.erledigtAm ?? a.ts));
+  $("archiv-liste").innerHTML = liste.map((e) => {
+    const wer = e.personen?.length ? e.personen.join(", ") : "für alle";
+    return `<li><span class="farbe" style="background:${farbeVon(e.person)}"></span><span class="zeile"><span>${esc(titelVon(e))}</span><span class="wann">${esc(wer)} · erledigt am ${esc(datumText(e.erledigtAm))}</span></span></li>`;
+  }).join("");
+  /* Leer ist das Archiv, wenn keine Jahre übrig sind oder der gewählte Monat unter der Auswahl leer ist. */
+  const leer = jahre.length === 0 || (monatOffen && liste.length === 0);
+  $("archiv-leer").hidden = !leer;
+  $("archiv-leer").textContent = !Object.keys(roh).length
+    ? "Noch nichts archiviert. Erledigte Aufgaben kommen nach 30 Tagen hierher."
+    : jahre.length === 0 ? "Für diese Auswahl ist nichts archiviert." : "Für diese Auswahl ist in diesem Monat nichts archiviert.";
+}
+sortierbar($("alle-liste"), "[data-griff]", (von, nach) => {
+  if (von === nach) { alleZeichnen(); return; }
+  reihenfolgeAendern(von, nach);
+}, ":scope > li.offen");
+
+/* Ziehen per Griff: sobald der Finger oder die Maus sich bewegt, sonst nach kurzem Gedrückthalten.
+   Über die Tastatur geht es mit den Pfeiltasten. Der Griff hat touch-action:none, die Seite scrollt
+   dort also nicht weg; darum darf das Ziehen sofort beginnen. */
+function sortierbar(liste, griffWahl, onEnde, listenWahl = ":scope > li") {
+  const SCHWELLE = 5, HALTEN = 350, RAND = 70, SCHRITT = 14;
+  let zug = null;
+  const markierungLoeschen = () => liste.querySelectorAll(".ziel-oben, .ziel-unten").forEach((el) => el.classList.remove("ziel-oben", "ziel-unten"));
+
+  function starten() {
+    if (!zug || zug.aktiv) return;
+    clearTimeout(zug.uhr);
+    /* Zwischendurch könnte die Liste neu aufgebaut worden sein. */
+    if (!zug.li.isConnected) { zug = null; return; }
+    zug.aktiv = true;
+    zug.li.classList.add("zieht");
+    zug.roller = setInterval(randScrollen, 16);
+  }
+  /* Es zaehlt die vordere Kante der gezogenen Zeile in Zugrichtung: nach oben die Oberkante, nach
+     unten die Unterkante. Die Fingerposition taugt nicht, weil der Griff bei hohen Zeilen ganz oben
+     sitzt. Neu gemessen wird bei jeder Bewegung, weil die Seite zwischendurch scrollen kann. */
+  function zielPlatz(versatz) {
+    const r = zug.li.getBoundingClientRect();
+    const kante = versatz < 0 ? r.top : r.bottom;
+    let vorne = 0;
+    zug.items.forEach((el, i) => {
+      if (i === zug.von) return;
+      const o = el.getBoundingClientRect();
+      if (kante > o.top + o.height / 2) vorne += 1;
+    });
+    return vorne;
+  }
+  function zeichnen(y) {
+    zug.y = y;
+    const versatz = (y + window.scrollY) - zug.seiteY0;
+    zug.li.style.transform = "translateY(" + versatz + "px)";
+    zug.nach = zielPlatz(versatz);
+    markierungLoeschen();
+    const andere = zug.items.filter((_, i) => i !== zug.von);
+    if (zug.nach !== zug.von && andere.length) {
+      if (zug.nach < andere.length) andere[zug.nach].classList.add("ziel-oben");
+      else andere[andere.length - 1].classList.add("ziel-unten");
+    }
+  }
+  /* Am oberen und unteren Rand wandert die Seite mit, sonst käme man bei langen Listen nicht ans Ziel. */
+  function randScrollen() {
+    if (!zug || !zug.aktiv) return;
+    const y = zug.y;
+    const d = y < RAND ? -SCHRITT : y > window.innerHeight - RAND ? SCHRITT : 0;
+    if (!d) return;
+    const vorher = window.scrollY;
+    window.scrollBy(0, d);
+    if (window.scrollY !== vorher) zeichnen(y);
+  }
+
+  liste.addEventListener("pointerdown", (e) => {
+    const griff = e.target.closest(griffWahl);
+    if (!griff || (e.pointerType === "mouse" && e.button !== 0)) return;
+    const li = griff.closest("li");
+    const items = [...liste.querySelectorAll(listenWahl)];
+    const von = items.indexOf(li);
+    if (von < 0) return;
+    /* Ab jetzt wird die Liste nicht mehr neu aufgebaut, sonst verschwindet das Element unter dem Finger. */
+    ziehtGerade = true;
+    zug = { id: e.pointerId, griff, li, items, von, y0: e.clientY, y: e.clientY, seiteY0: e.clientY + window.scrollY, aktiv: false, nach: von, uhr: 0, roller: 0 };
+    try { griff.setPointerCapture(e.pointerId); } catch (err) {}
+    zug.uhr = setTimeout(starten, HALTEN);
+  });
+  liste.addEventListener("pointermove", (e) => {
+    if (!zug || e.pointerId !== zug.id) return;
+    if (!zug.aktiv) {
+      if (Math.abs(e.clientY - zug.y0) < SCHWELLE) return;
+      starten();
+      if (!zug) return;
+    }
+    e.preventDefault();
+    zeichnen(e.clientY);
+  });
+  const beenden = (e) => {
+    if (!zug || e.pointerId !== zug.id) return;
+    const war = zug;
+    zug = null;
+    clearTimeout(war.uhr);
+    clearInterval(war.roller);
+    ziehtGerade = false;
+    markierungLoeschen();
+    try { war.griff.releasePointerCapture(war.id); } catch (err) {}
+    if (!war.aktiv) return;
+    war.li.classList.remove("zieht");
+    war.li.style.transform = "";
+    onEnde(war.von, war.nach);
+  };
+  liste.addEventListener("pointerup", beenden);
+  liste.addEventListener("pointercancel", beenden);
+  liste.addEventListener("keydown", (e) => {
+    const griff = e.target.closest(griffWahl);
+    if (!griff) return;
+    const items = [...liste.querySelectorAll(listenWahl)];
+    const von = items.indexOf(griff.closest("li"));
+    const nach = e.key === "ArrowUp" ? von - 1 : e.key === "ArrowDown" ? von + 1 : -1;
+    if (von < 0 || nach < 0 || nach >= items.length) return;
+    e.preventDefault();
+    onEnde(von, nach);
+  });
+}
+
+/* ---- Werkzeuge ---- */
+function modusSetzen(m) {
+  S.modus = m;
+  ["ansehen", "aufgabe", "pfeil"].forEach((name) => $("w-" + name).setAttribute("aria-pressed", String(name === m)));
+  S.entwurf = null; S.start = null; S.personen = []; S.bearbeiten = null; S.verschiebt = null;
+  if (S.tafel === "formular") tafelZeigen("aus");
+  hinweisZurueck();
+  map.classList.toggle("setzen", m !== "ansehen" && S.tafel !== "verlauf");
+  zeichnePlan();
+}
+["ansehen", "aufgabe", "pfeil"].forEach((name) => $("w-" + name).addEventListener("click", () => modusSetzen(name)));
+
+/* ---- Daten von Firebase ---- */
+/* Die Daten kommen von anderen Geräten. Nur Einträge mit brauchbaren Werten werden übernommen. */
+function sauber(roh) {
+  const zahl = (v) => (typeof v === "number" && isFinite(v) ? v : null);
+  const raus = {};
+  Object.entries(roh || {}).forEach(([id, e]) => {
+    if (!e || typeof e.text !== "string") return;
+    /* Textzeilen stehen neu als Text (JSON) in der Datenbank, damit die Regeln
+       sie vergleichen können. Ältere Einträge haben noch ein Objekt. */
+    let zRoh = e.zeilen, zeilenAlt = false;
+    if (typeof zRoh === "string") { try { zRoh = JSON.parse(zRoh); } catch (err) { zRoh = []; } }
+    else if (zRoh && typeof zRoh === "object") zeilenAlt = true;
+    const zListe = Array.isArray(zRoh)
+      ? zRoh.map((z, i) => ({ id: "z" + i, z, reihe: i }))
+      : Object.entries(zRoh || {}).map(([zid, z]) => ({ id: zid, z, reihe: zahl(z?.reihe) ?? 0 }));
+    const zeilen = zListe
+      .map(({ id: zid, z, reihe }) => {
+        const titel = typeof z?.titel === "string" ? z.titel.slice(0, 80) : "";
+        if (z?.art === "anhang" && typeof z.anhang === "string" && ANHANG_ID.test(z.anhang)) {
+          return { id: zid, art: "anhang", titel, anhang: z.anhang,
+            name: typeof z.name === "string" ? z.name.slice(0, 200) : "Datei",
+            typ: typeof z.typ === "string" ? z.typ.slice(0, 100) : "",
+            groesse: zahl(z.groesse) ?? 0, reihe };
+        }
+        return { id: zid, titel, text: typeof z?.text === "string" ? z.text.slice(0, 1000) : "", reihe };
+      })
+      .filter((z) => z.art === "anhang" || z.titel || z.text)
+      .sort((a, b) => a.reihe - b.reihe);
+    /* Mehrere Mitarbeiter stehen als "Arno|Joel" in personen; alte Einträge haben person. */
+    const personen = typeof e.personen === "string"
+      ? e.personen.split("|").map((s) => s.trim().slice(0, 40)).filter(Boolean).slice(0, 12)
+      : (typeof e.person === "string" && e.person ? [e.person.slice(0, 40)] : []);
+    const gemeinsam = {
+      text: e.text.slice(0, 200),
+      person: personen[0] ?? null,
+      personen,
+      zeilenAlt,
+      ersteller: typeof e.ersteller === "string" ? e.ersteller : null,
+      status: e.status === "erledigt" ? "erledigt" : e.status === "bearbeitung" ? "bearbeitung" : "offen",
+      bearbeitetAm: zahl(e.bearbeitetAm),
+      erledigtAm: zahl(e.erledigtAm),
+      ts: zahl(e.ts) ?? 0,
+      reihe: zahl(e.reihe),
+      zeilen,
+      alleDuerfenErledigen: e.alleDuerfenErledigen === true,
+    };
+    /* Einträge von früher haben keine Etage. Die gehören in die Halle. */
+    const et = (v) => (v === "aussen" ? "aussen" : "halle");
+    if (e.art === "pfeil") {
+      const x1 = zahl(e.x1), y1 = zahl(e.y1), x2 = zahl(e.x2), y2 = zahl(e.y2);
+      if (x1 === null || y1 === null || x2 === null || y2 === null) return;
+      raus[id] = { art: "pfeil", ...gemeinsam, x1, y1, x2, y2, etage: et(e.etage), etage2: et(e.etage2 ?? e.etage) };
+    } else {
+      const x = zahl(e.x), y = zahl(e.y);
+      if (x === null || y === null) return;
+      raus[id] = { art: "aufgabe", ...gemeinsam, x, y, etage: et(e.etage) };
+    }
+  });
+  return raus;
+}
+/* Ältere Einträge haben ihre Textzeilen noch als Objekt. Damit auch Mitarbeiter
+   ohne Bearbeiten-Recht sie abhaken oder versetzen können, stellt sie jeder, der
+   sie bearbeiten darf, still auf Text um. Am Inhalt ändert sich nichts. */
+const umgestellt = new Set();
+function zeilenUmstellen() {
+  if (!ICH) return;
+  const werte = {};
+  Object.entries(S.eintraege).forEach(([id, e]) => {
+    if (!e.zeilenAlt || umgestellt.has(id) || !darfAufgabe(ICH, "bearbeiten", istMeine(e))) return;
+    umgestellt.add(id);
+    werte[`${BASIS}/eintraege/${id}/zeilen`] = e.zeilen.length ? JSON.stringify(e.zeilen.map((z) => ({ titel: z.titel, text: z.text }))) : null;
+  });
+  if (Object.keys(werte).length) update(ref(db), werte).catch((err) => console.error(err));
+}
+
+/* ---- Vorlagen: Veranstaltung speichern, laden, zurücksetzen ---- */
+const VL = { liste: {} };
+const darfV = (recht) => darfZusatz(ICH, "veranstaltung", recht);
+const vlMeldung = (t) => { $("vl-meldung").textContent = t; };
+function vlSchnappschuss() {
+  const o = {};
+  Object.entries(S.roh).forEach(([id, e]) => {
+    if (!e || typeof e.text !== "string") return;
+    const k = { ...e, status: "offen" };
+    delete k.erledigtAm; delete k.bearbeitetAm; delete k.geloescht;
+    if (typeof k.zeilen === "string") {
+      try { k.zeilen = JSON.stringify(JSON.parse(k.zeilen).filter((z) => z?.art !== "anhang")); } catch (err) { delete k.zeilen; }
+    } else if (k.zeilen && typeof k.zeilen === "object") {
+      k.zeilen = JSON.stringify(Object.values(k.zeilen).filter((z) => z?.art !== "anhang"));
+    }
+    o[id] = k;
+  });
+  return o;
+}
+function vlZeichnen() {
+  const ids = Object.keys(VL.liste).sort((a, b) => (VL.liste[a].name || "").localeCompare(VL.liste[b].name || "", "de"));
+  $("vl-leer").hidden = ids.length > 0;
+  $("vl-neu").hidden = !darfV("vorlageSpeichern");
+  $("vl-reset").hidden = !darfV("vorlageLoeschen");
+  $("vl-liste").innerHTML = ids.map((id) => {
+    const v = VL.liste[id];
+    const wann = v.ts ? new Date(v.ts).toLocaleDateString("de-DE") : "";
+    const k = [];
+    if (darfV("vorlageLaden")) k.push(`<button class="knopf klein primaer" type="button" data-vl="laden" data-id="${esc(id)}">Laden</button>`);
+    if (darfV("vorlageBearbeiten")) k.push(`<button class="knopf klein" type="button" data-vl="ueberschreiben" data-id="${esc(id)}">Mit jetzt überschreiben</button>`, `<button class="knopf klein" type="button" data-vl="umbenennen" data-id="${esc(id)}">Umbenennen</button>`);
+    if (darfV("vorlageLoeschen")) k.push(`<button class="knopf klein" type="button" data-vl="loeschen" data-id="${esc(id)}">Löschen</button>`);
+    return `<div class="vl-zeile"><span class="vl-name">${esc(v.name)}<span class="vl-info">${v.anzahl ?? ""} ${v.anzahl === 1 ? "Eintrag" : "Einträge"}${wann ? " · " + esc(wann) : ""}${v.von ? " · " + esc(v.von) : ""}</span></span><span class="vl-knoepfe">${k.join("")}</span></div>`;
+  }).join("");
+}
+function vlStarten() {
+  onValue(ref(db, `${BASIS}/vorlagen`), (snap) => { VL.liste = snap.val() ?? {}; vlZeichnen(); }, () => {});
+}
+async function vlSchreiben(werte, ok) {
+  const gut = await schreiben(werte);
+  vlMeldung(gut ? ok : "Das hat nicht geklappt.");
+  return gut;
+}
+$("vorlagen-knopf").addEventListener("click", () => {
+  const tafel = $("vorlagen-tafel");
+  if (!tafel.hidden) { tafel.hidden = true; $("vorlagen-knopf").setAttribute("aria-pressed", "false"); return; }
+  $("filter-tafel").hidden = true;
+  vlMeldung(""); vlZeichnen();
+  tafel.hidden = false;
+  $("vorlagen-knopf").setAttribute("aria-pressed", "true");
+  tafel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+});
+$("vl-zu").addEventListener("click", () => { $("vorlagen-tafel").hidden = true; $("vorlagen-knopf").setAttribute("aria-pressed", "false"); });
+$("vl-speichern").addEventListener("click", async () => {
+  if (!darfV("vorlageSpeichern")) return;
+  const name = $("vl-name").value.trim().slice(0, 60);
+  if (!name) { vlMeldung("Bitte einen Namen eingeben."); return; }
+  const daten = vlSchnappschuss();
+  const anzahl = Object.keys(daten).length;
+  if (!anzahl) { vlMeldung("Es gibt noch nichts zu speichern."); return; }
+  if (Object.values(VL.liste).some((v) => (v.name || "").toLowerCase() === name.toLowerCase())
+    && !confirm(`Es gibt schon eine Vorlage „${name}“. Trotzdem eine weitere speichern?`)) return;
+  if (await vlSchreiben({ [`${BASIS}/vorlagen/${neueId()}`]: { name, ts: Date.now(), von: S.ich, anzahl, daten: JSON.stringify(daten) } }, `Gespeichert als „${name}“.`)) $("vl-name").value = "";
+});
+$("vl-liste").addEventListener("click", async (ev) => {
+  const k = ev.target.closest("[data-vl]");
+  if (!k) return;
+  const id = k.dataset.id, v = VL.liste[id];
+  if (!v) return;
+  const was = k.dataset.vl;
+  if (was === "laden") {
+    if (!darfV("vorlageLaden")) return;
+    let daten;
+    try { daten = JSON.parse(v.daten); } catch (err) { vlMeldung("Diese Vorlage ist beschädigt."); return; }
+    const jetzt = Object.keys(S.roh).length;
+    if (!confirm(`„${v.name}“ laden? Die ${jetzt} aktuellen Einträge werden ersetzt. Alles steht danach auf „nicht bearbeitet“.`)) return;
+    const werte = {};
+    Object.keys(S.roh).forEach((alt) => { werte[`${BASIS}/eintraege/${alt}`] = null; });
+    const t = Date.now();
+    Object.values(daten).forEach((e, i) => { werte[`${BASIS}/eintraege/${neueId()}`] = { ...e, status: "offen", ts: t + i }; });
+    Object.assign(werte, verlaufPaar("vorlage", v.name, null));
+    if (await vlSchreiben(werte, `„${v.name}“ ist geladen.`)) $("vorlagen-tafel").hidden = true, $("vorlagen-knopf").setAttribute("aria-pressed", "false");
+  } else if (was === "ueberschreiben") {
+    if (!darfV("vorlageBearbeiten")) return;
+    if (!confirm(`„${v.name}“ mit dem jetzigen Stand überschreiben?`)) return;
+    const daten = vlSchnappschuss();
+    await vlSchreiben({ [`${BASIS}/vorlagen/${id}`]: { name: v.name, ts: Date.now(), von: S.ich, anzahl: Object.keys(daten).length, daten: JSON.stringify(daten) } }, `„${v.name}“ ist überschrieben.`);
+  } else if (was === "umbenennen") {
+    if (!darfV("vorlageBearbeiten")) return;
+    const neu = (prompt("Neuer Name der Vorlage:", v.name) || "").trim().slice(0, 60);
+    if (!neu || neu === v.name) return;
+    await vlSchreiben({ [`${BASIS}/vorlagen/${id}`]: { ...v, name: neu } }, `Umbenannt in „${neu}“.`);
+  } else if (was === "loeschen") {
+    if (!darfV("vorlageLoeschen")) return;
+    if (!confirm(`Vorlage „${v.name}“ löschen? Das kann nicht rückgängig gemacht werden.`)) return;
+    await vlSchreiben({ [`${BASIS}/vorlagen/${id}`]: null }, `„${v.name}“ ist gelöscht.`);
+  }
+});
+$("vl-reset").addEventListener("click", async () => {
+  if (!darfV("vorlageLoeschen")) return;
+  const ids = Object.entries(S.roh).filter(([, e]) => e && e.status && e.status !== "offen").map(([id]) => id);
+  if (!ids.length) { vlMeldung("Es ist schon alles auf „nicht bearbeitet“."); return; }
+  if (!confirm(`${ids.length} Aufgaben wieder auf „nicht bearbeitet“ stellen?`)) return;
+  const werte = {};
+  ids.forEach((id) => { werte[`${BASIS}/eintraege/${id}/status`] = "offen"; werte[`${BASIS}/eintraege/${id}/erledigtAm`] = null; werte[`${BASIS}/eintraege/${id}/bearbeitetAm`] = null; });
+  Object.assign(werte, verlaufPaar("zurueck", `${ids.length} Aufgaben`, null));
+  await vlSchreiben(werte, "Alles steht wieder auf „nicht bearbeitet“.");
+});
+
+function datenFehler(err) {
+  console.error(err);
+  $("live-text").textContent = istRechteFehler(err) ? NICHT_FREI : "Keine Verbindung. Die Anzeige kann veraltet sein.";
+}
+let syncLaeuft = false;
+function starteSync() {
+  ansichtSetzen();
+  personenZeichnen();
+  filterZeichnen();
+  hinweisZurueck();
+  zeichnePlan();
+  if (syncLaeuft) return;
+  syncLaeuft = true;
+  vlStarten();
+  onValue(ref(db, `${BASIS}/eintraege`), (snap) => {
+    S.roh = snap.val() ?? {};
+    S.eintraege = sauber(S.roh);
+    zeilenUmstellen();
+    $("live-text").textContent = "Aufgaben und Pfeile für die Veranstaltung. Alle sehen dasselbe.";
+    if (S.gewaehlt && !S.eintraege[S.gewaehlt]) {
+      S.gewaehlt = null;
+      if (S.tafel === "detail") { tafelZeigen("aus"); hinweisSetzen("Der Eintrag wurde inzwischen gelöscht."); }
+    } else if (S.gewaehlt && S.tafel === "detail") {
+      waehle(S.gewaehlt);
+    }
+    ansichtSetzen();
+    zeichnePlan();
+    alleZeichnen();
+    eintraegeDa = true;
+    aufraeumenStarten();
+  }, datenFehler);
+  onValue(ref(db, `${BASIS}/geloescht`), (snap) => {
+    S.geloeschtRoh = snap.val() ?? {};
+    S.geloescht = sauber(S.geloeschtRoh);
+    geloeschtDa = true;
+    aufraeumenStarten();
+    alleZeichnen();
+  }, datenFehler);
+  onValue(ref(db, `${BASIS}/verlauf`), (snap) => {
+    S.verlauf = snap.val() ?? {};
+    verlaufZeichnen();
+  }, datenFehler);
+}
+
+/* Beim Öffnen steht die Karte auf dem ganzen Plan. */
+requestAnimationFrame(() => { ansichtSetzen(); zeichnePlan(); });
+personenZeichnen();
+zeilenZeichnen();
+filterZeichnen();
+etageSetzen(S.etage);
+filterPersonenZeichnen();
+hinweisZurueck();
+tafelZeigen("aus");
+seiteStarten().catch((err) => { console.error(err); zeigeBereich(false); });
+</script>
+<!-- Bild groß ansehen -->
+<div class="bild-gross" id="bild-gross" role="dialog" aria-modal="true" aria-label="Bild" hidden>
+  <div class="bild-gross-kopf"><p id="bild-gross-titel"></p><button class="knopf klein" id="bild-gross-zu" type="button">Schließen</button></div>
+  <div class="bild-gross-flaeche"><img id="bild-gross-img" alt=""></div>
+</div>
+</body>
+</html>
