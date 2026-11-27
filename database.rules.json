@@ -374,6 +374,22 @@
           }
         }
       },
+      "aktiv": {
+        ".write": "(auth != null && root.child('geraete').child(auth.uid).child('code').val() === root.child('zugang').child('admin').val()) || ((auth != null && root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('code').val() === root.child('geraete').child(auth.uid).child('code').val() && root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('gesperrt').val() !== true && (!root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('stand').exists() || root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('stand').val() <= root.child('geraete').child(auth.uid).child('seit').val())) && (root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('admin').val() === true || (root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('veranstaltung').val() === true && (root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('veranstaltung_tun').child('vorlageSpeichern').val() === true || root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('veranstaltung_tun').child('vorlageLaden').val() === true || root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('veranstaltung_tun').child('vorlageBearbeiten').val() === true || root.child('benutzer').child(root.child('geraete').child(auth.uid).child('benutzer').val()).child('rechte').child('veranstaltung_tun').child('vorlageLoeschen').val() === true))))",
+        ".validate": "newData.hasChildren(['id','name','ts'])",
+        "id": {
+          ".validate": "newData.isString() && newData.val().length >= 4 && newData.val().length <= 40"
+        },
+        "name": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 60"
+        },
+        "ts": {
+          ".validate": "newData.isNumber()"
+        },
+        "$anderes": {
+          ".validate": false
+        }
+      },
       "$anderes": {
         ".validate": false
       }

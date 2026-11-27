@@ -57,6 +57,11 @@ body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--body); 
 button:focus-visible, input:focus-visible, a:focus-visible, textarea:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
 h1{margin:0; font-family:var(--display); font-weight:600; font-size:calc(clamp(32px, 8vw, 44px) + var(--schrift-plus,0px)); line-height:1; text-wrap:balance}
 h2{margin:0; font-family:var(--display); font-weight:600; font-size:calc(26px + var(--schrift-plus,0px)); line-height:1.05; text-wrap:balance; overflow-wrap:anywhere}
+.va-kopf{display:flex; flex-direction:column; gap:4px}
+.va-label{font-size:.5em; font-weight:500; letter-spacing:.02em; color:var(--ink-2)}
+.va-name{overflow-wrap:anywhere}
+.still{display:none !important}
+#live-text:empty, #karten-hinweis:empty{display:none}
 .muted{margin:0; font-size:calc(15px + var(--schrift-plus,0px)); color:var(--ink-2)}
 .meldung{margin:0; min-height:20px; font-size:calc(14px + var(--schrift-plus,0px)); color:var(--ink-2)}
 .meldung.fehler{color:var(--fehler)}
@@ -232,6 +237,8 @@ html.tablett #alle-zeigen{display:none !important}
 .vl-info{display:block; font-weight:400; font-size:13px; color:var(--ink-2)}
 .vl-knoepfe{display:flex; flex-wrap:wrap; gap:6px}
 .vl-neu{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+.vl-unter{margin:10px 0 0; font-size:calc(16px + var(--schrift-plus,0px))}
+.vl-neu{margin-top:6px}
 .vl-neu input{flex:1 1 160px; min-height:44px; padding:0 12px; border:1px solid var(--line); border-radius:10px; background:var(--bg); color:var(--ink); font:inherit}
 .listen-knoepfe{display:inline-flex; flex-wrap:wrap; gap:8px}
 .klapp-zahl{font-weight:400; color:var(--ink-2); font-size:.8em}
@@ -273,8 +280,8 @@ html.tablett #alle-zeigen{display:none !important}
 </section>
 
 <section id="panel" class="stapel" hidden style="padding-top:16px">
-  <h1>Veranstaltung</h1>
-  <p class="muted" id="live-text">Aufgaben und Pfeile für die Veranstaltung. Alle sehen dasselbe.</p>
+  <h1 class="va-kopf"><span class="va-label">Veranstaltung:</span><span class="va-name" id="va-name">Noch nicht gespeichert</span></h1>
+  <p class="muted" id="live-text"></p>
 
   <div class="feld">
     <span id="ich-text">Angemeldet als</span>
@@ -290,13 +297,17 @@ html.tablett #alle-zeigen{display:none !important}
   <div class="tafel" id="vorlagen-tafel" style="margin-bottom:12px" hidden>
     <div class="stapel">
       <h2>Veranstaltung speichern und laden</h2>
-      <p class="muted">Speichere die Aufgaben und Pfeile als Vorlage und lade sie bei der nächsten Veranstaltung wieder. Beim Laden steht alles auf „nicht bearbeitet“. Dateianhänge (Bilder und Dateien) werden mitgespeichert.</p>
+      <div class="vl-neu" id="vl-aktuell">
+        <button class="knopf klein primaer" id="vl-speichern" type="button">Speichern</button>
+      </div>
+      <h3 class="vl-unter" id="vl-neu-titel">Neue Vorlage</h3>
       <div class="vl-neu" id="vl-neu">
-        <input id="vl-name" type="text" maxlength="60" placeholder="Name der Vorlage" aria-label="Name der Vorlage" autocomplete="off">
-        <button class="knopf klein primaer" id="vl-speichern" type="button">Als neue Vorlage speichern</button>
+        <input id="vl-name" type="text" maxlength="60" placeholder="Name der Vorlage" aria-label="Name der neuen Vorlage" autocomplete="off">
+        <button class="knopf klein" id="vl-leer-neu" type="button" title="Komplett neue, leere Vorlage ohne Aufgaben">Neue leere Vorlage</button>
+        <button class="knopf klein" id="vl-folge" type="button" title="Aufgaben der aktuellen Vorlage übernehmen, alle auf offen">Folgeveranstaltung</button>
       </div>
       <div id="vl-liste"></div>
-      <p class="muted" id="vl-leer" hidden>Es gibt noch keine Vorlage.</p>
+      <p class="muted still" id="vl-leer" hidden>Es gibt noch keine Vorlage.</p>
       <p class="muted" id="vl-meldung" role="status"></p>
       <div class="reihe">
         <button class="knopf klein" id="vl-reset" type="button">Alles auf „nicht bearbeitet“ stellen</button>
@@ -308,9 +319,8 @@ html.tablett #alle-zeigen{display:none !important}
   <div class="tafel" id="filter-tafel" style="margin-bottom:12px" hidden>
     <div class="stapel">
       <h2>Nur Aufgaben von bestimmten Personen zeigen</h2>
-      <p class="muted">Tippe die Personen an, deren Aufgaben und Pfeile du sehen willst. Ist nichts ausgewählt, siehst du alles.</p>
       <div class="filter-feld" id="filter-personen"></div>
-      <p class="muted" id="filter-stand">Es werden alle Einträge gezeigt.</p>
+      <p class="muted still" id="filter-stand">Es werden alle Einträge gezeigt.</p>
       <div class="reihe">
         <button class="knopf klein" id="filter-alle" type="button">Alle zeigen</button>
         <button class="knopf klein" id="filter-zu" type="button">Schließen</button>
@@ -340,7 +350,7 @@ html.tablett #alle-zeigen{display:none !important}
       <button class="zb klein" id="z-ganz" type="button" aria-label="Ganzen Plan zeigen" title="Ganzer Plan">Alles</button>
     </div>
   </div>
-  <p class="meldung" id="karten-hinweis" aria-live="polite">Tippe auf einen Punkt oder Pfeil, um Details zu sehen.</p>
+  <p class="meldung" id="karten-hinweis" aria-live="polite"></p>
 
   <section class="tafel" id="tafel" aria-live="polite">
     <!-- Details zu einer Aufgabe oder einem Pfeil: nur lesen -->
@@ -386,14 +396,14 @@ html.tablett #alle-zeigen{display:none !important}
         <div class="feld" style="gap:8px">
           <span id="f-zeilen-text">Textzeilen, Bilder und Dateien (optional)</span>
           <ul class="zeilen-liste" id="f-zeilen" aria-labelledby="f-zeilen-text"></ul>
-          <p class="muted" id="f-zeilen-leer">Noch nichts dabei. Mit „+ Textzeile“ oder „+ Bild oder Datei“ kommt etwas dazu.</p>
+          <p class="muted still" id="f-zeilen-leer">Noch nichts dabei. Mit „+ Textzeile“ oder „+ Bild oder Datei“ kommt etwas dazu.</p>
           <div class="zeile-knoepfe">
             <button class="knopf klein" id="f-zeile-neu" type="button">+ Textzeile</button>
             <button class="knopf klein" id="f-anhang-neu" type="button"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5" /></svg>+ Bild oder Datei</button>
             <input type="file" id="f-anhang-datei" multiple hidden>
           </div>
         </div>
-        <p class="muted" id="f-hinweis">Bleibt die Person frei, gilt die Aufgabe für das ganze Personal.</p>
+        <p class="muted still" id="f-hinweis">Bleibt die Person frei, gilt die Aufgabe für das ganze Personal.</p>
         <p class="meldung fehler" id="f-fehler" role="alert"></p>
         <div class="reihe">
           <button class="knopf" id="f-abbrechen" type="button">Abbrechen</button>
@@ -406,10 +416,9 @@ html.tablett #alle-zeigen{display:none !important}
     <div id="t-verlauf" hidden>
       <div class="stapel">
         <h2>Verlauf</h2>
-        <p class="muted">Wer hat was erstellt, bearbeitet, verschoben, erledigt oder gelöscht?</p>
         <div class="filter" role="group" aria-label="Verlauf filtern" id="v-filter"></div>
         <ul class="verlauf" id="v-liste"></ul>
-        <p class="muted" id="v-leer" hidden>Keine Einträge in dieser Auswahl.</p>
+        <p class="muted still" id="v-leer" hidden>Keine Einträge in dieser Auswahl.</p>
         <button class="knopf" id="v-zurueck" type="button">Zurück zur Karte</button>
       </div>
     </div>
@@ -421,7 +430,7 @@ html.tablett #alle-zeigen{display:none !important}
       <span class="listen-knoepfe"><button class="knopf klein" id="alle-zeigen" type="button" disabled>Alle anzeigen</button><button class="knopf klein klapp-knopf" type="button" data-klapp="listen-tafel" aria-expanded="true" aria-controls="alle-liste">Einklappen</button></span>
     </div>
     <ul class="verlauf" id="alle-liste" style="max-height:none"></ul>
-    <p class="muted" id="alle-leer" hidden>Noch nichts eingetragen. Tippe oben auf „Aufgabe“ und dann auf den Plan.</p>
+    <p class="muted still" id="alle-leer" hidden>Noch nichts eingetragen. Tippe oben auf „Aufgabe“ und dann auf den Plan.</p>
   </section>
   <section class="tafel zu" id="erledigt-tafel">
     <div class="listen-kopf">
@@ -429,13 +438,13 @@ html.tablett #alle-zeigen{display:none !important}
       <button class="knopf klein klapp-knopf" type="button" data-klapp="erledigt-tafel" aria-expanded="false">Anzeigen</button>
     </div>
     <ul class="verlauf" id="erledigt-liste" style="max-height:none"></ul>
-    <p class="muted" id="erledigt-leer" hidden>Noch nichts erledigt.</p>
+    <p class="muted still" id="erledigt-leer" hidden>Noch nichts erledigt.</p>
     <button class="knopf klein" id="archiv-knopf" type="button" aria-expanded="false" aria-controls="archiv-inhalt">Aufgaben-Archiv</button>
     <div id="archiv-inhalt" hidden>
       <div class="filter" id="archiv-jahre" role="group" aria-label="Jahr im Archiv"></div>
       <div class="filter" id="archiv-monate" role="group" aria-label="Monat im Archiv"></div>
       <ul class="verlauf" id="archiv-liste"></ul>
-      <p class="muted" id="archiv-leer" hidden>Noch nichts archiviert. Erledigte Aufgaben kommen nach 30 Tagen hierher.</p>
+      <p class="muted still" id="archiv-leer" hidden>Noch nichts archiviert. Erledigte Aufgaben kommen nach 30 Tagen hierher.</p>
     </div>
   </section>
   <section class="tafel zu" id="geloescht-tafel">
@@ -443,9 +452,8 @@ html.tablett #alle-zeigen{display:none !important}
       <h2 id="geloescht-titel">Gelöschte Aufgaben <span class="klapp-zahl" id="geloescht-zahl"></span></h2>
       <button class="knopf klein klapp-knopf" type="button" data-klapp="geloescht-tafel" aria-expanded="false">Anzeigen</button>
     </div>
-    <p class="muted">Gelöschte Aufgaben werden nach 30 Tagen endgültig entfernt.</p>
     <ul class="verlauf" id="geloescht-liste" style="max-height:none"></ul>
-    <p class="muted" id="geloescht-leer" hidden>Nichts gelöscht.</p>
+    <p class="muted still" id="geloescht-leer" hidden>Nichts gelöscht.</p>
   </section>
 </section>
 
@@ -1135,11 +1143,7 @@ function planGetippt(punkt) {
 }
 
 /* ---- Tafel unten ---- */
-const HINWEISE = {
-  ansehen: "Tippen öffnet einen Punkt oder Pfeil. Gedrückt halten und ziehen versetzt ihn. Zoomen mit zwei Fingern oder dem Mausrad.",
-  aufgabe: "Tippe auf den Plan, auch draußen. Dort entsteht eine neue Aufgabe.",
-  pfeil: "Tippe erst auf den Start, dann auf das Ziel.",
-};
+const HINWEISE = { ansehen: "", aufgabe: "", pfeil: "" };
 function hinweisSetzen(text) { $("karten-hinweis").textContent = text; }
 function hinweisZurueck() { hinweisSetzen(HINWEISE[S.modus]); }
 function tafelZeigen(welche) {
@@ -2232,7 +2236,7 @@ function zeilenUmstellen() {
 }
 
 /* ---- Vorlagen: Veranstaltung speichern, laden, zurücksetzen ---- */
-const VL = { liste: {} };
+const VL = { liste: {}, aktiv: null };
 const darfV = (recht) => darfZusatz(ICH, "veranstaltung", recht);
 const vlMeldung = (t) => { $("vl-meldung").textContent = t; };
 function vlSchnappschuss() {
@@ -2287,7 +2291,12 @@ const vlWeg = (ids) => (ids.length ? update(ref(db), Object.fromEntries(ids.map(
 function vlZeichnen() {
   const ids = Object.keys(VL.liste).sort((a, b) => (VL.liste[a].name || "").localeCompare(VL.liste[b].name || "", "de"));
   $("vl-leer").hidden = ids.length > 0;
-  $("vl-neu").hidden = !darfV("vorlageSpeichern");
+  const akt = vlAktiv();
+  $("vl-aktuell").hidden = !(akt ? darfV("vorlageBearbeiten") : darfV("vorlageSpeichern"));
+  $("vl-speichern").textContent = akt ? `„${akt.name}“ speichern` : "Als Vorlage speichern";
+  $("vl-neu").hidden = !darfV("vorlageSpeichern"); $("vl-neu-titel").hidden = $("vl-neu").hidden;
+  $("vl-leer-neu").hidden = !darfV("vorlageLaden");
+  vaNameZeigen();
   $("vl-reset").hidden = !darfV("vorlageLoeschen");
   $("vl-liste").innerHTML = ids.map((id) => {
     const v = VL.liste[id];
@@ -2299,8 +2308,20 @@ function vlZeichnen() {
     return `<div class="vl-zeile"><span class="vl-name">${esc(v.name)}<span class="vl-info">${v.anzahl ?? ""} ${v.anzahl === 1 ? "Eintrag" : "Einträge"}${wann ? " · " + esc(wann) : ""}${v.von ? " · " + esc(v.von) : ""}</span></span><span class="vl-knoepfe">${k.join("")}</span></div>`;
   }).join("");
 }
+/* Die aktive Vorlage ist die, mit der gerade gearbeitet wird. Sie steht unter veranstaltung/aktiv. */
+function vlAktiv() {
+  const a = VL.aktiv;
+  if (!a || typeof a.id !== "string") return null;
+  const v = VL.liste[a.id];
+  return v ? { id: a.id, name: v.name } : null;
+}
+function vaNameZeigen() {
+  const a = vlAktiv() ?? (VL.aktiv && VL.aktiv.name ? { name: VL.aktiv.name } : null);
+  $("va-name").textContent = a ? a.name : "Noch nicht gespeichert";
+}
 function vlStarten() {
   onValue(ref(db, `${BASIS}/vorlagen`), (snap) => { VL.liste = snap.val() ?? {}; vlZeichnen(); }, () => {});
+  onValue(ref(db, `${BASIS}/aktiv`), (snap) => { VL.aktiv = snap.val(); vlZeichnen(); }, () => {});
 }
 async function vlSchreiben(werte, ok) {
   const gut = await schreiben(werte);
@@ -2317,23 +2338,82 @@ $("vorlagen-knopf").addEventListener("click", () => {
   tafel.scrollIntoView({ behavior: "smooth", block: "nearest" });
 });
 $("vl-zu").addEventListener("click", () => { $("vorlagen-tafel").hidden = true; $("vorlagen-knopf").setAttribute("aria-pressed", "false"); });
-$("vl-speichern").addEventListener("click", async () => {
-  if (!darfV("vorlageSpeichern")) return;
-  const name = $("vl-name").value.trim().slice(0, 60);
-  if (!name) { vlMeldung("Bitte einen Namen eingeben."); return; }
+const vlNameLesen = () => $("vl-name").value.trim().slice(0, 60);
+const vlDoppelt = (name) => Object.values(VL.liste).some((v) => (v.name || "").toLowerCase() === name.toLowerCase());
+const vlAktivSatz = (id, name) => ({ [`${BASIS}/aktiv`]: { id, name, ts: Date.now() } });
+/* Die aktuelle Vorlage mit dem jetzigen Stand überschreiben. */
+async function vlUeberschreiben(id, v, knopf) {
   const roh = vlSchnappschuss();
-  const anzahl = Object.keys(roh).length;
-  if (!anzahl) { vlMeldung("Es gibt noch nichts zu speichern."); return; }
-  if (Object.values(VL.liste).some((v) => (v.name || "").toLowerCase() === name.toLowerCase())
-    && !confirm(`Es gibt schon eine Vorlage „${name}“. Trotzdem eine weitere speichern?`)) return;
+  knopf.disabled = true;
+  try {
+    const daten = await vlKopieren(roh, () => "vl_" + id);
+    if (await vlSchreiben({ [`${BASIS}/vorlagen/${id}`]: { name: v.name, ts: Date.now(), von: S.ich, anzahl: Object.keys(daten).length, daten: JSON.stringify(daten) }, ...vlAktivSatz(id, v.name) }, `„${v.name}“ ist gespeichert.`)) vlWeg(vlAltIds(v));
+    else vlWeg(vlAnhangIds(daten));
+  } catch (err) { vlMeldung("Die Anhänge konnten nicht kopiert werden. Es wurde nichts geändert."); }
+  knopf.disabled = false;
+}
+$("vl-speichern").addEventListener("click", async () => {
+  const akt = vlAktiv();
+  if (akt) {
+    if (!darfV("vorlageBearbeiten")) return;
+    await vlUeberschreiben(akt.id, VL.liste[akt.id], $("vl-speichern"));
+    return;
+  }
+  /* Noch keine Vorlage: der Stand wird als neue Vorlage gespeichert und ist danach die aktive. */
+  if (!darfV("vorlageSpeichern")) return;
+  const name = vlNameLesen();
+  if (!name) { vlMeldung("Bitte unten einen Namen eingeben."); $("vl-name").focus(); return; }
+  if (vlDoppelt(name) && !confirm(`Es gibt schon eine Vorlage „${name}“. Trotzdem eine weitere speichern?`)) return;
+  const roh = vlSchnappschuss();
   const vid = neueId();
   $("vl-speichern").disabled = true;
   try {
     const daten = await vlKopieren(roh, () => "vl_" + vid);
-    if (await vlSchreiben({ [`${BASIS}/vorlagen/${vid}`]: { name, ts: Date.now(), von: S.ich, anzahl, daten: JSON.stringify(daten) } }, `Gespeichert als „${name}“.`)) $("vl-name").value = "";
+    if (await vlSchreiben({ [`${BASIS}/vorlagen/${vid}`]: { name, ts: Date.now(), von: S.ich, anzahl: Object.keys(daten).length, daten: JSON.stringify(daten) }, ...vlAktivSatz(vid, name) }, `Gespeichert als „${name}“.`)) $("vl-name").value = "";
     else vlWeg(vlAnhangIds(daten));
   } catch (err) { vlMeldung("Die Anhänge konnten nicht kopiert werden. Es wurde nichts gespeichert."); }
   $("vl-speichern").disabled = false;
+});
+/* Option 1: komplett neue, leere Vorlage. Die jetzige Liste wird geleert. */
+$("vl-leer-neu").addEventListener("click", async () => {
+  if (!darfV("vorlageSpeichern") || !darfV("vorlageLaden")) return;
+  const name = vlNameLesen();
+  if (!name) { vlMeldung("Bitte einen Namen eingeben."); $("vl-name").focus(); return; }
+  if (vlDoppelt(name) && !confirm(`Es gibt schon eine Vorlage „${name}“. Trotzdem eine weitere anlegen?`)) return;
+  const jetzt = Object.keys(S.roh).length;
+  if (!confirm(`Neue leere Vorlage „${name}“ anlegen? Die ${jetzt} aktuellen Einträge werden entfernt. Speichere vorher, was du behalten willst.`)) return;
+  const alteAnhaenge = Object.values(S.roh).flatMap((e) => vlZeilen(e).filter((z) => z?.art === "anhang" && ANHANG_ID.test(z.anhang || "")).map((z) => z.anhang));
+  const vid = neueId();
+  const werte = { [`${BASIS}/vorlagen/${vid}`]: { name, ts: Date.now(), von: S.ich, anzahl: 0, daten: "{}" }, ...vlAktivSatz(vid, name), ...verlaufPaar("vorlage", name, null) };
+  Object.keys(S.roh).forEach((alt) => { werte[`${BASIS}/eintraege/${alt}`] = null; });
+  if (await vlSchreiben(werte, `Neue leere Vorlage „${name}“ ist angelegt.`)) { vlWeg(alteAnhaenge); $("vl-name").value = ""; }
+});
+/* Option 2: Vorlage für die Folgeveranstaltung. Die Aufgaben der aktuellen Vorlage werden übernommen und stehen auf offen. */
+$("vl-folge").addEventListener("click", async () => {
+  if (!darfV("vorlageSpeichern")) return;
+  const name = vlNameLesen();
+  if (!name) { vlMeldung("Bitte einen Namen eingeben."); $("vl-name").focus(); return; }
+  const roh = vlSchnappschuss();
+  const anzahl = Object.keys(roh).length;
+  if (!anzahl) { vlMeldung("Es gibt noch keine Aufgaben zum Übernehmen."); return; }
+  if (vlDoppelt(name) && !confirm(`Es gibt schon eine Vorlage „${name}“. Trotzdem eine weitere anlegen?`)) return;
+  const stellen = darfV("vorlageLaden");
+  if (!confirm(`Folgeveranstaltung „${name}“ anlegen? Die ${anzahl} Aufgaben werden übernommen${stellen ? " und stehen danach alle auf offen" : ""}.`)) return;
+  const vid = neueId();
+  $("vl-folge").disabled = true;
+  try {
+    const daten = await vlKopieren(roh, () => "vl_" + vid);
+    const werte = { [`${BASIS}/vorlagen/${vid}`]: { name, ts: Date.now(), von: S.ich, anzahl, daten: JSON.stringify(daten) } };
+    if (stellen) {
+      Object.assign(werte, vlAktivSatz(vid, name), verlaufPaar("vorlage", name, null));
+      Object.entries(S.roh).forEach(([id, e]) => {
+        if (e && e.status && e.status !== "offen") { werte[`${BASIS}/eintraege/${id}/status`] = "offen"; werte[`${BASIS}/eintraege/${id}/erledigtAm`] = null; werte[`${BASIS}/eintraege/${id}/bearbeitetAm`] = null; }
+      });
+    }
+    if (await vlSchreiben(werte, `Folgeveranstaltung „${name}“ ist angelegt.`)) $("vl-name").value = "";
+    else vlWeg(vlAnhangIds(daten));
+  } catch (err) { vlMeldung("Die Anhänge konnten nicht kopiert werden. Es wurde nichts gespeichert."); }
+  $("vl-folge").disabled = false;
 });
 $("vl-liste").addEventListener("click", async (ev) => {
   const k = ev.target.closest("[data-vl]");
@@ -2357,7 +2437,7 @@ $("vl-liste").addEventListener("click", async (ev) => {
       Object.keys(S.roh).forEach((alt) => { werte[`${BASIS}/eintraege/${alt}`] = null; });
       const t = Date.now();
       Object.entries(kopiert).forEach(([schl, e], i) => { werte[`${BASIS}/eintraege/${neuId[schl]}`] = { ...e, status: "offen", ts: t + i }; });
-      Object.assign(werte, verlaufPaar("vorlage", v.name, null));
+      Object.assign(werte, verlaufPaar("vorlage", v.name, null), vlAktivSatz(id, v.name));
       if (await vlSchreiben(werte, `„${v.name}“ ist geladen.`)) {
         vlWeg(alteAnhaenge);
         $("vorlagen-tafel").hidden = true; $("vorlagen-knopf").setAttribute("aria-pressed", "false");
@@ -2367,14 +2447,7 @@ $("vl-liste").addEventListener("click", async (ev) => {
   } else if (was === "ueberschreiben") {
     if (!darfV("vorlageBearbeiten")) return;
     if (!confirm(`„${v.name}“ mit dem jetzigen Stand überschreiben?`)) return;
-    const roh = vlSchnappschuss();
-    k.disabled = true;
-    try {
-      const daten = await vlKopieren(roh, () => "vl_" + id);
-      if (await vlSchreiben({ [`${BASIS}/vorlagen/${id}`]: { name: v.name, ts: Date.now(), von: S.ich, anzahl: Object.keys(daten).length, daten: JSON.stringify(daten) } }, `„${v.name}“ ist überschrieben.`)) vlWeg(vlAltIds(v));
-      else vlWeg(vlAnhangIds(daten));
-    } catch (err) { vlMeldung("Die Anhänge konnten nicht kopiert werden. Es wurde nichts geändert."); }
-    k.disabled = false;
+    await vlUeberschreiben(id, v, k);
   } else if (was === "umbenennen") {
     if (!darfV("vorlageBearbeiten")) return;
     const neu = (prompt("Neuer Name der Vorlage:", v.name) || "").trim().slice(0, 60);
@@ -2383,7 +2456,7 @@ $("vl-liste").addEventListener("click", async (ev) => {
   } else if (was === "loeschen") {
     if (!darfV("vorlageLoeschen")) return;
     if (!confirm(`Vorlage „${v.name}“ löschen? Das kann nicht rückgängig gemacht werden.`)) return;
-    if (await vlSchreiben({ [`${BASIS}/vorlagen/${id}`]: null }, `„${v.name}“ ist gelöscht.`)) vlWeg(vlAltIds(v));
+    if (await vlSchreiben({ [`${BASIS}/vorlagen/${id}`]: null, ...(VL.aktiv?.id === id ? { [`${BASIS}/aktiv`]: null } : {}) }, `„${v.name}“ ist gelöscht.`)) vlWeg(vlAltIds(v));
   }
 });
 $("vl-reset").addEventListener("click", async () => {
@@ -2415,7 +2488,7 @@ function starteSync() {
     S.roh = snap.val() ?? {};
     S.eintraege = sauber(S.roh);
     zeilenUmstellen();
-    $("live-text").textContent = "Aufgaben und Pfeile für die Veranstaltung. Alle sehen dasselbe.";
+    $("live-text").textContent = "";
     if (S.gewaehlt && !S.eintraege[S.gewaehlt]) {
       S.gewaehlt = null;
       if (S.tafel === "detail") { tafelZeigen("aus"); hinweisSetzen("Der Eintrag wurde inzwischen gelöscht."); }
