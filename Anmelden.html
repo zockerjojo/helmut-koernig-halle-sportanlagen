@@ -113,20 +113,39 @@ const gueltig = /^[A-Za-z0-9_-]{20,40}$/.test(tablett);
 
 /* Trägt die Anmeldung dieses Handys für das Tablet ein. Die Regeln prüfen, ob die Anfrage am Tablet frisch ist.
    Ein Knopfdruck ist nicht nötig: wer schon angemeldet ist, ist nach dem Scannen sofort fertig. */
+/* Ein NFC-Sticker öffnet die Seite manchmal zweimal (zwei Tabs). Der zweite Versuch würde abgelehnt, weil das Tablet die
+   Anfrage nach der ersten Anmeldung schon zurückgenommen hat. Darum merken sich beide Tabs, ob schon einer dran ist. */
+const MERKER = "hkh-anmeldung-" + tablett;
+const merkerLesen = () => { try { const m = JSON.parse(localStorage.getItem(MERKER) || "null"); return m && Date.now() - m.t < 10000 ? m : null; } catch (e) { return null; } };
+const merkerSetzen = (st) => { try { localStorage.setItem(MERKER, JSON.stringify({ t: Date.now(), s: st })); } catch (e) {} };
+const merkerWeg = () => { try { localStorage.removeItem(MERKER); } catch (e) {} };
 async function uebertragen(si) {
   zeige("laden");
+  const anderer = merkerLesen();
+  if (anderer) {
+    /* Ein anderer Tab dieses Handys meldet gerade an oder hat es schon getan: dessen Ergebnis abwarten. */
+    for (let i = 0; i < 20; i++) {
+      const m = merkerLesen();
+      if (m?.s === "ok") { $("wer").textContent = si.name; zeige("fertig"); return; }
+      if (!m) break;
+      await new Promise((r) => setTimeout(r, 300));
+    }
+  }
+  merkerSetzen("lauft");
   try {
     const uid = auth.currentUser?.uid;
     if (!uid) throw Object.assign(new Error("nicht angemeldet"), { code: "app/keine-kennung" });
     const g = (await get(ref(db, `geraete/${uid}`))).val();
     if (!g?.benutzer) throw Object.assign(new Error("keine Person"), { code: "app/keine-person" });
     await set(ref(db, `geraete/${tablett}`), { benutzer: g.benutzer, code: g.code, seit: g.seit });
+    merkerSetzen("ok");
     $("wer").textContent = si.name;
     zeige("fertig");
     /* Das Fenster schließt sich selbst, wo der Browser es erlaubt; sonst bleibt „Angemeldet“ stehen. */
     setTimeout(() => { try { window.close(); } catch (e) {} }, 1800);
   } catch (err) {
     console.error(err);
+    merkerWeg();
     let code = err?.code || err?.message || "unbekannt";
     /* Ein Handy, das selbst als Tablet freigeschaltet ist, darf keine Anmeldung für ein anderes eintragen. */
     try {
