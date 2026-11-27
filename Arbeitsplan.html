@@ -166,13 +166,13 @@ html.tablett #alle-zeigen{display:none !important}
   .wrap{max-width:1560px}
   /* Die Karte läuft über drei Zeilen (5 bis 7). Leere Zeilen für Filter und Aufgabe bekommen Höhe 0,
      sonst teilt die Karte ihnen Platz zu und die Liste rutscht nach unten. Der Abstand kommt aus den Rändern. */
-  #panel{display:grid; grid-template-columns:minmax(0,1fr) minmax(360px,420px); column-gap:24px; row-gap:0; align-items:start; grid-template-rows:repeat(4,auto) var(--zeile-filter,0px) var(--zeile-aufgabe,0px) auto auto}
+  #panel{display:grid; grid-template-columns:minmax(0,1fr) minmax(360px,420px); column-gap:24px; row-gap:0; align-items:start; grid-template-rows:repeat(4,auto) var(--zeile-filter,0px) var(--zeile-aufgabe,0px) auto auto auto 1fr auto}
   #panel:has(> #filter-tafel:not([hidden])){--zeile-filter:auto}
   #panel:has(> #tafel:not([hidden])){--zeile-aufgabe:auto}
   #panel > *{grid-column:1 / -1}
   #panel > #live-text, #panel > .feld, #panel > .leiste, #panel > #map, #panel > #karten-hinweis, #panel > #filter-tafel, #panel > #tafel, #panel > #listen-tafel, #panel > #erledigt-tafel, #panel > #geloescht-tafel{margin-top:12px}
-  #panel > #map{grid-column:1; grid-row:5 / span 3; position:sticky; top:12px; max-height:calc(100vh - 96px)}
-  #panel > #karten-hinweis{grid-column:1; grid-row:8}
+  #panel > #map{grid-column:1; grid-row:5 / span 6; position:sticky; top:12px; max-height:calc(100vh - 96px)}
+  #panel > #karten-hinweis{grid-column:1; grid-row:11}
   #panel > #filter-tafel{grid-column:2; grid-row:5; margin-bottom:0 !important}
   #panel > #tafel{grid-column:2; grid-row:6}
   #panel > #listen-tafel{grid-column:2; grid-row:7; max-height:calc(100vh - 96px); overflow:auto}
